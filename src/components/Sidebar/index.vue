@@ -5,7 +5,11 @@
         this.$store.themeSettingsStore.skin === 'bordered'
           ? 'border-r border-gray-5002 dark:border-slate-700'
           : 'shadow-base'
-      }   ${this.$store.themeSettingsStore.sidebarCollasp ? this.closeClass : this.openClass}
+      }   ${
+        this.$store.themeSettingsStore.sidebarCollasp
+          ? this.closeClass
+          : this.openClass
+      }
       ${this.$store.themeSettingsStore.isMouseHovered ? 'sidebar-hovered' : ''}
       
       `"
@@ -14,7 +18,9 @@
     >
       <div
         :class="`logo-segment flex justify-between items-center bg-white dark:bg-slate-800 z-[9] py-6  sticky top-0   px-4  ${
-          this.$store.themeSettingsStore.sidebarCollasp ? this.closeClass : this.openClass
+          this.$store.themeSettingsStore.sidebarCollasp
+            ? this.closeClass
+            : this.openClass
         } ${
           this.$store.themeSettingsStore.skin === 'bordered'
             ? ' border-b border-r border-gray-5002 dark:border-slate-700'
@@ -34,13 +40,19 @@
           <img
             src="@/assets/images/logo/logo.svg"
             alt=""
-            v-if="!this.$store.themeSettingsStore.isDark && !this.$store.themeSettingsStore.semidark"
+            v-if="
+              !this.$store.themeSettingsStore.isDark &&
+              !this.$store.themeSettingsStore.semidark
+            "
           />
 
           <img
             src="@/assets/images/logo/logo-white.svg"
             alt=""
-            v-if="this.$store.themeSettingsStore.isDark || this.$store.themeSettingsStore.semidark"
+            v-if="
+              this.$store.themeSettingsStore.isDark ||
+              this.$store.themeSettingsStore.semidark
+            "
           />
         </router-link>
         <router-link
@@ -53,12 +65,18 @@
           <img
             src="@/assets/images/logo/logo-c.svg"
             alt=""
-            v-if="!this.$store.themeSettingsStore.isDark && !this.$store.themeSettingsStore.semidark"
+            v-if="
+              !this.$store.themeSettingsStore.isDark &&
+              !this.$store.themeSettingsStore.semidark
+            "
           />
           <img
             src="@/assets/images/logo/logo-c-white.svg"
             alt=""
-            v-if="this.$store.themeSettingsStore.isDark || this.$store.themeSettingsStore.semidark"
+            v-if="
+              this.$store.themeSettingsStore.isDark ||
+              this.$store.themeSettingsStore.semidark
+            "
           />
         </router-link>
         <span
@@ -68,7 +86,8 @@
             this.$store.themeSettingsStore.isMouseHovered
           "
           @click="
-            this.$store.themeSettingsStore.sidebarCollasp = !this.$store.themeSettingsStore.sidebarCollasp
+            this.$store.themeSettingsStore.sidebarCollasp =
+              !this.$store.themeSettingsStore.sidebarCollasp
           "
         >
           <!-- <Icon icon="heroicons-outline:menu-alt-3"
@@ -97,31 +116,6 @@
         "
       >
         <Navmenu :items="menuItems" />
-        <Transition @enter="enterWidget" @leave="leaveWidget">
-          <div
-            class="bg-slate-900 mb-10 mt-24 p-4 relative text-center rounded-2xl text-white"
-            v-if="!this.$store.themeSettingsStore.sidebarCollasp"
-          >
-            <img
-              src="@/assets/images/svg/rabit.svg"
-              alt=""
-              class="mx-auto relative -mt-[73px]"
-            />
-            <div class="max-w-[160px] mx-auto mt-6">
-              <div class="widget-title">Unlimited Access</div>
-              <div class="text-xs font-light">
-                Upgrade your system to business plan
-              </div>
-            </div>
-            <div class="mt-6">
-              <button
-                class="btn bg-white hover:bg-opacity-80 text-slate-900 btn-sm w-full block"
-              >
-                Upgrade
-              </button>
-            </div>
-          </div>
-        </Transition>
       </SimpleBar>
     </div>
   </div>
@@ -168,24 +162,7 @@ export default defineComponent({
         });
     });
 
-    const enterWidget = (el) => {
-      gsap.fromTo(
-        el,
-        { x: 0, opacity: 0, scale: 0.5 },
-        { x: 0, opacity: 1, duration: 0.3, scale: 1 }
-      );
-    };
-    const leaveWidget = (el) => {
-      gsap.fromTo(
-        el,
-        { x: 0, opacity: 1, scale: 1 },
-        { x: 0, opacity: 0, duration: 0.3, scale: 0.5 }
-      );
-    };
-
     return {
-      enterWidget,
-      leaveWidget,
       simplebarInstance,
       shadowbase,
     };

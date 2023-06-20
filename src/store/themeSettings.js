@@ -6,8 +6,8 @@ export const useThemeSettingsStore = defineStore('themeSettings',{
         sidebarHidden: false,
         mobielSidebar: false,
         semidark: false,
-        monochrome: false,
         semiDarkTheme: "semi-light",
+        monochrome: false,
         isDark: false,
         skin: "default",
         theme: "light",
@@ -37,7 +37,6 @@ export const useThemeSettingsStore = defineStore('themeSettings',{
 
         toggleMonochrome() {
             const isMonochrome = (localStorage.getItem('monochrome') !== null);
-            // this.monochrome = !this.monochrome;
             if(isMonochrome) {
                 localStorage.removeItem("monochrome");
                 document.getElementsByTagName( 'html' )[0].classList.remove('grayscale');

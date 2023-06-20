@@ -1,11 +1,24 @@
-import axios from 'axios'
+import axios from "axios";
+import store from "../store";
+import router from "../router/index.js";
 
-const axiosIns = axios.create({
-// You can add your headers here
-// ================================
-// baseURL: 'https://some-domain.com/api/',
-// timeout: 1000,
-// headers: {'X-Custom-Header': 'foobar'}
+const axiosClient = axios.create({
+    baseURL: 'http://dashkit-laravel-api/api/'
 })
 
-export default axiosIns
+axiosClient.interceptors.request.use(config => {
+    config.headers.Authorization = `Bearer ${store.state.user.token}`
+    return config;
+})
+
+axiosClient.interceptors.response.use(response => {
+    return response;
+}, error => {
+    if (error.response.status === 401) {
+        store.commit('setToken', null)
+        router.push({name: 'login'})
+    }
+    throw error;
+})
+
+export default axiosClient;

@@ -50,7 +50,7 @@
           "
         />
         <div
-          class="nav-tools flex items-center lg:space-x-5 space-x-3 rtl:space-x-reverse"
+          class="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse"
         >
           <LanguageVue />
           <SwitchDark />

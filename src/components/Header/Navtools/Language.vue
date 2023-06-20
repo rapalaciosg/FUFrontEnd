@@ -5,7 +5,7 @@
         <ListboxButton
           class="relative w-full flex items-center cursor-pointer space-x-[6px] rtl:space-x-reverse"
         >
-          <span class="inline-block md:h-6 md:w-6 w-5 h-5 rounded-full"
+          <span class="inline-block md:h-6 md:w-6 w-4 h-4 rounded-full"
             ><img
               :src="selectLanguage.image"
               alt=""
@@ -23,7 +23,7 @@
           leave-to-class="opacity-0"
         >
           <ListboxOptions
-            class="absolute min-w-[100px] ltr:right-0 rtl:left-0 md:top-[49px] top-[34px] w-auto max-h-60 overflow-auto border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 mt-1"
+            class="absolute min-w-[100px] ltr:right-0 rtl:left-0 md:top-[50px] top-[38px] w-auto max-h-60 overflow-auto border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 mt-1"
           >
             <ListboxOption
               v-slot="{ active }"

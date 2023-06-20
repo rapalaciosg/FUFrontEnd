@@ -18,13 +18,10 @@
         class="menu-link"
         v-if="!item.child && !item.isHeadr"
       >
-        <span class="menu-icon flex-grow-0" v-if="item.icon">
+        <span class="menu-icon" v-if="item.icon">
           <Icon :icon="item.icon"
         /></span>
-        <div class="text-box flex-grow" v-if="item.title">
-          {{ item.title }}
-        </div>
-        <span class="menu-badge" v-if="item.badge">{{ item.badge }}</span>
+        <div class="text-box" v-if="item.title">{{ item.title }}</div>
       </router-link>
 
       <!-- ?? only for menulabel ??  -->
@@ -289,9 +286,7 @@ export default {
     }
   }
 }
-.menu-badge {
-  @apply py-1 px-2 text-xs capitalize font-semibold rounded-[.358rem] whitespace-nowrap align-baseline inline-flex bg-slate-900 text-slate-50 dark:bg-slate-700 dark:text-slate-300;
-}
+
 // active menu
 .item-has-children {
   .parent_active {
@@ -314,9 +309,6 @@ export default {
     .text-box {
       @apply text-white dark:text-slate-300;
     }
-  }
-  .menu-badge {
-    @apply bg-slate-100  text-slate-900;
   }
 }
 </style>
