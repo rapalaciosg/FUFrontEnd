@@ -13,6 +13,31 @@ export const menuItems = [
     icon: "heroicons-outline:home",
     link: "home",
   },
+  {
+    title: "Rutas",
+    icon: "heroicons-outline:map",
+    link: "routes",
+  },
+  {
+    title: "Clientes",
+    icon: "heroicons-outline:user-group",
+    link: "clients",
+  },
+  {
+    title: "Adm. de inventario",
+    icon: "heroicons-outline:list-bullet",
+    link: "inventory",
+  },
+  {
+    title: "Reportes",
+    icon: "heroicons-outline:chart-bar",
+    link: "reports",
+  },
+  {
+    title: "Configuración",
+    icon: "heroicons-outline:cog-8-tooth",
+    link: "configuration",
+  },
 ];
 // menuseetins
 

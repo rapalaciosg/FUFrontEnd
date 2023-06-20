@@ -1,7 +1,7 @@
 <template>
   <header :class="navbarTypeClass()">
     <div
-      :class="`app-header md:px-6 px-[15px]  dark:bg-slate-800 shadow-base dark:shadow-base3 bg-white ${borderSwicthClass()} ${
+      :class="`app-header md:px-6 px-[15px]  dark:bg-slate-800 shadow-base dark:shadow-base3 bg-primaryBase ${borderSwicthClass()} ${
         this.$store.themeSettingsStore.navbarColor
       }
       ${

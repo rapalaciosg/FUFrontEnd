@@ -1,7 +1,7 @@
 <template>
   <div :class="this.$store.themeSettingsStore.semidark ? 'dark' : ''">
     <div
-      :class="`sidebar-wrapper bg-white dark:bg-slate-800    ${
+      :class="`sidebar-wrapper bg-secondaryBase dark:bg-slate-800    ${
         this.$store.themeSettingsStore.skin === 'bordered'
           ? 'border-r border-gray-5002 dark:border-slate-700'
           : 'shadow-base'
@@ -17,7 +17,7 @@
       @mouseleave="this.$store.themeSettingsStore.isMouseHovered = false"
     >
       <div
-        :class="`logo-segment flex justify-between items-center bg-white dark:bg-slate-800 z-[9] py-6  sticky top-0   px-4  ${
+        :class="`logo-segment flex justify-between items-center bg-secondaryBase dark:bg-slate-800 z-[9] py-6  sticky top-0   px-4  ${
           this.$store.themeSettingsStore.sidebarCollasp
             ? this.closeClass
             : this.openClass
@@ -38,7 +38,7 @@
           "
         >
           <img
-            src="@/assets/images/logo/logo.svg"
+            src="@/assets/images/logo/logo-white.svg"
             alt=""
             v-if="
               !this.$store.themeSettingsStore.isDark &&
@@ -80,7 +80,7 @@
           />
         </router-link>
         <span
-          class="cursor-pointer text-slate-900 dark:text-white text-2xl"
+          class="cursor-pointer text-white dark:text-white text-2xl"
           v-if="
             !this.$store.themeSettingsStore.sidebarCollasp ||
             this.$store.themeSettingsStore.isMouseHovered
