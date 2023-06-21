@@ -1696,3 +1696,54 @@ export const recetOrder = [
     status: "cancled",
   },
 ];
+
+export const routesData = [
+  {
+    id: "D2M2",
+    distributor: "Ruta test",
+    product: "test",
+    attended: "0",
+    notAttended: "0",
+    inProgress: "2",
+    total: "2",
+    cilindersOne: "0",
+    cilindersTwo: "0",
+    percent: "0%"
+  },
+  {
+    id: "D2M2",
+    distributor: "Ruta test",
+    product: "test",
+    attended: "0",
+    notAttended: "0",
+    inProgress: "2",
+    total: "2",
+    cilindersOne: "0",
+    cilindersTwo: "0",
+    percent: "0%"
+  },
+  {
+    id: "D2M2",
+    distributor: "Ruta test",
+    product: "test",
+    attended: "0",
+    notAttended: "0",
+    inProgress: "2",
+    total: "2",
+    cilindersOne: "0",
+    cilindersTwo: "0",
+    percent: "0%"
+  },
+  {
+    id: "D2M2",
+    distributor: "Ruta test",
+    product: "test",
+    attended: "0",
+    notAttended: "0",
+    inProgress: "2",
+    total: "2",
+    cilindersOne: "0",
+    cilindersTwo: "0",
+    percent: "0%"
+  },
+]

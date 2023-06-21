@@ -23,6 +23,7 @@
           :validate="validate"
           :multiple="multiple"
           :options="options"
+          :placeholder="placeholder"
         >
         </vSelect>
       </div>
