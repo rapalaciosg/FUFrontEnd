@@ -18,13 +18,10 @@
         class="menu-link"
         v-if="!item.child && !item.isHeadr"
       >
-        <span class="menu-icon flex-grow-0" v-if="item.icon">
+        <span class="menu-icon" v-if="item.icon">
           <Icon :icon="item.icon"
         /></span>
-        <div class="text-box flex-grow" v-if="item.title">
-          {{ item.title }}
-        </div>
-        <span class="menu-badge" v-if="item.badge">{{ item.badge }}</span>
+        <div class="text-box text-white" v-if="item.title">{{ item.title }}</div>
       </router-link>
 
       <!-- ?? only for menulabel ??  -->
@@ -44,7 +41,7 @@
           <span class="menu-icon" v-show="item.icon">
             <Icon :icon="item.icon"
           /></span>
-          <div class="text-box" v-if="item.title">{{ item.title }}</div>
+          <div class="text-box text-white" v-if="item.title">{{ item.title }}</div>
         </div>
         <div class="flex-0">
           <div
@@ -81,8 +78,8 @@
                 class="text-sm flex space-x-3 rtl:space-x-reverse items-center transition-all duration-150"
                 :class="
                   isActive
-                    ? ' text-slate-900 dark:text-white font-medium'
-                    : 'text-slate-600 dark:text-slate-300'
+                    ? ' text-white dark:text-white font-medium'
+                    : 'text-white dark:text-slate-300'
                 "
               >
                 <span
@@ -102,7 +99,7 @@
         </ul>
       </Transition>
     </li>
-    <li class="single-sidebar-menu">
+    <!-- <li class="single-sidebar-menu">
       <a
         href="https://dashcode-doc.codeshaper.tech/"
         target="_blank"
@@ -111,7 +108,7 @@
         <span class="menu-icon"><Icon icon="heroicons:document" /></span>
         <div class="text-box">Documentation</div>
       </a>
-    </li>
+    </li> -->
   </ul>
 </template>
 <script>
@@ -238,13 +235,13 @@ export default {
 .single-sidebar-menu {
   @apply relative;
   .menulabel {
-    @apply text-slate-800 dark:text-slate-300 text-xs font-semibold uppercase mb-4 mt-4;
+    @apply text-white dark:text-slate-300 text-xs font-semibold uppercase mb-4 mt-4;
   }
   > .menu-link {
     @apply flex text-slate-600 font-medium dark:text-slate-300 text-sm capitalize px-[10px] py-3 rounded-[4px] cursor-pointer;
   }
   .menu-icon {
-    @apply icon-box inline-flex items-center text-slate-600 dark:text-slate-300 text-lg ltr:mr-3 rtl:ml-3;
+    @apply icon-box inline-flex items-center text-white dark:text-slate-300 text-lg ltr:mr-3 rtl:ml-3;
   }
 }
 // menu item has chilren
@@ -289,9 +286,7 @@ export default {
     }
   }
 }
-.menu-badge {
-  @apply py-1 px-2 text-xs capitalize font-semibold rounded-[.358rem] whitespace-nowrap align-baseline inline-flex bg-slate-900 text-slate-50 dark:bg-slate-700 dark:text-slate-300;
-}
+
 // active menu
 .item-has-children {
   .parent_active {
@@ -299,7 +294,7 @@ export default {
     .icon-box,
     .menu-icon,
     .text-box {
-      @apply text-slate-700 dark:text-slate-200;
+      @apply text-white dark:text-slate-200;
     }
     .menu-arrow {
       @apply bg-secondary-500 text-slate-600 text-opacity-70 bg-opacity-30 dark:text-white;
@@ -308,15 +303,12 @@ export default {
 }
 .menu-item-active {
   .menu-link {
-    @apply bg-slate-800 dark:bg-slate-700;
+    @apply bg-activeMenu dark:bg-slate-700;
     .icon-box,
     .menu-icon,
     .text-box {
       @apply text-white dark:text-slate-300;
     }
-  }
-  .menu-badge {
-    @apply bg-slate-100  text-slate-900;
   }
 }
 </style>

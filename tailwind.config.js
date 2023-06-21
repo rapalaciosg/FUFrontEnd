@@ -126,6 +126,34 @@ module.exports = {
           800: "#1E293B",
           900: "#0F172A",
         },
+
+
+
+        // Personalized colors
+        primaryBase: "#E53935",
+        secondaryBase: "#212F3C",
+        textBlack: "#000000",
+        activeMenu: "#0f172a",
+
+        //Second sample colors
+        // primaryBase: "#0033CC",
+        // secondaryBase: "#000066",
+        // textBlack: "#000000",
+        // activeMenu: "#000033"
+
+        //third sampole colors
+        // primaryBase: "#607D8B",
+        // secondaryBase: "#455A64",
+        // textBlack: "#000000",
+        // activeMenu: "#263238",
+
+        //fourth sample colors
+        // primaryBase: "#FF5722",
+        // secondaryBase: "#424242",
+        // textBlack: "#000000",
+        // activeMenu: "#263238",
+
+
         // light: "#425466",
         // "gray-f7": "#F7F8FC",
         // dark: "#1E293B",

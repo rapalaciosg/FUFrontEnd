@@ -1,7 +1,7 @@
 <template>
   <header :class="navbarTypeClass()">
     <div
-      :class="`app-header md:px-6 px-[15px]  dark:bg-slate-800 shadow-base dark:shadow-base3 bg-white ${borderSwicthClass()} ${
+      :class="`app-header md:px-6 px-[15px]  dark:bg-slate-800 shadow-base dark:shadow-base3 bg-primaryBase ${borderSwicthClass()} ${
         this.$store.themeSettingsStore.navbarColor
       }
       ${
@@ -50,7 +50,7 @@
           "
         />
         <div
-          class="nav-tools flex items-center lg:space-x-5 space-x-3 rtl:space-x-reverse"
+          class="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse"
         >
           <LanguageVue />
           <SwitchDark />
