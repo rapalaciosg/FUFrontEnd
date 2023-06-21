@@ -17,7 +17,7 @@
           class="flex items-center md:space-x-4 space-x-2 rtl:space-x-reverse"
         >
           <button
-            class="ltr:mr-5 rtl:ml-5 text-xl text-slate-900 dark:text-white"
+            class="ltr:mr-5 rtl:ml-5 text-xl text-white dark:text-white"
             v-if="this.$store.themeSettingsStore.sidebarCollasp && window.width > 1280"
             @click="this.$store.themeSettingsStore.sidebarCollasp = false"
           >

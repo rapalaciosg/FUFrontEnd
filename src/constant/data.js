@@ -8,15 +8,25 @@ export const menuItems = [
     isHeadr: true,
     title: "menu",
   },
-  {
-    title: "Dashboard",
-    icon: "heroicons-outline:home",
-    link: "home",
-  },
+  // {
+  //   title: "Dashboard",
+  //   icon: "heroicons-outline:home",
+  //   link: "home",
+  // },
   {
     title: "Rutas",
     icon: "heroicons-outline:map",
-    link: "routes",
+    isOpen: true,
+    child: [
+      {
+        childtitle: "Inicio",
+        childlink: "home",
+      },
+      {
+        childtitle: "Seguimiento de rutas",
+        childlink: "routes",
+      }
+    ],
   },
   {
     title: "Clientes",
