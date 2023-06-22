@@ -13,7 +13,15 @@ const routes = [
       {
         path: "home",
         name: "home",
-        component: () => import("@/views/index.vue"),
+        component: () => import("@/views/Routes"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "frequency",
+        name: "frequency",
+        component: () => import("@/views/Routes/Frequency"),
         meta: {
           hide: true,
         },
@@ -21,7 +29,23 @@ const routes = [
       {
         path: "routes",
         name: "routes",
-        component: () => import("@/views/Routes"),
+        component: () => import("@/views/Routes/Tracking"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "clients",
+        name: "clients",
+        component: () => import("@/views/Clients"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "prices",
+        name: "prices",
+        component: () => import("@/views/Clients/SpecialPrices"),
         meta: {
           hide: true,
         },

@@ -25,13 +25,27 @@ export const menuItems = [
       {
         childtitle: "Seguimiento de rutas",
         childlink: "routes",
+      },
+      {
+        childtitle: "Frecuencias",
+        childlink: "frequency",
       }
     ],
   },
   {
     title: "Clientes",
     icon: "heroicons-outline:user-group",
-    link: "clients",
+    link: "#",
+    child: [
+      {
+        childtitle: "Inicio",
+        childlink: "clients",
+      },
+      {
+        childtitle: "Precios especiales",
+        childlink: "prices",
+      },
+    ],
   },
   {
     title: "Adm. de inventario",

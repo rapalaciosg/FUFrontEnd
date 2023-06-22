@@ -59,14 +59,14 @@
   </main>
 </template>
 <script>
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import Settings from "../components/Settings";
-import Sidebar from "../components/Sidebar/";
+import Breadcrumbs from "@/components/DashCodeComponents/Breadcrumbs";
+import Footer from "../components/DashCodeComponents/Footer";
+import Header from "../components/DashCodeComponents/Header";
+import Settings from "../components/DashCodeComponents/Settings";
+import Sidebar from "../components/DashCodeComponents/Sidebar/";
 import window from "@/mixins/window";
-import MobileSidebar from "@/components/Sidebar/MobileSidebar.vue";
-import FooterMenu from "@/components/Footer/FooterMenu.vue";
+import MobileSidebar from "@/components/DashCodeComponents/Sidebar/MobileSidebar.vue";
+import FooterMenu from "@/components/DashCodeComponents/Footer/FooterMenu.vue";
 
 export default {
   mixins: [window],
