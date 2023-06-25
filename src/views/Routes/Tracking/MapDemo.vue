@@ -1,5 +1,5 @@
 <template>
-    <div class="h-[500px] w-full">
+    <div class="h-[650px] w-full">
       <l-map
         class="cursor-default"
         :center="center"
@@ -22,7 +22,7 @@
 // DON'T load Leaflet components here!
 // Its CSS is needed though, if not imported elsewhere in your application.
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LPolygon, LMarker, LPolyline } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LPolygon, LMarker, LPolyline, LControl } from "@vue-leaflet/vue-leaflet";
 
 export default {
     components: {
@@ -30,7 +30,8 @@ export default {
       LTileLayer,
       LPolygon,
       LMarker,
-      LPolyline
+      LPolyline,
+      LControl,
     },
     data() {
       return {
@@ -83,5 +84,8 @@ export default {
   z-index: 555 !important;
   position: relative;
 }
+/* .leaflet-control-zoom {
+  display: none;
+} */
 </style>
   

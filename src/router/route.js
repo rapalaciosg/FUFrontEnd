@@ -50,6 +50,30 @@ const routes = [
           hide: true,
         },
       },
+      {
+        path: "inventory",
+        name: "inventory",
+        component: () => import("@/views/Inventory"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "reports",
+        name: "reports",
+        component: () => import("@/views/Reports"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "configuration",
+        name: "configuration",
+        component: () => import("@/views/Configuration"),
+        meta: {
+          hide: true,
+        },
+      },
     ],
   },
 ];
