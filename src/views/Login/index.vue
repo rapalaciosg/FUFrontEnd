@@ -2,7 +2,7 @@
   <div class="loginwrapper">
     <div class="lg-inner-column">
       <div class="left-column relative z-[1]">
-        <div class="max-w-[520px] pt-20 ltr:pl-20 rtl:pr-20">
+        <div class="max-w-full pt-20 ltr:pl-20 rtl:pr-20 bg-primaryBase">
           <router-link to="/">
             <img
               :src="logo"
@@ -15,13 +15,13 @@
 
           <h4>
             Unlock your Project
-            <span class="text-slate-800 dark:text-slate-400 font-bold"
+            <span class="text-white dark:text-slate-400 font-bold"
               >performance</span
             >
           </h4>
         </div>
         <div
-          class="absolute left-0 2xl:bottom-[-160px] bottom-[-130px] h-full w-full z-[-1]"
+          class="absolute left-0 2xl:bottom-[-160px] bottom-[-130px] h-full w-full z-[-1] bg-primaryBase"
         >
           <img :src="sideImg" alt="" class="h-full w-full object-contain" />
         </div>
