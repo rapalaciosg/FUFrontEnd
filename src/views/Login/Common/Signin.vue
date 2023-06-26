@@ -53,7 +53,7 @@
       >
     </div>
 
-    <button type="submit" class="btn btn-dark block w-full text-center">
+    <button type="submit" class="btn btn-primaryBase block w-full text-center">
       Sign in
     </button>
   </form>
