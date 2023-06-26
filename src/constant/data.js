@@ -8,20 +8,44 @@ export const menuItems = [
     isHeadr: true,
     title: "menu",
   },
-  {
-    title: "Dashboard",
-    icon: "heroicons-outline:home",
-    link: "home",
-  },
+  // {
+  //   title: "Dashboard",
+  //   icon: "heroicons-outline:home",
+  //   link: "home",
+  // },
   {
     title: "Rutas",
     icon: "heroicons-outline:map",
-    link: "routes",
+    isOpen: true,
+    child: [
+      {
+        childtitle: "Inicio",
+        childlink: "home",
+      },
+      {
+        childtitle: "Seguimiento de rutas",
+        childlink: "routes",
+      },
+      {
+        childtitle: "Frecuencias",
+        childlink: "frequency",
+      }
+    ],
   },
   {
     title: "Clientes",
     icon: "heroicons-outline:user-group",
-    link: "clients",
+    link: "#",
+    child: [
+      {
+        childtitle: "Inicio",
+        childlink: "clients",
+      },
+      {
+        childtitle: "Precios especiales",
+        childlink: "prices",
+      },
+    ],
   },
   {
     title: "Adm. de inventario",

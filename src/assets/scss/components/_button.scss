@@ -26,13 +26,13 @@
   @apply bg-secondary-500 dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-secondary-500 hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0;
 }
 .btn-success {
-  @apply bg-success-500 dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-success-500 hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0;
+  @apply bg-success-500 dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-success-500 hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0 items-center;
 }
 .btn-info {
-  @apply bg-[#0CE7FA] dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-[#0CE7FA] hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0;
+  @apply bg-[#0CE7FA] dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-[#0CE7FA] hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0 items-center;
 }
 .btn-warning {
-  @apply bg-[#FA916B] dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-[#FA916B] hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0;
+  @apply bg-[#FA916B] dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-[#FA916B] hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0 items-center;
 }
 .btn-danger {
   @apply bg-danger-500 dark:hover:bg-opacity-70  text-white hover:ring-2 hover:ring-opacity-80 ring-danger-500 hover:ring-offset-1 dark:hover:ring-0 dark:hover:ring-offset-0;
