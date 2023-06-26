@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-5">
     <Card title="Frequencia">
-      <div class="grid grid-cols-2 xl:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         <VueSelect :options="options" placeholder="Ruta o Camión" />
         <div class="grid grid-cols-2 gap-x-5">
           <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />

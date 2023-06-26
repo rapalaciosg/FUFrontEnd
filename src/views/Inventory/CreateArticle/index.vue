@@ -1,12 +1,11 @@
 <template>
   <div class="space-y-5">
-    <Card title="Precios Especiales">
-      <div class="grid grid-cols-2 2xl:grid-cols-3 gap-5">
-        <VueSelect :options="options" placeholder="Ruta o Camión" />
-        <VueSelect :options="options" placeholder="Producto" />
-        <div class="col-span-2 2xl:col-span-1 grid grid-cols-3 gap-x-5">
+    <Card title="Crear articulo">
+      <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+        <VueSelect :options="options" placeholder="Seleccione una opción" />
+        <div class="grid grid-cols-3 gap-x-5">
           <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
-          <BasicModal title="Registrar precio" btnClass="btn-success" />
+          <BasicModal title="Nuevo registro" btnClass="btn-success" />
           <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
         </div>
       </div>
@@ -17,6 +16,7 @@
 <script>
 import Card from "@/components/DashCodeComponents/Card";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+import Textinput from "@/components/DashCodeComponents/Textinput";
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import BasicModal from "@/components/WebFrontendComponents/Modals/BasicModal.vue";
@@ -28,6 +28,7 @@ export default {
     Button,
     AdvancedTable,
     BasicModal,
+    Textinput,
   },
   data() {
     return {

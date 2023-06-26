@@ -24,7 +24,7 @@ export const menuItems = [
       },
       {
         childtitle: "Seguimiento de rutas",
-        childlink: "routes",
+        childlink: "tracking",
       },
       {
         childtitle: "Frecuencias",
@@ -50,17 +50,43 @@ export const menuItems = [
   {
     title: "Adm. de inventario",
     icon: "heroicons-outline:list-bullet",
-    link: "inventory",
+    link: "#",
+    child: [
+      {
+        childtitle: "Transferir inventario",
+        childlink: "inventory",
+      },
+      {
+        childtitle: "Crear articulos",
+        childlink: "article",
+      },
+    ]
   },
   {
     title: "Reportes",
     icon: "heroicons-outline:chart-bar",
-    link: "reports",
+    link: "#",
+    child: [
+      {
+        childtitle: "Seguimiento de rutas",
+        childlink: "reports",
+      },
+      {
+        childtitle: "Ventas por cliente",
+        childlink: "sells",
+      },
+    ]
   },
   {
     title: "Configuración",
     icon: "heroicons-outline:cog-8-tooth",
-    link: "configuration",
+    link: "#",
+    child: [
+      {
+        childtitle: "Configuración de estilos",
+        childlink: "configuration"
+      }
+    ]
   },
 ];
 // menuseetins

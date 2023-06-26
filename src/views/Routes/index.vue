@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-5">
     <Card title="Dashboard Rutas">
-      <div class="grid grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <VueSelect :options="options" placeholder="Proyecto" />
         <VueSelect :options="options" placeholder="Producto" />
         <div class="grid grid-cols-2 gap-x-5">
