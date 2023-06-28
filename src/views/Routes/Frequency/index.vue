@@ -9,7 +9,7 @@
         </div>
       </div>
     </Card>
-    <AdvancedTable :headers="headersSecondTable" />
+    <AdvancedTable :headers="headersSecondTable" :data="data" />
   </div>
 </template>
 <script>
@@ -42,26 +42,64 @@ export default {
         },
       ],
       headersSecondTable: [
-        { label: "Camión o ruta", field: "id", },
-        { label: "Distribuidor", field: "distributor", },
-        { label: "Orden de atención", field: "OrderAttention", },
-        { label: "N° de factura", field: "billNumber", },
-        { label: "Id interno", field: "idIntern", },
-        { label: "Id sucursal", field: "idBranchOffice", },
-        { label: "Cliente", field: "customer", },
-        { label: "Dirección", field: "address", },  
-        { label: "Estado", field: "status", },
-        { label: "Importe total", field: "total", },
-        { label: "Precio", field: "price", },
-        { label: "Cilindros Sol.", field: "cilindersOne", },
-        { label: "Cilindros Fac.", field: "cilindersTwo", },
-        { label: "Inventario actual", field: "currentInventory", },
-        { label: "Fif nuesto", field: "ourFif", },
-        { label: "Fif otros", field: "otherFif", },
-        { label: "N° público de pedidos", field: "publicOrderNumber", },
-        { label: "N° de pedidos", field: "orderNumber", },
-        { label: "Forma de pago", field: "paymentType", },
+        { label: "Ruta", field: "route", },
+        { label: "Empresa", field: "company", },
+        { label: "Id registro", field: "idRegister", },
+        { label: "Cliente", field: "client", },
+        { label: "Sucursal", field: "branchOffice", },
+        { label: "Frecuencia", field: "frequency", },
+        { label: "Próxima visita", field: "nextVisit", },
+        { label: "Visita anterior", field: "lastVisit", },  
+        { label: "Observaciones", field: "observations", },
+        { label: "L", field: "monday", },
+        { label: "M", field: "tuesday", },
+        { label: "Mi", field: "wednesday", },
+        { label: "J", field: "thursday", },
+        { label: "V", field: "friday", },
+        { label: "S", field: "saturday", },
+        { label: "D", field: "sunday", },
+        { label: "Editar", field: "edit", },
       ],
+      data: [
+        {
+          route: "ML1",
+          company: "Test",
+          idRegister: "Id test",
+          client: "Cliente test",
+          branchOffice: "Test",
+          frequency: "Test",
+          nextVisit: "Test",
+          lastVisit: "Test",
+          observations: "Test",
+          monday: "0",
+          tuesday: "0",
+          wednesday: "0",
+          thursday: "0",
+          friday: "0",
+          saturday: "0",
+          sunday: "0",
+          edit: ""
+        },
+        {
+          route: "ML1",
+          company: "Test",
+          idRegister: "Id test",
+          client: "Cliente test",
+          branchOffice: "Test",
+          frequency: "Test",
+          nextVisit: "Test",
+          lastVisit: "Test",
+          observations: "Test",
+          monday: "0",
+          tuesday: "0",
+          wednesday: "0",
+          thursday: "0",
+          friday: "0",
+          saturday: "0",
+          sunday: "0",
+          edit: ""
+        }
+      ]
     };
   },
 };

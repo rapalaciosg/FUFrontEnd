@@ -10,7 +10,7 @@
         </div>
       </div>
     </Card>
-    <AdvancedTable :headers="headersSecondTable" />
+    <AdvancedTable :headers="headersSecondTable" :data="data" />
   </div>
 </template>
 <script>
@@ -45,26 +45,52 @@ export default {
         },
       ],
       headersSecondTable: [
-        { label: "Camión o ruta", field: "id" },
+        { label: "Ruta", field: "route" },
         { label: "Distribuidor", field: "distributor" },
-        { label: "Orden de atención", field: "OrderAttention" },
-        { label: "N° de factura", field: "billNumber" },
         { label: "Id interno", field: "idIntern" },
         { label: "Id sucursal", field: "idBranchOffice" },
         { label: "Cliente", field: "customer" },
+        { label: "Provincia", field: "addressOne" },
+        { label: "Distrito", field: "addressTwo" },
+        { label: "Corregimiento", field: "addressThree" },
         { label: "Dirección", field: "address" },
-        { label: "Estado", field: "status" },
-        { label: "Importe total", field: "total" },
-        { label: "Precio", field: "price" },
-        { label: "Cilindros Sol.", field: "cilindersOne" },
-        { label: "Cilindros Fac.", field: "cilindersTwo" },
-        { label: "Inventario actual", field: "currentInventory" },
+        { label: "Tipo de negocio", field: "businessType" },
         { label: "Fif nuesto", field: "ourFif" },
         { label: "Fif otros", field: "otherFif" },
-        { label: "N° público de pedidos", field: "publicOrderNumber" },
-        { label: "N° de pedidos", field: "orderNumber" },
-        { label: "Forma de pago", field: "paymentType" },
+        { label: "Editar", field: "edit" },
       ],
+      data: [
+        {
+          route: "TL2",
+          distributor: "Test",
+          idIntern: "CL2",
+          idBranchOffice: "Test",
+          customer: "Clientes test",
+          addressOne: "Test",
+          addressTwo: "Test",
+          addressThree: "Test",
+          address: "Test",
+          businessType: "Test",
+          ourFif: "Test",
+          otherFif: "Test",
+          edit: ""
+        },
+        {
+          route: "TL2",
+          distributor: "Test",
+          idIntern: "CL2",
+          idBranchOffice: "Test",
+          customer: "Clientes test",
+          addressOne: "Test",
+          addressTwo: "Test",
+          addressThree: "Test",
+          address: "Test",
+          businessType: "Test",
+          ourFif: "Test",
+          otherFif: "Test",
+          edit: ""
+        }
+      ]
     };
   },
 };

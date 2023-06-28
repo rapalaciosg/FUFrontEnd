@@ -34,7 +34,10 @@ const routes = [
       {
         path: "tracking",
         name: "tracking",
-        component: () => import("@/views/Routes/Tracking")
+        component: () => import("@/views/Routes/Tracking"),
+        meta: {
+          hide: true,
+        },
       },
       {
         path: "clients",
