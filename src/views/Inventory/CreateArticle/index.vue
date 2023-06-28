@@ -1,20 +1,11 @@
 <template>
   <div class="space-y-5">
-    <Card title="Transferir inventario">
-      <div class="grid grid-cols-3 lg:grid-cols-4 gap-5">
+    <Card title="Crear articulo">
+      <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
         <VueSelect :options="options" placeholder="Seleccione una opción" />
-        <Textinput name="pn" type="text" placeholder="Input" />
-        <FromGroup name="d1">
-          <flat-pickr
-            v-model="dateDefault"
-            class="form-control"
-            id="d1"
-            placeholder="yyyy-dd-mm"
-          />
-        </FromGroup>
-        <div class="col-span-3 lg:col-span-1 grid grid-cols-3 gap-x-5">
+        <div class="grid grid-cols-3 gap-x-5">
           <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
-          <BasicModal title="Registrar" btnClass="btn-success" />
+          <BasicModal title="Nuevo registro" btnClass="btn-success" />
           <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
         </div>
       </div>
@@ -26,11 +17,10 @@
 import Card from "@/components/DashCodeComponents/Card";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import Textinput from "@/components/DashCodeComponents/Textinput";
-import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import BasicModal from "@/components/WebFrontendComponents/Modals/BasicModal.vue";
-import { routesData, routesDateTwo } from "../../constant/basic-tablle-data.js";
+import { routesData, routesDateTwo } from "../../../constant/basic-tablle-data.js";
 export default {
   components: {
     Card,
@@ -39,11 +29,9 @@ export default {
     AdvancedTable,
     BasicModal,
     Textinput,
-    FromGroup,
   },
   data() {
     return {
-      dateDefault: "",
       options: [
         {
           value: "option1",
@@ -59,15 +47,20 @@ export default {
         },
       ],
       headersSecondTable: [
-        { label: "Id", field: "id" },
-        { label: "Emisor", field: "transmitter" },
-        { label: "Receptor", field: "catcher" },
-        { label: "Articulo", field: "article" },
-        { label: "Cantidad", field: "quantity" },
-        { label: "Fecha de transferencia", field: "transferDate" },
-        { label: "Fecha de registro", field: "registerDate" },
-        { label: "Observaciones", field: "observations" },
-        { label: "Movimiento id", field: "movementId" },
+        { label: "Articulo", field: "id" },
+        { label: "Descripción", field: "distributor" },
+        { label: "Segunda descripción", field: "OrderAttention" },
+        { label: "Nombre", field: "billNumber" },
+        { label: "Grupo", field: "idIntern" },
+        { label: "Categoría", field: "idBranchOffice" },
+        { label: "Familia", field: "customer" },
+        { label: "Línea", field: "address" },
+        { label: "Impuesto", field: "status" },
+        { label: "Estado", field: "total" },
+        { label: "Existencia", field: "price" },
+        { label: "Almacén", field: "cilindersOne" },
+        { label: "Precio.", field: "cilindersTwo" },
+        { label: "Editar", field: "currentInventory" },
       ],
     };
   },

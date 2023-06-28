@@ -1,17 +1,17 @@
 <template>
   <div class="space-y-5">
     <Card title="Precios Especiales">
-      <div class="grid grid-cols-3 gap-5">
+      <div class="grid grid-cols-2 2xl:grid-cols-3 gap-5">
         <VueSelect :options="options" placeholder="Ruta o Camión" />
         <VueSelect :options="options" placeholder="Producto" />
-        <div class="grid grid-cols-3 gap-x-5">
+        <div class="col-span-2 2xl:col-span-1 grid grid-cols-3 gap-x-5">
           <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
           <BasicModal title="Registrar precio" btnClass="btn-success" />
           <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
         </div>
       </div>
     </Card>
-    <AdvancedTable :headers="headersSecondTable" />
+    <AdvancedTable :headers="headersSecondTable" :data="data" />
   </div>
 </template>
 <script>
@@ -46,26 +46,46 @@ export default {
         },
       ],
       headersSecondTable: [
-        { label: "Camión o ruta", field: "id" },
-        { label: "Distribuidor", field: "distributor" },
-        { label: "Orden de atención", field: "OrderAttention" },
-        { label: "N° de factura", field: "billNumber" },
+        { label: "Cliente id", field: "customerId" },
         { label: "Id interno", field: "idIntern" },
         { label: "Id sucursal", field: "idBranchOffice" },
-        { label: "Cliente", field: "customer" },
-        { label: "Dirección", field: "address" },
+        { label: "Articulo id", field: "articleId" },
+        { label: "Ajuste precio", field: "priceAdjusted" },
+        { label: "Fecha inicial", field: "startDate" },
+        { label: "Fecha final", field: "endDate" },
+        { label: "Ruta", field: "route" },
         { label: "Estado", field: "status" },
-        { label: "Importe total", field: "total" },
-        { label: "Precio", field: "price" },
-        { label: "Cilindros Sol.", field: "cilindersOne" },
-        { label: "Cilindros Fac.", field: "cilindersTwo" },
-        { label: "Inventario actual", field: "currentInventory" },
-        { label: "Fif nuesto", field: "ourFif" },
-        { label: "Fif otros", field: "otherFif" },
-        { label: "N° público de pedidos", field: "publicOrderNumber" },
-        { label: "N° de pedidos", field: "orderNumber" },
-        { label: "Forma de pago", field: "paymentType" },
+        { label: "Empresa", field: "company" },
+        { label: "Editar", field: "edit" },
       ],
+      data: [
+        {
+          customerId: "CL4",
+          idIntern: "SH1",
+          idBranchOffice: "OF7",
+          articleId: "ART032",
+          priceAdjusted: "0.00",
+          startDate: "26/06/2023",
+          endDate: "26/06/2023",
+          route: "TML1",
+          status: "Test",
+          company: "Test",
+          edit: ""
+        },
+        {
+          customerId: "CL4",
+          idIntern: "SH1",
+          idBranchOffice: "OF7",
+          articleId: "ART032",
+          priceAdjusted: "0.00",
+          startDate: "26/06/2023",
+          endDate: "26/06/2023",
+          route: "TML1",
+          status: "Test",
+          company: "Test",
+          edit: ""
+        }
+      ]
     };
   },
 };

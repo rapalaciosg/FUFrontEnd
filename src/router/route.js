@@ -3,8 +3,13 @@
 const routes = [
   {
     path: "/",
+    name: "Login",
+    component: () => import("@/views/Login"),
+  },
+  {
+    path: "/app",
     name: "Layout",
-    redirect: "/home",
+    redirect: "/app/home",
     component: () => import("@/Layout/index.vue"),
     meta: {
       // middleware: [auth],
@@ -27,8 +32,8 @@ const routes = [
         },
       },
       {
-        path: "routes",
-        name: "routes",
+        path: "tracking",
+        name: "tracking",
         component: () => import("@/views/Routes/Tracking"),
         meta: {
           hide: true,
@@ -59,9 +64,25 @@ const routes = [
         },
       },
       {
+        path: "article",
+        name: "article",
+        component: () => import("@/views/Inventory/CreateArticle"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "reports",
         name: "reports",
         component: () => import("@/views/Reports"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "sells",
+        name: "sells",
+        component: () => import("@/views/Reports/SellsClientsReport"),
         meta: {
           hide: true,
         },
