@@ -37,11 +37,28 @@
         }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field == 'product'">
-            {{ props.row.product }}
-          </span>
-          <span v-if="props.column.field == 'distributor'">
-            {{ props.row.distributor }}
+          <span v-if="props.column.field == 'actions'">
+            <Dropdown classMenuItems=" w-[140px]">
+              <span class="text-xl"
+                ><Icon icon="heroicons-outline:dots-vertical"
+              /></span>
+              <template v-slot:menus>
+                <MenuItem v-for="(item, i) in actions" :key="i" @click="console.log('Click', item.name)">
+                  <div
+                    :class="`
+                  ${
+                    item.name === 'delete'
+                      ? 'bg-danger-500 text-danger-500 bg-opacity-30   hover:bg-opacity-100 hover:text-white'
+                      : 'hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50'
+                  }
+                   w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse `"
+                  >
+                    <span class="text-base"><Icon :icon="item.icon" /></span>
+                    <span>{{ item.name }}</span>
+                  </div>
+                </MenuItem>
+              </template>
+            </Dropdown>
           </span>
         </template>
         <template #pagination-bottom="props">
@@ -86,15 +103,19 @@ export default {
   props: {
     headers: {
       type: Array,
-      default: []
+      default: [],
     },
     data: {
       type: Array,
-      default: []
+      default: [],
     },
     title: {
       type: String,
-      default: ""
+      default: "",
+    },
+    actions: {
+      type: Array,
+      default: []
     }
   },
 
@@ -104,17 +125,11 @@ export default {
       perpage: 10,
       pageRange: 5,
       searchTerm: "",
-      actions: [
-        { name: "view", icon: "heroicons-outline:eye", },
-        { name: "edit", icon: "heroicons:pencil-square", },
-        { name: "delete", icon: "heroicons-outline:trash", },
-      ],
       options: [
-        { value: "1", label: "1", },
-        { value: "3", label: "3", },
-        { value: "5", label: "5", },
+        { value: "1", label: "1" },
+        { value: "3", label: "3" },
+        { value: "5", label: "5" },
       ],
-      
     };
   },
 };
