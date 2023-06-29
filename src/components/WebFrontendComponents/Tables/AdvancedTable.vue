@@ -113,6 +113,10 @@ export default {
       type: String,
       default: "",
     },
+    actions: {
+      type: Array,
+      default: []
+    }
   },
 
   data() {
@@ -121,11 +125,6 @@ export default {
       perpage: 10,
       pageRange: 5,
       searchTerm: "",
-      actions: [
-        { name: "view", icon: "heroicons-outline:eye" },
-        { name: "edit", icon: "heroicons:pencil-square" },
-        { name: "delete", icon: "heroicons-outline:trash" },
-      ],
       options: [
         { value: "1", label: "1" },
         { value: "3", label: "3" },

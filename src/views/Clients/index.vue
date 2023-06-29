@@ -15,7 +15,7 @@
         </div>
       </div>
     </Card>
-    <AdvancedTable :headers="headersClientsTable" :data="clients" />
+    <AdvancedTable :headers="headersClientsTable" :data="clients" :actions="actions" />
   </div>
 </template>
 
@@ -44,6 +44,9 @@ export default {
         { value: "ML01", label: "ML01" },
         { value: "ML02", label: "ML02" },
         { value: "ML03", label: "ML03" },
+      ],
+      actions: [
+        { name: "view", icon: "heroicons-outline:eye" },
       ],
     };
   },
