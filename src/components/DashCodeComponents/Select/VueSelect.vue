@@ -24,6 +24,10 @@
           :multiple="multiple"
           :options="options"
           :placeholder="placeholder"
+          :autocomplete="'on'"
+          :searchable="true"
+          :clearable="true"
+          v-model="value"
         >
         </vSelect>
       </div>
@@ -96,7 +100,7 @@ export default {
       type: String,
     },
     modelValue: {
-      // type: String || Array,
+      type: String || Array,
       default: "",
     },
     error: {
@@ -135,6 +139,17 @@ export default {
       type: Array,
     },
   },
+  watch: {
+    value(newValue) {
+      this.$emit('selected-value', newValue)
+    }
+  },
+  emits: ['selected-value'],
+  data() {
+    return {
+      value: this.modelValue
+    }
+  }
 };
 </script>
 <style lang="scss">
