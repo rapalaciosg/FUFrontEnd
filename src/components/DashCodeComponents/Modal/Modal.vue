@@ -1,5 +1,5 @@
 <template>
-  <button type="button" @click="openModal" class="btn" :class="labelClass">
+  <button v-if="showButton" type="button" @click="openModal" class="btn" :class="labelClass">
     {{ label }}
   </button>
 
@@ -25,7 +25,7 @@
 
       <div class="fixed inset-0 overflow-y-auto">
         <div
-          class="flex min-h-full justify-center text-center p-6"
+          class="flex min-h-full justify-center text-center px-6"
           :class="centered ? 'items-center' : 'items-start '"
         >
           <TransitionChild
@@ -134,7 +134,7 @@ import {
   Dialog,
   DialogPanel,
 } from "@headlessui/vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 export default defineComponent({
   components: {
     Icon,
@@ -145,6 +145,10 @@ export default defineComponent({
   },
 
   props: {
+    showButton: {
+      type: Boolean,
+      default: true
+    },
     labelClass: {
       type: String,
       default: "btn-primary",
@@ -188,8 +192,14 @@ export default defineComponent({
     },
   },
 
-  setup(props) {
+  emits: ['close-modal'],
+
+  setup(props, { emit }) {
     const isOpen = ref(props.activeModal);
+
+    watch(() => props.activeModal, (newValue) => {
+      isOpen.value = newValue
+    });
 
     // open
     const openModal = () => {
@@ -198,6 +208,7 @@ export default defineComponent({
     // close
     const closeModal = () => {
       isOpen.value = false;
+      emit('close-modal', false);
     };
 
     return { closeModal, openModal, isOpen };

@@ -27,7 +27,8 @@
           :autocomplete="'on'"
           :searchable="true"
           :clearable="true"
-          v-model="value"
+          :value="value"
+          v-model="inModelValue"
         >
         </vSelect>
       </div>
@@ -71,10 +72,28 @@
   </div>
 </template>
 <script>
+  import { ref, onMounted, watch } from "vue";
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 import Icon from "@/components/DashCodeComponents/Icon";
 export default {
+  setup: (props, {emit}) => {
+    const inModelValue = ref();
+
+    onMounted(() => {
+      inModelValue.value = props.modelValue;
+    })
+
+    watch(() => inModelValue.value, newInModelValue => {
+      emit("update:modelValue", newInModelValue)
+    }, { deep: true })
+
+    watch(() => props.modelValue, newValue => {
+      inModelValue.value = newValue;
+    }, { deep: true })
+
+    return { inModelValue }
+  },
   components: {
     vSelect,
     Icon,
@@ -98,10 +117,6 @@ export default {
 
     name: {
       type: String,
-    },
-    modelValue: {
-      type: String || Array,
-      default: "",
     },
     error: {
       type: String,
@@ -138,18 +153,26 @@ export default {
     options: {
       type: Array,
     },
-  },
-  watch: {
-    value(newValue) {
-      this.$emit('selected-value', newValue)
+    modelValue: {
+      type: String || Object,
+      default: ""
+    },
+    value: {
+      type: String,
+      default: ""
     }
   },
-  emits: ['selected-value'],
-  data() {
-    return {
-      value: this.modelValue
-    }
-  }
+  // watch: {
+  //   value(newValue) {
+  //     this.$emit('selected-value', newValue)
+  //   }
+  // },
+  // emits: ['selected-value', 'update:modelValue'],
+  // data() {
+  //   return {
+  //     value: this.modelValue
+  //   }
+  // }
 };
 </script>
 <style lang="scss">

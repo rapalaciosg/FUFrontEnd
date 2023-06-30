@@ -22,17 +22,23 @@ import "v-calendar/dist/style.css";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core'
 import { DefaultApolloClient } from '@vue/apollo-composable'
 
+const token = ''
+
 // HTTP connection to the API
 const httpLink = createHttpLink({
   // Absolute URL
-  uri: 'https://justcause-graphql-staging.azurewebsites.net/graphql/',
+    // uri: 'https://justcause-graphql-staging.azurewebsites.net/graphql/',
+    uri: 'https://localhost:7201/graphql/',
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
 })
 
 // Cache implementation
 const cache = new InMemoryCache()
 
 // Create the apollo client
-const apolloClient = new ApolloClient({
+export const apolloClient = new ApolloClient({
   link: httpLink,
   cache,
 })

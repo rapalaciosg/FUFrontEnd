@@ -1,6 +1,5 @@
 export const headersClientsTable = [
   { label: "Ruta", field: "ruta" },
-  { label: "Distribuidor", field: "rutaID" },
   { label: "Id interno", field: "clienteID" },
   { label: "Id sucursal", field: "sucursal" },
   { label: "Cliente", field: "nombreCliente" },

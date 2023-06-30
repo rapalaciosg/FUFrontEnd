@@ -43,7 +43,7 @@
                 ><Icon icon="heroicons-outline:dots-vertical"
               /></span>
               <template v-slot:menus>
-                <MenuItem v-for="(item, i) in actions" :key="i" @click="console.log('Click', item.name)">
+                <MenuItem v-for="(item, i) in actions" :key="i" @click="showModal(props.row, item.value)">
                   <div
                     :class="`
                   ${
@@ -119,6 +119,8 @@ export default {
     }
   },
 
+  emits: ['open-modal'],
+
   data() {
     return {
       current: 1,
@@ -132,6 +134,16 @@ export default {
       ],
     };
   },
+
+  methods: {
+    showModal(row, action) {
+      const payload = {
+        row,
+        action
+      }
+      this.$emit('open-modal', { row, action })
+    }
+  }
 };
 </script>
 <style lang="scss"></style>

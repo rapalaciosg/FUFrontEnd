@@ -4,30 +4,35 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-5">
         <VueSelect
           :options="options"
-          :modelValue="variables.truckId"
+          v-model="truckId"
           placeholder="Ruta o Camión"
-          @selected-value="setValueSelected"
         />
         <div class="grid grid-cols-3 gap-x-5">
           <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
-          <BasicModal title="Crear cliente" btnClass="btn-success" />
+          <CreateClientModal title="Crear cliente" btnClass="btn-success" />
           <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
         </div>
       </div>
     </Card>
-    <AdvancedTable :headers="headersClientsTable" :data="clients" :actions="actions" />
+    <AdvancedTable :headers="headersClientsTable" :data="clients" :actions="actions" @open-modal="toggleModal" />
+    <EditClientModal title="Editar cliente" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="client" />
   </div>
 </template>
 
-<script>
+<script> 
+import { computed, reactive, ref, watch, onMounted } from "vue";
 import Card from "@/components/DashCodeComponents/Card";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import BasicModal from "@/components/WebFrontendComponents/Modals/BasicModal.vue";
-import { headersClientsTable } from "../../constant/clients/constantClient.js";
-import { computed, reactive } from "vue";
-import { useClientsStore } from "@/store/clientsStore.js";
+import CreateClientModal from "@/components/WebFrontendComponents/Modals/Clients/CreateClientModal.vue";
+import EditClientModal from "@/components/WebFrontendComponents/Modals/Clients/EditClientModal.vue";
+import { headersClientsTable } from "@/constant/clients/constantClient.js";
+import { useClientsStore } from "@/store/clients/clientsStore.js";
+
+import { GET_ALL_CLIENTS_QUERY, GET_CLIENT_QUERY } from "@/services/clients/clientsGraphql.js";
+import { useQuery, provideApolloClient } from "@vue/apollo-composable";
+import { apolloClient } from "../../main.js";
 
 export default {
   components: {
@@ -35,7 +40,8 @@ export default {
     VueSelect,
     Button,
     AdvancedTable,
-    BasicModal,
+    EditClientModal,
+    CreateClientModal,
   },
   data() {
     return {
@@ -46,25 +52,43 @@ export default {
         { value: "ML03", label: "ML03" },
       ],
       actions: [
-        { name: "view", icon: "heroicons-outline:eye" },
+        { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
       ],
     };
   },
   setup() {
-    const variables = reactive({ truckId: "" });
+    const variablesClients = reactive({ truckId: "" });
+    const variablesClient = reactive({ customerId: "" });
     const clientStore = useClientsStore();
-    clientStore.getAllClients(variables);
 
-    const clients = computed(
-      () => clientStore.clients?.srvLoadClientsAll ?? []
-    );
+    let isModalOpen = ref(false);
+    const truckId = ref("");
 
-    const setValueSelected = (newValue) =>
-      newValue
-        ? (variables.truckId = newValue.value)
-        : (variables.truckId = "");
+    const queryGetClients = provideApolloClient(apolloClient)(() => useQuery(GET_ALL_CLIENTS_QUERY, variablesClients));
+    const queryGetClient = provideApolloClient(apolloClient)(() => useQuery(GET_CLIENT_QUERY, variablesClient));
 
-    return { clients, setValueSelected, variables };
+    const clients = computed(() => queryGetClients.result.value?.srvLoadClientsAll ?? []);
+    const client = computed(() => queryGetClient.result.value?.srvUserInfo ?? []);
+
+    watch(() => truckId, newValue => {
+      variablesClients.truckId = newValue.value.value
+    }, { deep: true })
+
+    const toggleModal = (value) => {
+      if(value.action === 'edit')
+        isModalOpen.value = true
+
+      variablesClient.customerId = value.row.clienteID
+    }
+
+    return { 
+      clients,
+      variablesClients,
+      client,
+      isModalOpen,
+      toggleModal,
+      truckId,
+    };
   },
 };
 </script>
