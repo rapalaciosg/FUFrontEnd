@@ -31,7 +31,7 @@ import { headersClientsTable } from "@/constant/clients/constantClient.js";
 import { useClientsStore } from "@/store/clients/clientsStore.js";
 
 import { GET_ALL_CLIENTS_QUERY, GET_CLIENT_QUERY } from "@/services/clients/clientsGraphql.js";
-import { useQuery, provideApolloClient } from "@vue/apollo-composable";
+import { provideApolloClient, useLazyQuery } from "@vue/apollo-composable";
 import { apolloClient } from "../../main.js";
 
 export default {
@@ -64,21 +64,24 @@ export default {
     let isModalOpen = ref(false);
     const truckId = ref("");
 
-    const queryGetClients = provideApolloClient(apolloClient)(() => useQuery(GET_ALL_CLIENTS_QUERY, variablesClients));
-    const queryGetClient = provideApolloClient(apolloClient)(() => useQuery(GET_CLIENT_QUERY, variablesClient));
+    const queryGetClients = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_CLIENTS_QUERY, variablesClients));
+
+    const queryGetClient = provideApolloClient(apolloClient)(() => useLazyQuery(GET_CLIENT_QUERY, variablesClient));
 
     const clients = computed(() => queryGetClients.result.value?.srvLoadClientsAll ?? []);
     const client = computed(() => queryGetClient.result.value?.srvUserInfo ?? []);
 
     watch(() => truckId, newValue => {
-      variablesClients.truckId = newValue.value.value
+      variablesClients.truckId = newValue.value.value;
+      queryGetClients.load();
     }, { deep: true })
 
     const toggleModal = (value) => {
-      if(value.action === 'edit')
+      if(value.action === 'edit');
         isModalOpen.value = true
 
-      variablesClient.customerId = value.row.clienteID
+      variablesClient.customerId = value.row.clienteID;
+      queryGetClient.load();
     }
 
     return { 

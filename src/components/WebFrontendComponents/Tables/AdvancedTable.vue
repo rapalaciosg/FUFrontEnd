@@ -37,6 +37,27 @@
         }"
       >
         <template v-slot:table-row="props">
+          <span v-if="props.column.field == 'l'" class="flex">
+            <Checkbox />
+          </span>
+          <span v-if="props.column.field == 'm'" class="flex">
+            <Checkbox />
+          </span>
+          <span v-if="props.column.field == 'mi'" class="flex">
+            <Checkbox />
+          </span>
+          <span v-if="props.column.field == 'j'" class="flex">
+            <Checkbox />
+          </span>
+          <span v-if="props.column.field == 'v'" class="flex">
+            <Checkbox />
+          </span>
+          <span v-if="props.column.field == 's'" class="flex">
+            <Checkbox />
+          </span>
+          <span v-if="props.column.field == 'd'" class="flex">
+            <Checkbox />
+          </span>
           <span v-if="props.column.field == 'actions'">
             <Dropdown classMenuItems=" w-[140px]">
               <span class="text-xl"
@@ -89,6 +110,7 @@ import Card from "@/components/DashCodeComponents/Card";
 import Icon from "@/components/DashCodeComponents/Icon";
 import InputGroup from "@/components/DashCodeComponents/InputGroup";
 import Pagination from "@/components/DashCodeComponents/Pagination";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 import { MenuItem } from "@headlessui/vue";
 export default {
   components: {
@@ -98,6 +120,7 @@ export default {
     Icon,
     Card,
     MenuItem,
+    Checkbox
   },
 
   props: {

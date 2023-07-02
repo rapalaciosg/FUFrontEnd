@@ -2,92 +2,105 @@
   <div class="space-y-5">
     <Card title="Precios Especiales">
       <div class="grid grid-cols-2 2xl:grid-cols-3 gap-5">
-        <VueSelect :options="options" placeholder="Ruta o Camión" />
-        <VueSelect :options="options" placeholder="Producto" />
+        <VueSelect :options="options" placeholder="Ruta o Camión" v-model="route" />
+        <VueSelect :options="companiesFormatted" placeholder="Empresa" v-model="company" :disabled="route === ''" />
         <div class="col-span-2 2xl:col-span-1 grid grid-cols-3 gap-x-5">
           <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
-          <BasicModal title="Registrar precio" btnClass="btn-success" />
+          <CreateSpecialPriceModal title="Registrar precio" btnClass="btn-success" />
           <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
         </div>
       </div>
     </Card>
-    <AdvancedTable :headers="headersSecondTable" :data="data" />
+    <AdvancedTable :headers="headersSpecialPricesTable" :data="specialPrices" :actions="actions" @open-modal="toggleModal" />
+    <EditSpecialPriceModal title="Editar precio especial" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" />
   </div>
 </template>
 <script>
+import { computed, reactive, ref, watch, onMounted } from "vue";
 import Card from "@/components/DashCodeComponents/Card";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import BasicModal from "@/components/WebFrontendComponents/Modals/BasicModal.vue";
-import { routesData, routesDateTwo } from "../../../constant/basic-tablle-data.js";
+import CreateSpecialPriceModal from "@/components/WebFrontendComponents/Modals/Clients/SpecialPrices/CreateSpecialPriceModal.vue";
+import EditSpecialPriceModal from "@/components/WebFrontendComponents/Modals/Clients/SpecialPrices/EditSpecialPriceModal.vue";
+import { headersSpecialPricesTable } from "@/constant/clients/specialPrices/constantSpecialPrices.js";
+
+import { GET_COMPANIES_QUERY, GET_ALL_SPECIAL_PRICES } from "@/services/clients/specialPrices/specialPricesGraphql.js";
+import { provideApolloClient, useLazyQuery } from "@vue/apollo-composable";
+import { apolloClient } from "@/main.js";
+
 export default {
   components: {
     Card,
     VueSelect,
     Button,
     AdvancedTable,
-    BasicModal,
+    CreateSpecialPriceModal,
+    EditSpecialPriceModal,
   },
   data() {
     return {
+      headersSpecialPricesTable,
+      actions: [
+        { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
+      ],
       options: [
-        {
-          value: "option1",
-          label: "Option 1",
-        },
-        {
-          value: "option2",
-          label: "Option 2",
-        },
-        {
-          value: "option3",
-          label: "Option 3",
-        },
+        { value: "ML01", label: "ML01" },
+        { value: "ML02", label: "ML02" },
+        { value: "ML03", label: "ML03" },
+        { value: "ML03", label: "ML04" },
+        { value: "ML03", label: "ML05" },
+        { value: "ML03", label: "ML" },
       ],
-      headersSecondTable: [
-        { label: "Cliente id", field: "customerId" },
-        { label: "Id interno", field: "idIntern" },
-        { label: "Id sucursal", field: "idBranchOffice" },
-        { label: "Articulo id", field: "articleId" },
-        { label: "Ajuste precio", field: "priceAdjusted" },
-        { label: "Fecha inicial", field: "startDate" },
-        { label: "Fecha final", field: "endDate" },
-        { label: "Ruta", field: "route" },
-        { label: "Estado", field: "status" },
-        { label: "Empresa", field: "company" },
-        { label: "Editar", field: "edit" },
-      ],
-      data: [
-        {
-          customerId: "CL4",
-          idIntern: "SH1",
-          idBranchOffice: "OF7",
-          articleId: "ART032",
-          priceAdjusted: "0.00",
-          startDate: "26/06/2023",
-          endDate: "26/06/2023",
-          route: "TML1",
-          status: "Test",
-          company: "Test",
-          edit: ""
-        },
-        {
-          customerId: "CL4",
-          idIntern: "SH1",
-          idBranchOffice: "OF7",
-          articleId: "ART032",
-          priceAdjusted: "0.00",
-          startDate: "26/06/2023",
-          endDate: "26/06/2023",
-          route: "TML1",
-          status: "Test",
-          company: "Test",
-          edit: ""
-        }
-      ]
     };
   },
+  setup(props) {
+    const variablesCompanies = reactive({ route: "" });
+    const variablesSpecialPrices = reactive({ route: "", company: "" });
+
+    let companiesFormatted = ref([]);
+
+    let isModalOpen = ref(false);
+    const route = ref("");
+    const company = ref("");
+
+    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_COMPANIES_QUERY, variablesCompanies));
+    const queryGetSpecialPrices = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_SPECIAL_PRICES, variablesSpecialPrices));
+
+    const companies = computed(() => queryGetCompanies.result.value?.srvEmpresa ?? []);
+    const specialPrices = computed(() => queryGetSpecialPrices.result.value?.srvClientAjutePrecioClienteSucursal ?? []);
+
+    const formatValuesSelect = (data) => {
+      const valueFormated = data.value.map(item => ({ value: item.empresaID, label: item.nombre }));
+      return valueFormated;
+    }
+
+    watch(() => companies, (newValue) => {
+      companiesFormatted.value = formatValuesSelect(companies)
+    }, { deep: true })
+
+    watch(() => route, newValue => {
+      variablesCompanies.route = newValue.value.value;
+      variablesSpecialPrices.route = newValue.value.value;
+      queryGetCompanies.load();
+
+      if (variablesSpecialPrices.company !== "") {
+        queryGetSpecialPrices.load();
+      }
+    }, { deep: true })
+
+    watch(() => company, newValue => {
+      variablesSpecialPrices.company = newValue.value.value;
+      queryGetSpecialPrices.load();
+    }, { deep: true })
+
+    const toggleModal = (value) => {
+      if(value.action === 'edit');
+        isModalOpen.value = true
+    }
+
+    return { route, company, companiesFormatted, specialPrices, toggleModal, isModalOpen };
+  }
 };
 </script>
 <style></style>

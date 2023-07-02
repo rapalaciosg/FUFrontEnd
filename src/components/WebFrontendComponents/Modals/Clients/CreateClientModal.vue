@@ -2,19 +2,19 @@
   <modal-base>
     <template v-slot:modal-body>
       <div class="grid grid-cols-2 gap-5">
-        <VueSelect :options="options" placeholder="Ruta" />
-        <VueSelect :options="options" placeholder="Provincia" />
-        <Textinput name="pn" type="text" placeholder="Identificador" :isReadonly="true" />
-        <VueSelect :options="options" placeholder="Distrito" />
-        <VueSelect :options="options" placeholder="MS, ABT, KIOSKO, ETV" />
-        <VueSelect :options="options" placeholder="Corregimiento" />
-        <Textinput name="pn" type="text" placeholder="Nombre del local" />
-        <VueSelect :options="options" placeholder="Lugar poblado" />
-        <Textinput name="pn" type="text" placeholder="RUC + DV o Cédula" />
-        <Textinput name="pn" type="text" placeholder="Latitud" />
-        <Textinput name="pn" type="text" placeholder="Digito verificador" />
-        <Textinput name="pn" type="text" placeholder="Longitud" />
-        <FromGroup name="d1">
+        <VueSelect :options="routes" label="Ruta" placeholder="Ruta" />
+        <VueSelect :options="provincesFormatted" label="Provincia" placeholder="Provincia" v-model="client.provincia" />
+        <Textinput name="pn" type="text" label="Identificador" placeholder="Identificador" :isReadonly="true" />
+        <VueSelect :options="districtsFormatted" label="Distrito" placeholder="Distrito" v-model="client.distrito" />
+        <VueSelect :options="localTypeFormatted" label="MS, ABT, KIOSKO, ETV" placeholder="MS, ABT, KIOSKO, ETV" />
+        <VueSelect :options="correctionsFormatted" label="Corregimiento" placeholder="Corregimiento" v-model="client.corregimiento" />
+        <Textinput name="pn" type="text" label="Nombre del local" placeholder="Nombre del local" />
+        <VueSelect :options="routes" label="Lugar poblado" placeholder="Lugar poblado" />
+        <Textinput name="pn" type="text" label="RUC + DV o Cédula" placeholder="RUC + DV o Cédula" />
+        <Textinput name="pn" type="text" label="Latitud" placeholder="Latitud" />
+        <Textinput name="pn" type="text" label="Digito verificador" placeholder="Digito verificador" />
+        <Textinput name="pn" type="text" label="Longitud" placeholder="Longitud" />
+        <FromGroup name="d1" label="Fecha de nacimiento">
           <flat-pickr
             v-model="dateDefault"
             class="form-control"
@@ -22,25 +22,30 @@
             placeholder="Fecha de nacimiento"
           />
         </FromGroup>
-        <Textinput name="pn" type="number" placeholder="Nuestros tanques" />
-        <Textinput name="pn" type="text" placeholder="Dirección" />
-        <Textinput name="pn" type="text" placeholder="Precio" :isReadonly="true" />
-        <VueSelect :options="options" placeholder="Tipo cliente" />
-        <Textinput name="pn" type="number" placeholder="Otros tanques" />
-        <Textinput name="pn" type="number" placeholder="Número de casa" />
-        <Textinput name="pn" type="text" placeholder="Contacto" />
-        <Textinput name="pn" type="number" placeholder="Teléfono o celula" />
-        <Textinput name="pn" type="text" placeholder="Observaciones" />
+        <Textinput name="pn" type="number" label="Nuestros tanques" placeholder="Nuestros tanques" />
+        <Textinput name="pn" type="text" label="Dirección" placeholder="Dirección" />
+        <Textinput name="pn" type="text" label="Precio" placeholder="Precio" :isReadonly="true" />
+        <VueSelect :options="customerType" label="Tipo cliente" placeholder="Tipo cliente" />
+        <Textinput name="pn" type="number" label="Otros tanques" placeholder="Otros tanques" />
+        <Textinput name="pn" type="number" label="Número de casa" placeholder="Número de casa" />
+        <Textinput name="pn" type="text" label="Contacto" placeholder="Contacto" />
+        <Textinput name="pn" type="number" label="Teléfono o cedular" placeholder="Teléfono o celula" />
+        <Textinput name="pn" type="text" label="Observaciones" placeholder="Observaciones" />
       </div>
     </template>
   </modal-base>
 </template>
 
 <script>
+import { computed, reactive, ref, watch, onMounted } from "vue";
 import ModalBase from "../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
+import { GET_LOCAL_TYPE, GET_PROVINCES, GET_DISTRICTS, GET_CORRECTIONS } from "@/services/clients/clientsGraphql.js";
+import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
+import { apolloClient } from "@/main.js";
 
 export default {
   components: {
@@ -49,15 +54,111 @@ export default {
     FromGroup,
     VueSelect,
   },
+  props: [],
   data() {
     return {
       dateDefault: "",
-      options: [
-        { value: "option1", label: "Option 1" },
-        { value: "option2", label: "Option 2" },
-        { value: "option3", label: "Option 3" },
+      routes: [
+        { value: "ML01", label: "ML01" },
+        { value: "ML02", label: "ML02" },
+        { value: "ML03", label: "ML03" },
+      ],
+      customerType: [
+        { value: "0", label: "PLV. Tiendas Nuevas" },
+        { value: "1", label: "Clientes comercial" },
+        { value: "2", label: "Cliente residencial" },
+        { value: "3", label: "Cliente existente con Tanques PLV" },
       ],
     }
+  },
+  setup(props) {
+    // Declaring variables and apollo clients
+    const variablesDistrics = reactive({ provinceId: ""});
+    const variablesCorrections = reactive({ districtId: ""});
+
+    const queryGetTipoLocal = provideApolloClient(apolloClient)(() => useLazyQuery(GET_LOCAL_TYPE));
+    const queryGetProvincias = provideApolloClient(apolloClient)(() => useLazyQuery(GET_PROVINCES));
+    const queryGetDistritos = provideApolloClient(apolloClient)(() => useLazyQuery(GET_DISTRICTS, variablesDistrics));
+    const queryGetCorrections = provideApolloClient(apolloClient)(() => useLazyQuery(GET_CORRECTIONS, variablesCorrections));
+
+    let localTypeFormatted = ref([]);
+    let provincesFormatted = ref([]);
+    let districtsFormatted = ref([]);
+    let correctionsFormatted = ref([]);
+
+    const client = reactive({
+      ruta: "",
+      distrito: "",
+      clientID: "",
+      corregimiento: "",
+      lugarPoblado: "",
+      cedula: "",
+      coordenadas: "",
+      dv: "",
+      birth: "",
+      tanquesNuestros: "",
+      ubicacion: "",
+      otrosTanques: "",
+      casa: "",
+      contacto: "",
+      telefono: "",
+      provincia: "",
+      apellido: "",
+      nombre: "",
+      clientType: ""
+    });
+
+    // Initializing the component
+    const initialize = () => {
+      queryGetTipoLocal.load();
+      queryGetProvincias.load();
+    }
+
+    onMounted(() => initialize())
+
+    // Getting lists of data
+    const localType = computed(() => queryGetTipoLocal.result.value?.srvTipoLocal ?? []);
+    const provinces = computed(() => queryGetProvincias.result.value?.srvProvincia ?? []);
+    const districts = computed(() => queryGetDistritos.result.value?.srvDistrictByProvince ?? []);
+    const corrections = computed(() => queryGetCorrections.result.value?.srvCorregimiento ?? []);
+
+    const formatValuesSelect = (data) => {
+      const valueFormated = data.value.map(item => ({ value: item.id, label: item.nombre }));
+      return valueFormated;
+    }
+
+    // Watchers to format values and show them in selects
+
+    watch(() => localType, (newValue) => {
+      localTypeFormatted.value = formatValuesSelect(localType)
+    }, { deep: true })
+
+    watch(() => provinces.value, (newValue) => {
+      provincesFormatted.value = formatValuesSelect(provinces)
+    }, { deep: true })
+
+    watch(() => districts.value, (newValue) => {
+      districtsFormatted.value = formatValuesSelect(districts)
+    }, { deep: true })
+
+    watch(() => corrections.value, (newValue) => {
+      correctionsFormatted.value = formatValuesSelect(corrections)
+    }, { deep: true })
+
+    // Watchers to hierarchical values of selects
+
+    watch(() => client.provincia, (newValue) => {
+      variablesDistrics.provinceId = (newValue.value) ? newValue.value.toString() : getProvince(client.lugarPoblado, provinces).id.toString();
+      queryGetDistritos.load();
+    }, { deep: true })
+
+    watch(() => client.distrito, (newValue) => {
+      variablesCorrections.districtId = (newValue.value) ? newValue.value : getDistrictId(client.lugarPoblado);
+      queryGetCorrections.load();
+    }, { deep: true })
+
+
+    return { client, provincesFormatted, localTypeFormatted, districtsFormatted, correctionsFormatted };
   }
 };
 </script>

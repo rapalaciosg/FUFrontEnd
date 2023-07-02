@@ -7,7 +7,7 @@
     <Dialog
       as="div"
       @close="closeModal"
-      class="relative z-[99999]"
+      class="relative z-[99999] w-[100px]"
       v-if="disableBackdrop === false"
     >
       <TransitionChild
@@ -56,7 +56,7 @@
                 </button>
               </div>
               <div
-                class="px-6 py-8"
+                class="px-6 py-3"
                 :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : ''"
               >
                 <slot />
@@ -180,7 +180,7 @@ export default defineComponent({
     },
     sizeClass: {
       type: String,
-      default: "max-w-xl",
+      default: "max-w-3xl",
     },
     scrollContent: {
       type: Boolean,
