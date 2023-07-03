@@ -2,7 +2,7 @@ import "animate.css";
 import "flatpickr/dist/flatpickr.css";
 import "simplebar/dist/simplebar.min.css";
 import "sweetalert2/dist/sweetalert2.min.css";
-import {createApp} from "vue";
+import {createApp, provide, h} from "vue";
 import VueFlatPickr from "vue-flatpickr-component";
 import VueGoodTablePlugin from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
@@ -19,11 +19,39 @@ import router from "./router";
 import VCalendar from "v-calendar";
 import {createPinia} from 'pinia'
 import "v-calendar/dist/style.css";
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core'
+import { DefaultApolloClient } from '@vue/apollo-composable'
+
+const token = ''
+
+// HTTP connection to the API
+const httpLink = createHttpLink({
+  // Absolute URL
+    // uri: 'https://justcause-graphql-staging.azurewebsites.net/graphql/',
+    uri: 'https://localhost:7201/graphql/',
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+})
+
+// Cache implementation
+const cache = new InMemoryCache()
+
+// Create the apollo client
+export const apolloClient = new ApolloClient({
+  link: httpLink,
+  cache,
+})
 
 const pinia = createPinia()
 
 // vue use
-const app = createApp(App)
+const app = createApp({
+  setup () {
+    provide(DefaultApolloClient, apolloClient)
+  },
+  render: () => h(App)
+})
     .use(pinia)
     .use(VueSweetalert2)
     .use(Toast, {
