@@ -34,9 +34,9 @@
       </div>
       <slot></slot>
       <div class="flex text-xl absolute right-[14px] top-1/2 -translate-y-1/2">
-        <span v-if="error" class="text-danger-500">
+        <!-- <span v-if="error" class="text-danger-500">
           <Icon icon="heroicons-outline:information-circle" />
-        </span>
+        </span> -->
 
         <span v-if="validate" class="text-success-500">
           <Icon icon="bi:check-lg" />

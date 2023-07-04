@@ -1,0 +1,20 @@
+export const headersFrecuencyTable = [
+  { label: "Ruta", field: "ruta" },
+  { label: "Empresa", field: "empresa" },
+  { label: "Id registro", field: "idReg" },
+  { label: "Cliente", field: "cliente" },
+  { label: "Sucursal", field: "sucCliente" },
+  { label: "Frecuencia", field: "frecuencia" },
+  { label: "Próxima visita", field: "proximaVisita" },
+  { label: "Visita anterior", field: "visitaAnterior" },
+  { label: "Observaciones", field: "observaciones" },
+  { label: "L", field: "l" },
+  { label: "M", field: "m" },
+  { label: "Mi", field: "mi" },
+  { label: "J", field: "j" },
+  { label: "V", field: "v" },
+  { label: "S", field: "s" },
+  { label: "D", field: "d" },
+  { label: "Editar", field: "actions" },
+];
+    

@@ -8,7 +8,6 @@ export const GET_ALL_CLIENTS_QUERY = gql`
       sucursal
       nombreCliente
       direccionCliente
-      rutaID
       precio
       precioAdd
       tipoNegocio
@@ -37,34 +36,63 @@ export const GET_CLIENT_QUERY = gql`
       casa
       contacto
       telefono
+      apellido
+      nombre
+      clientType
     }
   }
 `;
 
-// export const GET_PROVINCES = gql``;
+export const CREATE_CLIENT = gql`
+  mutation createClientMut($client: EntityClientInput!) {
+    createClient(entityClient: $client) {
+      clientID
+    }
+  }
+`;
 
 export const UPDATE_CLIENT = gql`
-  mutation updateClientMut($client: EntityClientInput!) {
-    updateClient(entityClient: $client) {
+  mutation updateClientMut($entityClient: EntityClientInput!) {
+    updateClient(entityClient: $entityClient) {
       nombre
     }
   }
 `;
 
-export const GET_TIPO_LOCAL = gql`
-  query getsrvTipoLocal{
-    srvTipoLocal{
+export const GET_LOCAL_TYPE = gql`
+  query getLocalType {
+    srvTipoLocal {
       id
       nombre
     }
-  } 
+  }
 `;
 
-export const GET_PROVINCIAS = gql`
-  query getProvincias {
-    srvProvincia{
+export const GET_PROVINCES = gql`
+  query getProvinces {
+    srvProvincia {
       id
       nombre
+    }
+  }
+`;
+
+export const GET_DISTRICTS = gql`
+  query getDistricts($provinceId: String!) {
+    srvDistrictByProvince(provinceId: $provinceId) {
+      id
+      nombre
+      id_Provincia
+    }
+  }
+`;
+
+export const GET_CORRECTIONS = gql`
+  query getCorrections($districtId: String!) {
+    srvCorregimiento(districtId: $districtId) {
+      id
+      nombre
+      id_Distrito
     }
   }
 `;

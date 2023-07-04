@@ -1,0 +1,16 @@
+export const headersInventoryTable = [
+  { label: "Artículo", field: "articulo" },
+  { label: "Descripción", field: "descripcion1" },
+  { label: "Segunda descripción", field: "descripcion2" },
+  { label: "Nombre", field: "nombreCorto" },
+  { label: "Grupo", field: "grupo" },
+  { label: "Categoría", field: "categoria" },
+  { label: "Familia", field: "familia" },
+  { label: "Línea", field: "linea" },
+  { label: "Impuesto", field: "impuesto1" },
+  { label: "Estado", field: "estatus" },
+  { label: "Existencia", field: "existencia" },
+  { label: "Almacén", field: "almacen" },
+  { label: "Precio", field: "price" },
+  { label: "Acciones", field: "actions" },
+];

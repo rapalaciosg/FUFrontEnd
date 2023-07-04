@@ -62,7 +62,6 @@ import Textinput from "@/components/DashCodeComponents/Textinput";
 import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import BasicModal from "@/components/WebFrontendComponents/Modals/BasicModal.vue";
 import DropZone from "@/components/WebFrontendComponents/Form/FileInput/DropZone.vue";
 import { routesData, routesDateTwo } from "../../constant/basic-tablle-data.js";
 export default {
@@ -71,7 +70,6 @@ export default {
     VueSelect,
     Button,
     AdvancedTable,
-    BasicModal,
     Textinput,
     FromGroup,
     DropZone,

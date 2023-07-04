@@ -21,6 +21,7 @@ import {createPinia} from 'pinia'
 import "v-calendar/dist/style.css";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core'
 import { DefaultApolloClient } from '@vue/apollo-composable'
+import JsonExcel from "vue-json-excel3";
 
 const token = ''
 
@@ -68,6 +69,7 @@ const app = createApp({
 
 app.config.globalProperties.$store = {};
 app.mount("#app");
+app.component("downloadExcel", JsonExcel);
 
 import {useThemeSettingsStore} from "@/store/themeSettings";
 const themeSettingsStore = useThemeSettingsStore()

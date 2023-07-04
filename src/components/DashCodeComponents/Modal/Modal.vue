@@ -1,5 +1,5 @@
 <template>
-  <button v-if="showButton" type="button" @click="openModal" class="btn" :class="labelClass">
+  <button v-if="showButton" type="button" @click="openModal" class="font-semibold  text-sm leading-6 md:px-6 px-4 rounded capitalize  transition-all duration-150 md:whitespace-nowrap whitespace-normal relative" :class="labelClass">
     {{ label }}
   </button>
 
@@ -7,7 +7,7 @@
     <Dialog
       as="div"
       @close="closeModal"
-      class="relative z-[99999]"
+      class="relative z-[99999] w-[100px]"
       v-if="disableBackdrop === false"
     >
       <TransitionChild
@@ -56,7 +56,7 @@
                 </button>
               </div>
               <div
-                class="px-6 py-8"
+                class="px-6 py-3"
                 :class="scrollContent ? 'overflow-y-auto max-h-[400px]' : ''"
               >
                 <slot />
@@ -180,7 +180,7 @@ export default defineComponent({
     },
     sizeClass: {
       type: String,
-      default: "max-w-xl",
+      default: "max-w-3xl",
     },
     scrollContent: {
       type: Boolean,
