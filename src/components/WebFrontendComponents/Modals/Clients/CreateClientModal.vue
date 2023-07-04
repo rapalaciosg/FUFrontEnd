@@ -1,50 +1,50 @@
 <template>
-  <modal-base>
+  <modal-base @save="createClient()">
     <template v-slot:modal-body>
       <div class="grid grid-cols-2 gap-5">
-        <VueSelect :options="routes" label="Ruta" placeholder="Ruta" />
+        <VueSelect :options="routes" label="Ruta" placeholder="Ruta" v-model="ruta" :error="error" />
         <VueSelect :options="provincesFormatted" label="Provincia" placeholder="Provincia" v-model="client.provincia" />
-        <Textinput name="pn" type="text" label="Identificador" placeholder="Identificador" :isReadonly="true" />
+        <Textinput name="pn" type="text" label="Identificador" placeholder="Identificador" v-model="client.clientID" :isReadonly="true" />
         <VueSelect :options="districtsFormatted" label="Distrito" placeholder="Distrito" v-model="client.distrito" />
-        <VueSelect :options="localTypeFormatted" label="MS, ABT, KIOSKO, ETV" placeholder="MS, ABT, KIOSKO, ETV" />
+        <VueSelect :options="localTypeFormatted" label="MS, ABT, KIOSKO, ETV" placeholder="MS, ABT, KIOSKO, ETV" v-model="client.nombre" />
         <VueSelect :options="correctionsFormatted" label="Corregimiento" placeholder="Corregimiento" v-model="client.corregimiento" />
-        <Textinput name="pn" type="text" label="Nombre del local" placeholder="Nombre del local" />
-        <VueSelect :options="routes" label="Lugar poblado" placeholder="Lugar poblado" />
-        <Textinput name="pn" type="text" label="RUC + DV o Cédula" placeholder="RUC + DV o Cédula" />
-        <Textinput name="pn" type="text" label="Latitud" placeholder="Latitud" />
-        <Textinput name="pn" type="text" label="Digito verificador" placeholder="Digito verificador" />
-        <Textinput name="pn" type="text" label="Longitud" placeholder="Longitud" />
+        <Textinput name="pn" type="text" label="Nombre del local" placeholder="Nombre del local" v-model="client.apellido" :error="error" />
+        <VueSelect :options="routes" label="Lugar poblado" placeholder="Lugar poblado" v-model="client.lugarPoblado" />
+        <Textinput name="pn" type="text" label="RUC + DV o Cédula" placeholder="RUC + DV o Cédula" v-model="client.cedula" />
+        <Textinput name="pn" type="text" label="Latitud" placeholder="Latitud" v-model="latitud" />
+        <Textinput name="pn" type="text" label="Digito verificador" placeholder="Digito verificador" v-model="client.dv" />
+        <Textinput name="pn" type="text" label="Longitud" placeholder="Longitud" v-model="longitud" />
         <FromGroup name="d1" label="Fecha de nacimiento">
           <flat-pickr
-            v-model="dateDefault"
+            v-model="client.birth"
             class="form-control"
             id="d1"
             placeholder="Fecha de nacimiento"
           />
         </FromGroup>
-        <Textinput name="pn" type="number" label="Nuestros tanques" placeholder="Nuestros tanques" />
-        <Textinput name="pn" type="text" label="Dirección" placeholder="Dirección" />
-        <Textinput name="pn" type="text" label="Precio" placeholder="Precio" :isReadonly="true" />
-        <VueSelect :options="customerType" label="Tipo cliente" placeholder="Tipo cliente" />
-        <Textinput name="pn" type="number" label="Otros tanques" placeholder="Otros tanques" />
-        <Textinput name="pn" type="number" label="Número de casa" placeholder="Número de casa" />
-        <Textinput name="pn" type="text" label="Contacto" placeholder="Contacto" />
-        <Textinput name="pn" type="number" label="Teléfono o cedular" placeholder="Teléfono o celula" />
-        <Textinput name="pn" type="text" label="Observaciones" placeholder="Observaciones" />
+        <Textinput name="pn" type="number" label="Nuestros tanques" placeholder="Nuestros tanques" v-model="client.tanquesNuestros" />
+        <Textinput name="pn" type="text" label="Dirección" placeholder="Dirección" v-model="client.ubicacion" />
+        <Textinput name="pn" type="text" label="Precio" placeholder="Precio" :isReadonly="true" v-model="client.precio" />
+        <VueSelect :options="customerType" label="Tipo cliente" placeholder="Tipo cliente" v-model="client.clientType" />
+        <Textinput name="pn" type="number" label="Otros tanques" placeholder="Otros tanques" v-model="client.otrosTanques" />
+        <Textinput name="pn" type="number" label="Número de casa" placeholder="Número de casa" v-model="client.casa" />
+        <Textinput name="pn" type="text" label="Contacto" placeholder="Contacto" v-model="client.contacto" />
+        <Textinput name="pn" type="number" label="Teléfono o cedular" placeholder="Teléfono o celula" v-model="client.telefono" />
+        <Textinput name="pn" type="text" label="Observaciones" placeholder="Observaciones" v-model="client.observaciones" />
       </div>
     </template>
   </modal-base>
 </template>
 
 <script>
-import { computed, reactive, ref, watch, onMounted } from "vue";
+import { computed, reactive, ref, watch, onMounted, defineEmits } from "vue";
 import ModalBase from "../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 
-import { GET_LOCAL_TYPE, GET_PROVINCES, GET_DISTRICTS, GET_CORRECTIONS } from "@/services/clients/clientsGraphql.js";
-import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
+import { GET_LOCAL_TYPE, GET_PROVINCES, GET_DISTRICTS, GET_CORRECTIONS, CREATE_CLIENT } from "@/services/clients/clientsGraphql.js";
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -55,6 +55,7 @@ export default {
     VueSelect,
   },
   props: [],
+  emits: ['client-created'],
   data() {
     return {
       dateDefault: "",
@@ -71,10 +72,12 @@ export default {
       ],
     }
   },
-  setup(props) {
+  setup(props, { emit }) {
     // Declaring variables and apollo clients
     const variablesDistrics = reactive({ provinceId: ""});
     const variablesCorrections = reactive({ districtId: ""});
+
+    // const variablesCreateClient = reactive({ entityClient: {}});
 
     const queryGetTipoLocal = provideApolloClient(apolloClient)(() => useLazyQuery(GET_LOCAL_TYPE));
     const queryGetProvincias = provideApolloClient(apolloClient)(() => useLazyQuery(GET_PROVINCES));
@@ -85,6 +88,9 @@ export default {
     let provincesFormatted = ref([]);
     let districtsFormatted = ref([]);
     let correctionsFormatted = ref([]);
+
+    let longitud = ref("");
+    let latitud = ref("");
 
     const client = reactive({
       ruta: "",
@@ -105,8 +111,12 @@ export default {
       provincia: "",
       apellido: "",
       nombre: "",
-      clientType: ""
+      clientType: "",
+      observaciones: "",
+      precio: ""
     });
+
+    const error = ref("");
 
     // Initializing the component
     const initialize = () => {
@@ -157,8 +167,28 @@ export default {
       queryGetCorrections.load();
     }, { deep: true })
 
+    // Create method
+    // const { mutate: createClient } = useMutation(CREATE_CLIENT, () => ({ variables: { entityClient: client } }));
 
-    return { client, provincesFormatted, localTypeFormatted, districtsFormatted, correctionsFormatted };
+    // const isEmpty = (data) => {
+    //   const isEmpty = Object.values(data).every(x => x === null || x === '');
+    //   if (isEmpty) {
+    //     error.value = "Este campo es requerido.";
+    //     setTimeout(() => {
+    //       error.value = "";
+    //     }, 3000);
+    //   }
+    //   return isEmpty
+    // }
+
+    // const emit = defineEmits(['client-created']);
+
+    const createClient = () => {
+      console.log('client => ', client);
+      emit('client-created')
+    }
+
+    return { client, provincesFormatted, localTypeFormatted, districtsFormatted, correctionsFormatted, createClient, longitud, latitud };
   }
 };
 </script>

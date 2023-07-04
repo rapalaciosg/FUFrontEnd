@@ -5,7 +5,8 @@
         <VueSelect :options="options" placeholder="Ruta o Camión" v-model="route" />
         <div class="grid grid-cols-2 gap-x-5">
           <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
-          <Button class="h-[40px]" text="Exportar" btnClass="btn-success" />
+          <download-excel class="btn-info rounded pt-2 text-center" :data="frecuencies" name="filename.xls">Exportar</download-excel>
+          <!-- <Button class="h-[40px]" text="Exportar" btnClass="btn-success" /> -->
         </div>
       </div>
     </Card>

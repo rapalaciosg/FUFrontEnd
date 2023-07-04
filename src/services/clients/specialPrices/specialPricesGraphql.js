@@ -24,3 +24,44 @@ export const GET_ALL_SPECIAL_PRICES = gql`
     }
   }
 `;
+
+export const GET_ALL_ARTICLES = gql`
+  query getAllArticles($truckId: String!) {
+    srvArticulosRuta(truckId: $truckId) {
+      articulo
+      descripcion1
+      descripcion2
+      nombreCorto
+      grupo
+      categoria
+      familia
+      linea
+      fabricante
+      impuesto1
+      estatus
+      existencia
+      almacen
+      price
+    }
+  }
+`;
+
+export const CREATE_SPECIAL_PRICE = gql`
+  mutation createAjustePrecioMut(
+    $clientAjustePrecio: ClientAjustePrecioClienteSucursalInput!
+  ) {
+    createAjustePrecio(clientAjustePrecio: $clientAjustePrecio) {
+      clienteID
+    }
+  }
+`;
+
+export const UPDATE_SPECIAL_PRICE = gql`
+  mutation updateAjustePrecioMut(
+    $clientAjustePrecio: ClientAjustePrecioClienteSucursalInput!
+  ) {
+    updateAjustePrecio(clientAjustePrecio: $clientAjustePrecio) {
+      clienteID
+    }
+  }
+`;

@@ -4,15 +4,14 @@
       <div class="grid grid-cols-2 2xl:grid-cols-3 gap-5">
         <VueSelect :options="options" placeholder="Ruta o Camión" v-model="route" />
         <VueSelect :options="companiesFormatted" placeholder="Empresa" v-model="company" :disabled="route === ''" />
-        <div class="col-span-2 2xl:col-span-1 grid grid-cols-3 gap-x-5">
-          <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
+        <div class="col-span-2 2xl:col-span-1 grid grid-cols-2 gap-x-5">
           <CreateSpecialPriceModal title="Registrar precio" btnClass="btn-success" />
-          <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
+          <download-excel class="btn-info rounded pt-2 text-center" :data="specialPrices" name="filename.xls">Exportar</download-excel>
         </div>
       </div>
     </Card>
     <AdvancedTable :headers="headersSpecialPricesTable" :data="specialPrices" :actions="actions" @open-modal="toggleModal" />
-    <EditSpecialPriceModal title="Editar precio especial" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" />
+    <EditSpecialPriceModal title="Editar precio especial" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="specialPrice" />
   </div>
 </template>
 <script>
@@ -59,6 +58,7 @@ export default {
     const variablesSpecialPrices = reactive({ route: "", company: "" });
 
     let companiesFormatted = ref([]);
+    let specialPrice = ref({});
 
     let isModalOpen = ref(false);
     const route = ref("");
@@ -97,9 +97,11 @@ export default {
     const toggleModal = (value) => {
       if(value.action === 'edit');
         isModalOpen.value = true
+
+      specialPrice.value = value.row;
     }
 
-    return { route, company, companiesFormatted, specialPrices, toggleModal, isModalOpen };
+    return { route, company, companiesFormatted, specialPrices, toggleModal, isModalOpen, specialPrice };
   }
 };
 </script>

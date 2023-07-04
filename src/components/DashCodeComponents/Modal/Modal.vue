@@ -1,5 +1,5 @@
 <template>
-  <button v-if="showButton" type="button" @click="openModal" class="btn" :class="labelClass">
+  <button v-if="showButton" type="button" @click="openModal" class="font-semibold  text-sm leading-6 md:px-6 px-4 rounded capitalize  transition-all duration-150 md:whitespace-nowrap whitespace-normal relative" :class="labelClass">
     {{ label }}
   </button>
 

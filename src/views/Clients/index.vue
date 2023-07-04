@@ -7,10 +7,11 @@
           v-model="truckId"
           placeholder="Ruta o Camión"
         />
-        <div class="grid grid-cols-3 gap-x-5">
-          <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
-          <CreateClientModal title="Crear cliente" btnClass="btn-success" />
-          <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
+        <div class="grid grid-cols-2 gap-x-5">
+          <!-- <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" /> -->
+          <CreateClientModal title="Crear cliente" btnClass="btn-success" @client-created="isModalOpen = false" />
+          <download-excel class="btn-info rounded pt-2 text-center" :data="clients" name="filename.xls">Exportar</download-excel>
+          <!-- <Button class="h-[40px]" text="Exportar" btnClass="btn-info" /> -->
         </div>
       </div>
     </Card>
@@ -50,6 +51,9 @@ export default {
         { value: "ML01", label: "ML01" },
         { value: "ML02", label: "ML02" },
         { value: "ML03", label: "ML03" },
+        { value: "ML03", label: "ML04" },
+        { value: "ML03", label: "ML05" },
+        { value: "ML03", label: "ML" },
       ],
       actions: [
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },

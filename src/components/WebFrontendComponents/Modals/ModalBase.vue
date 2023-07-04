@@ -12,7 +12,7 @@
         btnClass="btn-secondary"
         @click="$refs.modal.closeModal()"
       />
-      <Button text="Guardar" btnClass="btn-success" />
+      <Button text="Guardar" btnClass="btn-success" @click="save()" />
     </template>
   </Modal>
 </template>
@@ -24,12 +24,19 @@ export default {
     Modal,
     Button,
   },
+  emits: ['save'],
   props: {
     title: {
       type: String,
       default: "",
     },
   },
+  methods: {
+    save() {
+      this.$emit('save')
+      this.$refs.modal.closeModal()
+    }
+  }
 };
 </script>
 <style lang=""></style>

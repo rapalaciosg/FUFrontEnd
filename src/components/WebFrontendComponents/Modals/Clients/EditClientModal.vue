@@ -1,5 +1,5 @@
 <template>
-  <modal-base>
+  <modal-base @save="editClient()">
     <template v-slot:modal-body>
       <div class="grid grid-cols-2 gap-x-5 gap-y-1">
         <VueSelect :options="routes" label="Ruta" placeholder="Ruta" v-model="client.ruta" />
@@ -38,8 +38,8 @@ import Textinput from "@/components/DashCodeComponents/Textinput";
 import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 
-import { GET_LOCAL_TYPE, GET_PROVINCES, GET_DISTRICTS, GET_CORRECTIONS } from "@/services/clients/clientsGraphql.js";
-import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
+import { GET_LOCAL_TYPE, GET_PROVINCES, GET_DISTRICTS, GET_CORRECTIONS, UPDATE_CLIENT } from "@/services/clients/clientsGraphql.js";
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -187,8 +187,15 @@ export default {
       queryGetCorrections.load();
     }, { deep: true })
 
+    // update client
+    const { mutate: editClient } = useMutation(UPDATE_CLIENT, () => ({ variables: { entityClient: client } }));
 
-    return { client, provincesFormatted, localTypeFormatted, districtsFormatted, correctionsFormatted };
+    // const editClient = () => {
+    //   console.log('Editar cliente')
+    // }
+
+
+    return { client, provincesFormatted, localTypeFormatted, districtsFormatted, correctionsFormatted, editClient };
   }
 };
 </script>
