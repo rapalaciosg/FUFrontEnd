@@ -24,7 +24,7 @@
         </FromGroup>
         <VueSelect :options="options" label="Ruta" placeholder="Ruta" v-model="route" :error="errorFields.ruta" />
         <VueSelect :options="statusList" label="Estado" placeholder="Estado" v-model="status" :error="errorFields.estatus" />
-        <VueSelect :options="articleList" label="Artículo" placeholder="Artículo" v-model="article" :error="errorFields.articuloID" />
+        <VueSelect :options="articlesFormatted" label="Artículo" placeholder="Artículo" v-model="article" :error="errorFields.articuloID" />
         <VueSelect :options="companiesFormatted" label="Empresa" placeholder="Empresa" v-model="company" :error="errorFields.empresa" />
         <Textinput name="pn" type="number" label="Ajuste precio" placeholder="Ajuste precio" v-model="specialPrice.ajustePrecio" :error="errorFields.ajustePrecio" />
       </div>
@@ -63,9 +63,9 @@ export default {
         { value: "ML01", label: "ML01" },
         { value: "ML02", label: "ML02" },
         { value: "ML03", label: "ML03" },
-        { value: "ML03", label: "ML04" },
-        { value: "ML03", label: "ML05" },
-        { value: "ML03", label: "ML" },
+        { value: "ML04", label: "ML04" },
+        { value: "ML05", label: "ML05" },
+        { value: "ML", label: "ML" },
       ],
     }
   },

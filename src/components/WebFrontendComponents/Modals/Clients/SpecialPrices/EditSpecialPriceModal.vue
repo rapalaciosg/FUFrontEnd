@@ -68,9 +68,9 @@ export default {
         { value: "ML01", label: "ML01" },
         { value: "ML02", label: "ML02" },
         { value: "ML03", label: "ML03" },
-        { value: "ML03", label: "ML04" },
-        { value: "ML03", label: "ML05" },
-        { value: "ML03", label: "ML" },
+        { value: "ML04", label: "ML04" },
+        { value: "ML05", label: "ML05" },
+        { value: "ML", label: "ML" },
       ],
     }
   },
