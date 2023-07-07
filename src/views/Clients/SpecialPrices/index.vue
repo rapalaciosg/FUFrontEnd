@@ -11,7 +11,7 @@
       </div>
     </Card>
     <AdvancedTable :headers="headersSpecialPricesTable" :data="specialPrices" :actions="actions" @open-modal="toggleModal" />
-    <EditSpecialPriceModal title="Editar precio especial" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="specialPrice" />
+    <EditSpecialPriceModal title="Editar precio especial" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="specialPrice" @price-edited="refresSpecialPriceList" />
   </div>
 </template>
 <script>
@@ -85,14 +85,24 @@ export default {
       queryGetCompanies.load();
 
       if (variablesSpecialPrices.company !== "") {
-        queryGetSpecialPrices.load();
+        loadSpecialPrices()
       }
     }, { deep: true })
 
     watch(() => company, newValue => {
       variablesSpecialPrices.company = newValue.value.value;
-      queryGetSpecialPrices.load();
+      loadSpecialPrices()
     }, { deep: true })
+
+    const loadSpecialPrices = () => {
+      queryGetSpecialPrices.load() || queryGetSpecialPrices.refetch()
+    }
+
+    const refresSpecialPriceList = (value) => {
+      variablesSpecialPrices.route = value.truckId
+      variablesSpecialPrices.company = value.company
+      isModalOpen.value = false
+    }
 
     const toggleModal = (value) => {
       if(value.action === 'edit');
@@ -101,7 +111,7 @@ export default {
       specialPrice.value = value.row;
     }
 
-    return { route, company, companiesFormatted, specialPrices, toggleModal, isModalOpen, specialPrice };
+    return { route, company, companiesFormatted, specialPrices, toggleModal, isModalOpen, specialPrice, refresSpecialPriceList };
   }
 };
 </script>

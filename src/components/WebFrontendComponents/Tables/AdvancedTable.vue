@@ -37,26 +37,33 @@
         }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field == 'l'" class="flex">
-            <Checkbox />
+          <span v-if="props.column.field == 'l'">
+            <Icon v-if="props.row.l === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
-          <span v-if="props.column.field == 'm'" class="flex">
-            <Checkbox />
+          <span v-if="props.column.field == 'm'">
+            <Icon v-if="props.row.m === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'mi'" class="flex">
-            <Checkbox />
+            <Icon v-if="props.row.mi === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'j'" class="flex">
-            <Checkbox />
+            <Icon v-if="props.row.j === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'v'" class="flex">
-            <Checkbox />
+            <Icon v-if="props.row.v === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 's'" class="flex">
-            <Checkbox />
+            <Icon v-if="props.row.s === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'd'" class="flex">
-            <Checkbox />
+            <Icon v-if="props.row.d === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'actions'">
             <Dropdown classMenuItems=" w-[140px]">

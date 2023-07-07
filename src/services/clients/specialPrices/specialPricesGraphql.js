@@ -48,20 +48,22 @@ export const GET_ALL_ARTICLES = gql`
 
 export const CREATE_SPECIAL_PRICE = gql`
   mutation createAjustePrecioMut(
-    $clientAjustePrecio: ClientAjustePrecioClienteSucursalInput!
+    $clientAjustePrecio: AdjustmentPriceRequestModelInput!
   ) {
     createAjustePrecio(clientAjustePrecio: $clientAjustePrecio) {
-      clienteID
+      statusCode
+      message
     }
   }
 `;
 
 export const UPDATE_SPECIAL_PRICE = gql`
   mutation updateAjustePrecioMut(
-    $clientAjustePrecio: ClientAjustePrecioClienteSucursalInput!
+    $clientAjustePrecio: AdjustmentPriceRequestModelInput!
   ) {
     updateAjustePrecio(clientAjustePrecio: $clientAjustePrecio) {
-      clienteID
+      statusCode
+      message
     }
   }
 `;

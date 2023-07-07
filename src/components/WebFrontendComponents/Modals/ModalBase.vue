@@ -30,11 +30,22 @@ export default {
       type: String,
       default: "",
     },
+    closeModal: {
+      type: Boolean,
+      default: false
+    }
+  },
+  watch: {
+    closeModal(newValue) {
+      console.log('newValue Watch => ', newValue);
+      if(newValue === true)
+        this.$refs.modal.closeModal()
+    }
   },
   methods: {
     save() {
       this.$emit('save')
-      this.$refs.modal.closeModal()
+      //this.$refs.modal.closeModal()
     }
   }
 };

@@ -39,22 +39,27 @@ export const GET_CLIENT_QUERY = gql`
       apellido
       nombre
       clientType
+      precio
+      observacion
+      zona
     }
   }
 `;
 
 export const CREATE_CLIENT = gql`
-  mutation createClientMut($client: EntityClientInput!) {
-    createClient(entityClient: $client) {
-      clientID
+  mutation createClientMut($entityClient: CustomerRequestModelInput!) {
+    createClient(entityClient: $entityClient) {
+      statusCode
+      message
     }
   }
 `;
 
 export const UPDATE_CLIENT = gql`
-  mutation updateClientMut($entityClient: EntityClientInput!) {
+  mutation updateClientMut($entityClient: CustomerRequestModelInput!) {
     updateClient(entityClient: $entityClient) {
-      nombre
+      statusCode
+      message
     }
   }
 `;
@@ -93,6 +98,19 @@ export const GET_CORRECTIONS = gql`
       id
       nombre
       id_Distrito
+    }
+  }
+`;
+
+export const GET_TWON_PLACES = gql`
+  query getPlacesTown($townshipId: String!) {
+    srvLugarPoblacionWithPrice(townshipId: $townshipId) {
+      id_Corregimiento
+      precio
+      precio100lbs
+      precioXMenor
+      id
+      nombre
     }
   }
 `;

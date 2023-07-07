@@ -8,15 +8,13 @@
           placeholder="Ruta o Camión"
         />
         <div class="grid grid-cols-2 gap-x-5">
-          <!-- <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" /> -->
           <CreateClientModal title="Crear cliente" btnClass="btn-success" @client-created="isModalOpen = false" />
           <download-excel class="btn-info rounded pt-2 text-center" :data="clients" name="filename.xls">Exportar</download-excel>
-          <!-- <Button class="h-[40px]" text="Exportar" btnClass="btn-info" /> -->
         </div>
       </div>
     </Card>
     <AdvancedTable :headers="headersClientsTable" :data="clients" :actions="actions" @open-modal="toggleModal" />
-    <EditClientModal title="Editar cliente" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="client" />
+    <EditClientModal title="Editar cliente" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="client" @client-updated="refreshClientsList" />
   </div>
 </template>
 
@@ -76,8 +74,8 @@ export default {
     const client = computed(() => queryGetClient.result.value?.srvUserInfo ?? []);
 
     watch(() => truckId, newValue => {
-      variablesClients.truckId = newValue.value.value;
-      queryGetClients.load();
+      variablesClients.truckId = newValue.value.value || newValue.value;
+      loadClients()
     }, { deep: true })
 
     const toggleModal = (value) => {
@@ -88,6 +86,15 @@ export default {
       queryGetClient.load();
     }
 
+    const loadClients = () => {
+      queryGetClients.load() || queryGetClients.refetch()
+    }
+
+    const refreshClientsList = (value) => {
+      truckId.value = value
+      isModalOpen.value = false
+    }
+
     return { 
       clients,
       variablesClients,
@@ -95,6 +102,8 @@ export default {
       isModalOpen,
       toggleModal,
       truckId,
+      refreshClientsList,
+      queryGetClients
     };
   },
 };

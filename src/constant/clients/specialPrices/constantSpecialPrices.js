@@ -1,6 +1,6 @@
 export const headersSpecialPricesTable = [
   { label: "Cliente id", field: "clienteID" },
-  { label: "Id interno", field: "idIntern" },
+  { label: "Id interno", field: "clienteID" },
   { label: "Id sucursal", field: "sucursal" },
   { label: "Articulo id", field: "articuloID" },
   { label: "Ajuste precio", field: "ajustePrecio" },
@@ -12,13 +12,8 @@ export const headersSpecialPricesTable = [
   { label: "Editar", field: "actions" },
 ];
 
-
-
-      
-      
-      
-      
-      
-      
-      
-      
+export const articleList = [
+  { value: "GAS-100B", label: "00-USO AMIGAS 13 LBS"},
+  { value: "GAS-025", label: "25LBS"},
+  { value: "ML-00000007", label: "000-22-USO 25-LBS"}
+]
