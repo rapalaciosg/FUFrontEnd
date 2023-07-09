@@ -131,6 +131,10 @@ export default {
       return valueFormated;
     }
 
+    onMounted(() => {
+      Object.keys(specialPrice).every(x => specialPrice[x] = "")
+    })
+
     watch(() => companies, (newValue) => {
       companiesFormatted.value = formatValuesSelect(companies)
     }, { deep: true })
@@ -213,7 +217,7 @@ export default {
         specialPrice.ajustePrecio = parseFloat(specialPrice.ajustePrecio)
         createSpecialPriceMut()
           .then((response) => {
-            if (response.data.createAjustePrecio.message == "AJUSTE CREADO") {
+            if (response.data.createAjustePrecio.message === '"AJUSTE CREADO"') {
               toast.success("Precio especial creado exitosamente", {
                 timeout: 2000,
               });

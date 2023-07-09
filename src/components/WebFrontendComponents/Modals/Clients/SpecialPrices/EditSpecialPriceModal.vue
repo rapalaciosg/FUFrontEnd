@@ -129,9 +129,14 @@ export default {
 
     // Setting default values into edit modal
     watch(() => props.data, (value) => {
+      console.log('value => ', value);
       Object.keys(specialPrice).forEach(item => specialPrice[item] = value[item] || "");
       specialPrice.ajustePrecio = value.ajustePrecio
       route.value = value.ruta;
+      article.value = value.articuloID
+      console.log('articles => ', articles);
+      status.value = value.estatus
+      company.value = value.empresa
     })
 
     const formatValuesSelect = (data) => {
@@ -186,12 +191,12 @@ export default {
           errorFields.articuloID = ""
         }, 3000);
       }
-      if (specialPrice.ajustePrecio == "") {
-        errorFields.ajustePrecio = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.ajustePrecio = ""
-        }, 3000);
-      }
+      // if (specialPrice.ajustePrecio == "") {
+      //   errorFields.ajustePrecio = "Este campo es requerido."
+      //   setTimeout(() => {
+      //     errorFields.ajustePrecio = ""
+      //   }, 3000);
+      // }
       if (status.value == "") {
         errorFields.estatus = "Este campo es requerido."
         setTimeout(() => {
@@ -216,27 +221,30 @@ export default {
           errorFields.empresa = ""
         }, 3000);
       } else {
-        specialPrice.empresa = specialPrice.empresa.value || specialPrice.empresa
-        specialPrice.estatus = specialPrice.estatus.value || specialPrice.estatus
+        specialPrice.empresa = company.value.value || company.value
+        specialPrice.estatus = status.value.value || status.value
+        specialPrice.articuloID = article.value.value || article.value
         specialPrice.ruta = route.value.value || route.value
+        console.log("specialPrice => ", specialPrice);
         editSpecialPriceMut()
-        .then((response) => {
-            if (response.data.createAjustePrecio.message == "AJUSTE EDITADO") {
-              toast.success("Precio especial editado exitosamente", {
-                timeout: 2000,
-              });
-            } else {
-              toast.error("Ha ocurrido un error", {
-                timeout: 2000,
-              });
-            }
-          })
+          .then((response) => {
+            console.log("response.data.createAjustePrecio.message => ", response);
+              if (response.data.updateAjustePrecio.message == '"AJUSTE ACTUALIZADO"') {
+                toast.success("Precio especial editado exitosamente", {
+                  timeout: 2000,
+                });
+              } else {
+                toast.error("Ha ocurrido un error", {
+                  timeout: 2000,
+                });
+              }
+            })
         emit('price-edited', { truckId: specialPrice.ruta, company: specialPrice.empresa })
         closeModal.value = true
       }
     }
 
-    return { specialPrice, companiesFormatted, articlesFormatted, editSpecialPrice, route, closeModal, article, status, company }
+    return { specialPrice, companiesFormatted, articlesFormatted, editSpecialPrice, route, closeModal, article, status, company, errorFields }
   }
 };
 </script>

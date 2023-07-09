@@ -37,7 +37,6 @@ export default {
   },
   watch: {
     closeModal(newValue) {
-      console.log('newValue Watch => ', newValue);
       if(newValue === true)
         this.$refs.modal.closeModal()
     }
