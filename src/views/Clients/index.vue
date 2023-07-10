@@ -7,15 +7,14 @@
           v-model="truckId"
           placeholder="Ruta o Camión"
         />
-        <div class="grid grid-cols-3 gap-x-5">
-          <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" />
-          <CreateClientModal title="Crear cliente" btnClass="btn-success" />
-          <Button class="h-[40px]" text="Exportar" btnClass="btn-info" />
+        <div class="grid grid-cols-2 gap-x-5">
+          <CreateClientModal title="Crear cliente" btnClass="btn-success" @client-created="isModalOpen = false" />
+          <download-excel class="btn-info rounded pt-2 text-center" :data="clients" name="filename.xls">Exportar</download-excel>
         </div>
       </div>
     </Card>
     <AdvancedTable :headers="headersClientsTable" :data="clients" :actions="actions" @open-modal="toggleModal" />
-    <EditClientModal title="Editar cliente" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="client" />
+    <EditClientModal title="Editar cliente" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="client" @client-updated="refreshClientsList" />
   </div>
 </template>
 
@@ -31,7 +30,7 @@ import { headersClientsTable } from "@/constant/clients/constantClient.js";
 import { useClientsStore } from "@/store/clients/clientsStore.js";
 
 import { GET_ALL_CLIENTS_QUERY, GET_CLIENT_QUERY } from "@/services/clients/clientsGraphql.js";
-import { useQuery, provideApolloClient } from "@vue/apollo-composable";
+import { provideApolloClient, useLazyQuery } from "@vue/apollo-composable";
 import { apolloClient } from "../../main.js";
 
 export default {
@@ -50,6 +49,9 @@ export default {
         { value: "ML01", label: "ML01" },
         { value: "ML02", label: "ML02" },
         { value: "ML03", label: "ML03" },
+        { value: "ML03", label: "ML04" },
+        { value: "ML03", label: "ML05" },
+        { value: "ML03", label: "ML" },
       ],
       actions: [
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -64,21 +66,33 @@ export default {
     let isModalOpen = ref(false);
     const truckId = ref("");
 
-    const queryGetClients = provideApolloClient(apolloClient)(() => useQuery(GET_ALL_CLIENTS_QUERY, variablesClients));
-    const queryGetClient = provideApolloClient(apolloClient)(() => useQuery(GET_CLIENT_QUERY, variablesClient));
+    const queryGetClients = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_CLIENTS_QUERY, variablesClients));
+
+    const queryGetClient = provideApolloClient(apolloClient)(() => useLazyQuery(GET_CLIENT_QUERY, variablesClient));
 
     const clients = computed(() => queryGetClients.result.value?.srvLoadClientsAll ?? []);
     const client = computed(() => queryGetClient.result.value?.srvUserInfo ?? []);
 
     watch(() => truckId, newValue => {
-      variablesClients.truckId = newValue.value.value
+      variablesClients.truckId = newValue.value.value || newValue.value;
+      loadClients()
     }, { deep: true })
 
     const toggleModal = (value) => {
-      if(value.action === 'edit')
+      if(value.action === 'edit');
         isModalOpen.value = true
 
-      variablesClient.customerId = value.row.clienteID
+      variablesClient.customerId = value.row.clienteID;
+      queryGetClient.load();
+    }
+
+    const loadClients = () => {
+      queryGetClients.load() || queryGetClients.refetch()
+    }
+
+    const refreshClientsList = (value) => {
+      truckId.value = value
+      isModalOpen.value = false
     }
 
     return { 
@@ -88,6 +102,8 @@ export default {
       isModalOpen,
       toggleModal,
       truckId,
+      refreshClientsList,
+      queryGetClients
     };
   },
 };

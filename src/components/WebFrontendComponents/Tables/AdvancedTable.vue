@@ -37,6 +37,34 @@
         }"
       >
         <template v-slot:table-row="props">
+          <span v-if="props.column.field == 'l'">
+            <Icon v-if="props.row.l === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
+          </span>
+          <span v-if="props.column.field == 'm'">
+            <Icon v-if="props.row.m === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
+          </span>
+          <span v-if="props.column.field == 'mi'" class="flex">
+            <Icon v-if="props.row.mi === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
+          </span>
+          <span v-if="props.column.field == 'j'" class="flex">
+            <Icon v-if="props.row.j === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
+          </span>
+          <span v-if="props.column.field == 'v'" class="flex">
+            <Icon v-if="props.row.v === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
+          </span>
+          <span v-if="props.column.field == 's'" class="flex">
+            <Icon v-if="props.row.s === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
+          </span>
+          <span v-if="props.column.field == 'd'" class="flex">
+            <Icon v-if="props.row.d === 0" :icon="'material-symbols:circle'" />
+            <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
+          </span>
           <span v-if="props.column.field == 'actions'">
             <Dropdown classMenuItems=" w-[140px]">
               <span class="text-xl"
@@ -89,6 +117,7 @@ import Card from "@/components/DashCodeComponents/Card";
 import Icon from "@/components/DashCodeComponents/Icon";
 import InputGroup from "@/components/DashCodeComponents/InputGroup";
 import Pagination from "@/components/DashCodeComponents/Pagination";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 import { MenuItem } from "@headlessui/vue";
 export default {
   components: {
@@ -98,6 +127,7 @@ export default {
     Icon,
     Card,
     MenuItem,
+    Checkbox
   },
 
   props: {

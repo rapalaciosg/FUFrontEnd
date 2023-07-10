@@ -35,7 +35,6 @@
   import FromGroup from "@/components/DashCodeComponents/FromGroup";
   import Button from "@/components/DashCodeComponents/Button";
   import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-  import BasicModal from "@/components/WebFrontendComponents/Modals/BasicModal.vue";
   import { routesData, routesDateTwo } from "../../../constant/basic-tablle-data.js";
   export default {
     components: {
@@ -43,7 +42,6 @@
       VueSelect,
       Button,
       AdvancedTable,
-      BasicModal,
       Textinput,
       FromGroup,
     },
