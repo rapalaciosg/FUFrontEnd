@@ -22,3 +22,14 @@ export const GET_FRECUENCIAS = gql`
     }
   }
 `;
+
+export const UPDATE_FRECUENCY = gql`
+  mutation updateFrecuencyMut(
+    $frecuenciaCliente: FrequencyResponseModelInput!
+  ) {
+    updateFrecuency(frecuenciaCliente: $frecuenciaCliente) {
+      statusCode
+      message
+    }
+  }
+`;
