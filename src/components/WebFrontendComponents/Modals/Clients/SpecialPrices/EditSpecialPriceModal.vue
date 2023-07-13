@@ -52,8 +52,8 @@ export default {
   },
   props: {
     data: {
-      type: String,
-      defaul: []
+      type: Object,
+      defaul: {}
     }
   },
   emits: ['price-edited'],
