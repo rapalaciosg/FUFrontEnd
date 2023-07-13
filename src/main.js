@@ -1,4 +1,4 @@
-import "animate.css";
+import "animate.css/animate.compat.css";
 import "flatpickr/dist/flatpickr.css";
 import "simplebar/dist/simplebar.min.css";
 import "sweetalert2/dist/sweetalert2.min.css";
