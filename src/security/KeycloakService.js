@@ -1,9 +1,9 @@
 import Keycloak from "keycloak-js";
 
 const keycloakConfig = {
-    url: 'https://justcause-keycloak.azurewebsites.net/auth',
-    realm: 'customer',
-    clientId: 'vuej-app'
+    url: `${import.meta.env.VITE_APP_KEYCLOAK_URL}`,
+    realm: `${import.meta.env.VITE_APP_KEYCLOAK_REALM}`,
+    clientId: `${import.meta.env.VITE_APP_KEYCLOAK_CLIENT_ID}`
 }
 
 const keycloak = new Keycloak(keycloakConfig)

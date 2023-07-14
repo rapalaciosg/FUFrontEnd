@@ -1,4 +1,4 @@
-import "animate.css";
+import "animate.css/animate.compat.css";
 import "flatpickr/dist/flatpickr.css";
 import "simplebar/dist/simplebar.min.css";
 import "sweetalert2/dist/sweetalert2.min.css";
@@ -28,10 +28,8 @@ import keycloak from "./security/KeycloakService";
 const token = ''
 
 // HTTP connection to the API
-const httpLink = createHttpLink({
-  // Absolute URL
-    // uri: 'https://justcause-graphql-staging.azurewebsites.net/graphql/',
-    uri: 'https://localhost:7201/graphql/',
+const httpLink = createHttpLink({  
+    uri: `${import.meta.env.VITE_APP_API_URL}`,
     headers: {
         'Authorization': `Bearer ${token}`
     }
