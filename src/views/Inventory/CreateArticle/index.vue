@@ -10,7 +10,7 @@
       </div>
     </Card>
     <AdvancedTable :headers="headersInventoryTable" :data="articles" :actions="actions" @open-modal="toggleModal" />
-    <EditSpecialPriceModal title="Editar registro" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" />
+    <EditArticleModal title="Editar registro" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="article" @article-edited="refresArticleList"/>
   </div>
 </template>
 
@@ -44,9 +44,9 @@ export default {
         { value: "ML01", label: "ML01" },
         { value: "ML02", label: "ML02" },
         { value: "ML03", label: "ML03" },
-        { value: "ML03", label: "ML04" },
-        { value: "ML03", label: "ML05" },
-        { value: "ML03", label: "ML" },
+        { value: "ML04", label: "ML04" },
+        { value: "ML04", label: "ML05" },
+        { value: "ML", label: "ML" },
       ],
       actions: [
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -55,6 +55,8 @@ export default {
   },
   setup(props) {
     const variablesCreateArticle = reactive({ truckId: "" });
+
+    const article = ref({});
 
     onMounted(() => {
       truckId.value = "ML01";
@@ -65,19 +67,31 @@ export default {
 
     const queryGetArticles = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_ARTICLES_QUERY, variablesCreateArticle));
 
+    const loadGetArticles = () => {
+      queryGetArticles.load() || queryGetArticles.refetch()
+    }
+
+    const refresArticleList = (value) => {
+      variablesCreateArticle.truckId = value.truckId
+      isModalOpen.value = false
+    }
+
     const articles = computed(() => queryGetArticles.result.value?.srvArticulosRuta ?? []);
 
     watch(() => truckId, newValue => {
       variablesCreateArticle.truckId = newValue.value.value || newValue.value;
-      queryGetArticles.load();
+      loadGetArticles();
     }, { deep: true })
 
     const toggleModal = (value) => {
       if(value.action === 'edit');
         isModalOpen.value = true
+
+      article.value = value.row;
+      console.log('article => ', article.value);
     }
 
-    return { toggleModal, isModalOpen, articles, truckId }
+    return { toggleModal, isModalOpen, articles, truckId, article, refresArticleList }
   }
 };
 </script>
