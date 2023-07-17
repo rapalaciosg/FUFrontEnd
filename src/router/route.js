@@ -3,13 +3,8 @@
 const routes = [
   {
     path: "/",
-    name: "Login",
-    component: () => import("@/views/Login"),
-  },
-  {
-    path: "/app",
     name: "Layout",
-    redirect: "/app/home",
+    redirect: "/home",
     component: () => import("@/Layout/index.vue"),
     meta: {
       // middleware: [auth],

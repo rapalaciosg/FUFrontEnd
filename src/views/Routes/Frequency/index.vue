@@ -11,7 +11,7 @@
       </div>
     </Card>
     <AdvancedTable :headers="headersFrecuencyTable" :data="frecuencies" :actions="actions" @open-modal="toggleModal" />
-    <EditFrecuencyModal title="Crear registro de frecuencia" btnClass="btn-success" :activeModal="isModalOpen" :data="[]" :showButton="false" @close-modal="isModalOpen = false" />
+    <EditFrecuencyModal title="Crear registro de frecuencia" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="frecuency" @frecuency-edited="refreshFrecuenciesList" />
   </div>
 </template>
 
@@ -40,9 +40,12 @@ export default {
     return {
       headersFrecuencyTable,
       options: [
-        { value: "ML01", label: "ML01" },
+      { value: "ML01", label: "ML01" },
         { value: "ML02", label: "ML02" },
         { value: "ML03", label: "ML03" },
+        { value: "ML04", label: "ML04" },
+        { value: "ML05", label: "ML05" },
+        { value: "ML", label: "ML" },
       ],
       actions: [
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -52,6 +55,8 @@ export default {
   setup() {
     const variablesFrecuency = reactive({ route: "" });
 
+    let frecuency = ref({});
+
     let isModalOpen = ref(false);
     const route = ref("");
 
@@ -60,20 +65,33 @@ export default {
     const frecuencies = computed(() => queryGetFrecuencies.result.value?.srvFrecuenciaRuta ?? []);
 
     watch(() => route, newValue => {
-      variablesFrecuency.route = newValue.value.value
-      queryGetFrecuencies.load()
+      variablesFrecuency.route = newValue.value.value || newValue
+      loadFrecuencies();
     }, { deep: true })
+
+    const loadFrecuencies = () => {
+      queryGetFrecuencies.load() || queryGetFrecuencies.refetch()
+    }
+
+    const refreshFrecuenciesList = (value) => {
+      route.value = value.route
+      isModalOpen.value = false
+    }
 
     const toggleModal = (value) => {
       if(value.action === 'edit')
         isModalOpen.value = true
+
+      frecuency.value = value.row;
     }
 
     return { 
       frecuencies,
+      frecuency,
       toggleModal,
       route,
-      isModalOpen
+      isModalOpen,
+      refreshFrecuenciesList
     };
   }
 };

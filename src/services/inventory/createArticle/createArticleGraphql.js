@@ -20,3 +20,21 @@ export const GET_ALL_ARTICLES_QUERY = gql`
     }
   }
 `;
+
+export const CREATE_ARTICLE = gql`
+  mutation createrArticleMut($entityArticle: ArticleModelInput!) {
+    createrArticle(entityArticle: $entityArticle) {
+      statusCode
+      message
+    }
+  }
+`;
+
+export const UPDATE_ARTICLE = gql`
+  mutation updaterArticleMut($entityArticle: ArticleModelInput!) {
+    updaterArticle(entityArticle: $entityArticle) {
+      statusCode
+      message
+    }
+  }
+`;
