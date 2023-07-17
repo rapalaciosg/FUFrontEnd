@@ -22,14 +22,14 @@ import "v-calendar/dist/style.css";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core'
 import { DefaultApolloClient } from '@vue/apollo-composable'
 import JsonExcel from "vue-json-excel3";
+import {useThemeSettingsStore} from "@/store/themeSettings";
+import keycloak from "./security/KeycloakService";
 
 const token = ''
 
 // HTTP connection to the API
-const httpLink = createHttpLink({
-  // Absolute URL
-    // uri: 'https://justcause-graphql-staging.azurewebsites.net/graphql/',
-    uri: 'https://localhost:7201/graphql/',
+const httpLink = createHttpLink({  
+    uri: `${import.meta.env.VITE_APP_API_URL}`,
     headers: {
         'Authorization': `Bearer ${token}`
     }
@@ -46,89 +46,94 @@ export const apolloClient = new ApolloClient({
 
 const pinia = createPinia()
 
-// vue use
-const app = createApp({
-  setup () {
-    provide(DefaultApolloClient, apolloClient)
-  },
-  render: () => h(App)
+keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
+    if (authenticated) {
+        // vue use
+        const app = createApp({
+            setup () {
+            provide(DefaultApolloClient, apolloClient)
+            },
+            render: () => h(App)
+        })
+            .use(pinia)
+            .use(VueSweetalert2)
+            .use(Toast, {
+                toastClassName: "dashcode-toast",
+                bodyClassName: "dashcode-toast-body",
+            })
+            .use(router)
+            .use(VueClickAway)
+            .use(VueTippy)
+            .use(VueFlatPickr)
+            .use(VueGoodTablePlugin)
+            .use(VueApexCharts)
+            .use(VCalendar)
+        
+        app.config.globalProperties.$store = {};
+        app.component("downloadExcel", JsonExcel);
+        app.mount("#app");
+
+        const themeSettingsStore = useThemeSettingsStore()
+        if (localStorage.users === undefined) {
+            let users = [
+                {
+                    name: "dashcode",
+                    email: "dashcode@gmail.com",
+                    password: "dashcode",
+                },
+            ];
+            localStorage.setItem("users", JSON.stringify(users));
+        }
+
+        // check localStorage theme for dark light bordered
+        if (localStorage.theme === "dark") {
+            document.body.classList.add("dark");
+            themeSettingsStore.theme = "dark";
+            themeSettingsStore.isDark = true;
+        } else {
+            document.body.classList.add("light");
+            themeSettingsStore.theme = "light";
+            themeSettingsStore.isDark = false;
+        }
+        if (localStorage.semiDark === "true") {
+            document.body.classList.add("semi-dark");
+            themeSettingsStore.semidark = true;
+            themeSettingsStore.semiDarkTheme = "semi-dark";
+        } else {
+            document.body.classList.add("semi-light");
+            themeSettingsStore.semidark = false;
+            themeSettingsStore.semiDarkTheme = "semi-light";
+        }
+        // check loacl storege for menuLayout
+        if (localStorage.menuLayout === "horizontal") {
+            themeSettingsStore.menuLayout = "horizontal";
+        } else {
+            themeSettingsStore.menuLayout = "vertical";
+        }
+
+        // check skin  for localstorage
+        if (localStorage.skin === "bordered") {
+            themeSettingsStore.skin = "bordered";
+            document.body.classList.add("skin--bordered");
+        } else {
+            themeSettingsStore.skin = "default";
+            document.body.classList.add("skin--default");
+        }
+        // check direction for localstorage
+        if (localStorage.direction === "true") {
+            themeSettingsStore.direction = true;
+            document.documentElement.setAttribute("dir", "rtl");
+        } else {
+            themeSettingsStore.direction = false;
+            document.documentElement.setAttribute("dir", "ltr");
+        }
+
+        // Check if the monochrome mode is set or not
+        if (localStorage.getItem('monochrome') !== null) {
+            themeSettingsStore.monochrome = true;
+            document.getElementsByTagName( 'html' )[0].classList.add('grayscale');
+        }
+    }
 })
-    .use(pinia)
-    .use(VueSweetalert2)
-    .use(Toast, {
-        toastClassName: "dashcode-toast",
-        bodyClassName: "dashcode-toast-body",
-    })
-    .use(router)
-    .use(VueClickAway)
-    .use(VueTippy)
-    .use(VueFlatPickr)
-    .use(VueGoodTablePlugin)
-    .use(VueApexCharts)
-    .use(VCalendar)
 
-app.config.globalProperties.$store = {};
-app.mount("#app");
-app.component("downloadExcel", JsonExcel);
 
-import {useThemeSettingsStore} from "@/store/themeSettings";
-const themeSettingsStore = useThemeSettingsStore()
-if (localStorage.users === undefined) {
-    let users = [
-        {
-            name: "dashcode",
-            email: "dashcode@gmail.com",
-            password: "dashcode",
-        },
-    ];
-    localStorage.setItem("users", JSON.stringify(users));
-}
-
-// check localStorage theme for dark light bordered
-if (localStorage.theme === "dark") {
-    document.body.classList.add("dark");
-    themeSettingsStore.theme = "dark";
-    themeSettingsStore.isDark = true;
-} else {
-    document.body.classList.add("light");
-    themeSettingsStore.theme = "light";
-    themeSettingsStore.isDark = false;
-}
-if (localStorage.semiDark === "true") {
-    document.body.classList.add("semi-dark");
-    themeSettingsStore.semidark = true;
-    themeSettingsStore.semiDarkTheme = "semi-dark";
-} else {
-    document.body.classList.add("semi-light");
-    themeSettingsStore.semidark = false;
-    themeSettingsStore.semiDarkTheme = "semi-light";
-}
-// check loacl storege for menuLayout
-if (localStorage.menuLayout === "horizontal") {
-    themeSettingsStore.menuLayout = "horizontal";
-} else {
-    themeSettingsStore.menuLayout = "vertical";
-}
-
-// check skin  for localstorage
-if (localStorage.skin === "bordered") {
-    themeSettingsStore.skin = "bordered";
-    document.body.classList.add("skin--bordered");
-} else {
-    themeSettingsStore.skin = "default";
-    document.body.classList.add("skin--default");
-}
-// check direction for localstorage
-if (localStorage.direction === "true") {
-    themeSettingsStore.direction = true;
-    document.documentElement.setAttribute("dir", "rtl");
-} else {
-    themeSettingsStore.direction = false;
-    document.documentElement.setAttribute("dir", "ltr");
-}
-
-// Check if the monochrome mode is set or not
-if (localStorage.getItem('monochrome') !== null) {
-    themeSettingsStore.monochrome = true;
-    document.getElementsByTagName( 'html' )[0].classList.add('grayscale');
-}
