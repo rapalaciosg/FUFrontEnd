@@ -55,8 +55,8 @@
           <LanguageVue />
           <SwitchDark />
           <MonochromeMode />
-          <Message v-if="window.width > 768" />
-          <Notification v-if="window.width > 768" />
+          <!-- <Message v-if="window.width > 768" />
+          <Notification v-if="window.width > 768" /> -->
           <Profile v-if="window.width > 768" />
           <handle-mobile-menu v-if="window.width < 768" />
         </div>
