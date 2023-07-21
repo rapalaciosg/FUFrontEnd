@@ -14,8 +14,8 @@
         class="flex-none text-slate-600 dark:text-white text-sm font-normal items-center lg:flex hidden overflow-hidden text-white whitespace-nowrap"
       >
         <span
-          class="overflow-hidden text-white whitespace-nowrap w-[85px] block"
-          >Albert Flores</span
+          class="overflow-hidden text-base text-white whitespace-nowrap w-[85px] block"
+          >{{ profileName }}</span
         >
         <span class="text-base inline-block ltr:ml-[10px] rtl:mr-[10px]"
           ><Icon icon="heroicons-outline:chevron-down"></Icon
@@ -49,7 +49,7 @@
 import { MenuItem } from "@headlessui/vue";
 import Dropdown from "@/components/DashCodeComponents/Dropdown";
 import Icon from "@/components/DashCodeComponents/Icon";
-import profileImg from "@/assets/images/all-img/user.png"
+import profileImg from "@/assets/images/all-img/icon-user2.png"
 import keycloak from "@/security/KeycloakService";
 export default {
   components: {
@@ -59,6 +59,7 @@ export default {
   },
   data() {
     return {
+      profileName: "",
       profileImg,
       ProfileMenu: [
         {
@@ -80,6 +81,9 @@ export default {
       ],
     };
   },
+  mounted() {
+    this.profileName = keycloak.tokenParsed.given_name
+  }
 };
 </script>
 <style lang=""></style>

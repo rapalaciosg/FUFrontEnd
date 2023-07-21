@@ -78,6 +78,25 @@ export const menuItems = [
     ]
   },
   {
+    title: "Seguridad",
+    icon: "ic:baseline-security",
+    link: "#",
+    child: [
+      {
+        childtitle: "Usuarios",
+        childlink: "users",
+      },
+      {
+        childtitle: "Roles",
+        childlink: "roles",
+      },
+      {
+        childtitle: "Permisos",
+        childlink: "permissions",
+      },
+    ]
+  },
+  {
     title: "Configuración",
     icon: "heroicons-outline:cog-8-tooth",
     link: "#",

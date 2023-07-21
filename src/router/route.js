@@ -83,6 +83,30 @@ const routes = [
         },
       },
       {
+        path: "users",
+        name: "users",
+        component: () => import("@/views/Security"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "roles",
+        name: "roles",
+        component: () => import("@/views/Security/Roles"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "permissions",
+        name: "permissions",
+        component: () => import("@/views/Security/Permissions"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "configuration",
         name: "configuration",
         component: () => import("@/views/Configuration"),

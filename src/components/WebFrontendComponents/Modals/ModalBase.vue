@@ -12,7 +12,7 @@
         btnClass="btn-secondary"
         @click="$refs.modal.closeModal()"
       />
-      <Button text="Guardar" btnClass="btn-success" @click="save()" />
+      <Button v-if="isDetailModal === true" text="Guardar" btnClass="btn-success" @click="save()" />
     </template>
   </Modal>
 </template>
@@ -33,6 +33,10 @@ export default {
     closeModal: {
       type: Boolean,
       default: false
+    },
+    isDetailModal: {
+      type: Boolean,
+      default: true
     }
   },
   watch: {
