@@ -39,3 +39,12 @@ export const GET_INVENTORY_BY_DATE = gql`
     }
   }
 `;
+
+export const UPDATE_TRANSFER = gql`
+  mutation updateTransferMut($entityTransfer: TransferRequestModelInput!) {
+    updateTransfrencia(entityTransfer: $entityTransfer) {
+      statusCode
+      message
+    }
+  }
+`;

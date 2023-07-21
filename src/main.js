@@ -24,6 +24,10 @@ import { DefaultApolloClient } from '@vue/apollo-composable'
 import JsonExcel from "vue-json-excel3";
 import {useThemeSettingsStore} from "@/store/themeSettings";
 import keycloak from "./security/KeycloakService";
+import userAdministrationService from "./services/keycloak/userAdministrationService";
+import axios from "axios";
+
+axios.defaults.baseURL = `${import.meta.env.VITE_APP_KEYCLOAK_URL}`;
 
 const token = ''
 
@@ -73,6 +77,8 @@ keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
         app.component("downloadExcel", JsonExcel);
         app.mount("#app");
 
+        router.push('/home')
+
         const themeSettingsStore = useThemeSettingsStore()
         if (localStorage.users === undefined) {
             let users = [
@@ -84,6 +90,14 @@ keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
             ];
             localStorage.setItem("users", JSON.stringify(users));
         }
+
+        // console.log('token => ', keycloak.token)
+
+        // userAdministrationService.getUsers(keycloak.token).then((response) => { 
+        //     console.log('response => ', response);
+        //  })
+        
+        // console.log('keycloak user => ', keycloak.tokenParsed.given_name);
 
         // check localStorage theme for dark light bordered
         if (localStorage.theme === "dark") {

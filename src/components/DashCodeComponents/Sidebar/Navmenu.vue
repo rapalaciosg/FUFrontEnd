@@ -247,7 +247,7 @@ export default {
 // menu item has chilren
 .item-has-children {
   .menu-arrow {
-    @apply h-5 w-5 text-base text-slate-300 bg-slate-100 dark:bg-[#334155] dark:text-slate-300 rounded-full flex justify-center items-center;
+    @apply h-5 w-5 text-base text-slate-300 bg-[#334155] dark:bg-[#334155] dark:text-slate-300 rounded-full flex justify-center items-center;
   }
 }
 
