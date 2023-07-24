@@ -104,9 +104,8 @@ export default {
     }
 
     watch(() => route, newValue => {
-      variablesArticles.truckId = newValue.value.value;
+      variablesArticles.truckId = newValue.value?.value;
       routesReceptor.value = routes.filter(item => item.value != newValue.value.value)
-      console.log(routesReceptor);
       queryGetArticles.load();
     }, { deep: true })
 

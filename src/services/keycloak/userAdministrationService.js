@@ -11,4 +11,12 @@ export default {
     };
     return Axios.get(URL, config);
   },
+  createUser(data, accessToken) {
+    let config = {
+      headers: {
+        Authorization: 'Bearer ' + accessToken
+      }
+    };
+    return Axios.post(URL, data, config);
+},
 };

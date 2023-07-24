@@ -5,13 +5,16 @@
         class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center"
       >
         <h5>{{ title }}</h5>
-        <InputGroup
+        <div class="flex space-x-2">
+          <InputGroup
           v-model="searchTerm"
-          placeholder="Search"
+          placeholder="Buscar"
           type="text"
           prependIcon="heroicons-outline:search"
           merged
-        />
+          />
+          <slot name="button"></slot>
+        </div>
       </div>
 
       <vue-good-table

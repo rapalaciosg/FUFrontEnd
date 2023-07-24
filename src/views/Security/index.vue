@@ -1,9 +1,10 @@
 <template>
   <div class="space-y-5">
-    <Card>
-      <h4>Administración de usuarios</h4>
-    </Card>
-    <AdvancedTable :headers="headersUsersTable" :data="usersList" :actions="actions" @open-modal="toggleModal" />
+    <AdvancedTable title="Listado de usuarios" :headers="headersUsersTable" :data="usersList" :actions="actions" @open-modal="toggleModal">
+      <template v-slot:button>
+        <CreateUserModal title="Crear usuario" btnClass="btn-success" />
+      </template>
+    </AdvancedTable>
     <UserDetailsModal title="Detalles de usuario" :activeModal="isModalOpen" :showButton="false" :isDetailModal="false" :data="usernameDetails" @close-modal="isModalOpen = false" />
   </div>
 </template>
@@ -20,6 +21,7 @@ import { headersUsersTable } from "@/constant/security/users.js";
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
 import UserDetailsModal from "@/components/WebFrontendComponents/Modals/Security/UserDetailsModal.vue";
+import CreateUserModal from "@/components/WebFrontendComponents/Modals/Security/CreateUserModal.vue";
 export default {
   components: {
     Card,
@@ -28,7 +30,8 @@ export default {
     AdvancedTable,
     Textinput,
     FromGroup,
-    UserDetailsModal
+    UserDetailsModal,
+    CreateUserModal
   },
   data() {
     return {
