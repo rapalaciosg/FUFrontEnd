@@ -26,7 +26,7 @@
           :placeholder="placeholder"
           :autocomplete="'on'"
           :searchable="true"
-          :clearable="true"
+          :clearable="clearable"
           :value="value"
           v-model="inModelValue"
         >
@@ -99,6 +99,10 @@ export default {
     Icon,
   },
   props: {
+    clearable: {
+      type: Boolean,
+      default: true
+    },
     placeholder: {
       type: String,
       default: "Select Option",

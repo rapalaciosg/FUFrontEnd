@@ -8,52 +8,47 @@
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <CreateRolModal
-          title="Crear rol"
+        <CreateCompanyModal
+          title="Crear compañia"
           btnClass="btn-success"
-          @rol-created="getRolesList()"
+          @company-created="loadCompanies()"
         />
       </template>
     </AdvancedTable>
-    <RolDetailsModal
-      title="Detalles del rol"
+    <DetailsCompanyModal
+      title="Detalles de la compañia"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
-      :data="rolDetails"
+      :data="companyDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <EditRolModal
-      title="Editar rol"
+    <EditCompanyModal
+      title="Editar comapañia"
       :activeModal="isModalOpen"
       :showButton="false"
-      :data="rolDetails"
+      :data="companyDetails"
       @close-modal="isModalOpen = false"
-      @rol-updated="getRolesList()"
+      @company-updated="loadCompanies()"
     />
-    <DeleteRolModal
-      title="Eliminar rol"
+    <DeleteCompanyModal
+      title="Eliminar compañia"
       :activeModal="isModalDeleteOpen"
       :showButton="false"
-      :rol="rolDetails"
+      :company="companyDetails"
       @close-modal="isModalDeleteOpen = false"
+      @company-deleted="loadCompanies()"
     />
   </div>
 </template>
 
 <script>
-import { computed, reactive, ref, watch, onMounted } from "vue";
-import Card from "@/components/DashCodeComponents/Card";
-import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
-import Textinput from "@/components/DashCodeComponents/Textinput";
-import Button from "@/components/DashCodeComponents/Button";
+import { computed, ref, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersCompanyTable } from "@/constant/administration/company/constantCompany.js";
-import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
-import keycloak from "@/security/KeycloakService.js";
-import CreateRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/CreateRolModal.vue";
-import DeleteRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/DeleteRolModal.vue";
-import EditRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/EditRolModal.vue";
-import RolDetailsModal from "@/components/WebFrontendComponents/Modals/Security/Roles/RolDetailsModal.vue";
+import CreateCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/CreateCompanyModal.vue";
+import DetailsCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DetailsCompanyModal.vue";
+import DeleteCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DeleteCompanyModal.vue";
+import EditCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/EditCompanyModal.vue";
 
 import { GET_COMPANIES } from "@/services/administration/company/companyGraphql.js";
 import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
@@ -61,20 +56,15 @@ import { apolloClient } from "@/main.js";
 
 export default {
   components: {
-    Card,
-    VueSelect,
-    Button,
     AdvancedTable,
-    Textinput,
-    CreateRolModal,
-    RolDetailsModal,
-    DeleteRolModal,
-    EditRolModal,
+    CreateCompanyModal,
+    DetailsCompanyModal,
+    DeleteCompanyModal,
+    EditCompanyModal,
   },
   data() {
     return {
       headersCompanyTable,
-      rolesList: [],
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -82,18 +72,10 @@ export default {
       ],
     };
   },
-  mounted() {
-    this.getRolesList();
-  },
-  methods: {
-    getRolesList() {
-      roleAdministrationService.getRoles(keycloak.token).then((response) => {
-        this.rolesList = response.data;
-      });
-    },
-  },
+  mounted() {},
+  methods: {},
   setup() {
-    let rolDetails = ref({});
+    let companyDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
@@ -102,8 +84,12 @@ export default {
 
     const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
 
+    const loadCompanies = () => {
+      queryGetCompanies.load() || queryGetCompanies.refetch()
+    }
+
     onMounted(() => {
-        queryGetCompanies.load();
+      loadCompanies();
     })
 
     const toggleModal = (value) => {
@@ -113,15 +99,16 @@ export default {
 
       if (value.action === "delete") isModalDeleteOpen.value = true;
 
-      rolDetails.value = value.row;
+      companyDetails.value = value.row;
     };
     return {
       toggleModal,
       isModalOpen,
-      rolDetails,
+      companyDetails,
       isModalDetailsOpen,
       isModalDeleteOpen,
-      companies
+      companies,
+      loadCompanies
     };
   },
 };
