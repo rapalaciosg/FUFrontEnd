@@ -3,12 +3,11 @@
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput name="username" type="text" label="Nombre de usuario" placeholder="Nombre de usuario" v-model="username" :error="usernameError" />
+          <Textinput name="username" type="text" label="Nombre de usuario" placeholder="Nombre de usuario" v-model="username" :error="usernameError" :isReadonly="true" />
           <Textinput name="email" type="email" label="Correo" placeholder="Correo" v-model="email" :error="emailError" />
           <Textinput name="firstName" type="text" label="Nombre" placeholder="Nombre" v-model="firstName" :error="firstNameError" />
           <Textinput name="lastName" type="text" label="Apellido" placeholder="Apellido" v-model="lastName" :error="lastNameError" />
-          <Textinput name="password" type="password" label="Contraseña" placeholder="Contraseña" v-model="password" :error="passwordError" />
-          <VueSelect name="groups" label="Roles" :options="rolesListFormatted" placeholder="Roles" v-model="groups" multiple />
+          <VueSelect name="groups" label="Roles" :options="rolesListFormatted" placeholder="Roles" v-model="groupsUserFormatted" multiple />
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
           <button class="btn btn-secondary block text-center" @click="closeModal = !closeModal">Cerrar</button>
@@ -20,13 +19,14 @@
 </template>
 
 <script>
-import { ref, watch, reactive } from "vue";
-import { useToast } from "vue-toastification";
+import { reactive, ref, watch } from "vue";
 import ModalBase from "../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
+import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
+import { useToast } from "vue-toastification";
 import keycloak from "@/security/KeycloakService.js";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
@@ -35,14 +35,20 @@ export default {
   components: {
     ModalBase,
     Textinput,
+    FromGroup,
     VueSelect,
   },
-  props: [],
-  emits: ['user-created'],
+  props: {
+    data: {
+      type: Object,
+      default: {}
+    }
+  },
+  emits: ['user-updated'],
   data() {
     return {
       rolesList: [],
-      rolesListFormatted: []
+      rolesListFormatted: [],
     };
   },
   watch: {
@@ -67,46 +73,55 @@ export default {
   setup(props, { emit }) {
     const toast = useToast();
 
+    const groupsUser = ref([]);
+    const groupsUserFormatted = ref([]);
+
+    const userId = ref("");
+
     let closeModal = ref(false);
-
-    const groups = ref([]);
-
-    const formValues = reactive({
-      username: "",
-      firstName: "",
-      lastName: "",
-      email: ""
-    });
 
     const schema = yup.object({
       username: yup.string().required("Nombre de usuario requerido"),
       firstName: yup.string().required("Nombre requerido"),
       lastName: yup.string().required("Apellido requerido"),
       email: yup.string().required("Correo requerido").email(),
-      password: yup.string().required("Contraseña requerida").min(3)
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues
-    });
+    watch(() => props.data, (newValue) => {
+      getGroupsUser(newValue.id)
+      userId.value = newValue.id
+      username.value = newValue.username
+      firstName.value = newValue.firstName
+      lastName.value = newValue.lastName
+      email.value = newValue.email
+    })
 
-    watch(() => closeModal.value, (newValue) => {
-      resetForm()
+    watch(() => groupsUser.value, (newValue) => {
+      groupsUserFormatted.value = newValue.map(item => ({ value: item.id, label: item.name }))
     }, {deep:true})
+
+    const { handleSubmit } = useForm({
+      validationSchema: schema
+    });
 
     const { value: username, errorMessage: usernameError } = useField("username");
     const { value: firstName, errorMessage: firstNameError, meta: firstNameMeta } = useField("firstName");
     const { value: lastName, errorMessage: lastNameError } = useField("lastName");
     const { value: email, errorMessage: emailError } = useField("email");
-    const { value: password, errorMessage: passwordError } = useField("password");
+    const { value: groups, errorMessage: groupsError } = useField("groups");
 
-    const createUser = (user) => {
-      userAdministrationService.createUser(user, keycloak.token).then((response) => {
-        toast.success("Usuario creado exitosamente", {
+    const getGroupsUser = (id) => {
+      userAdministrationService.getUserGroups(keycloak.token, id).then((response) => {
+        groupsUser.value = response.data;
+      });
+    }
+
+    const updateUser = (user, id) => {
+      userAdministrationService.updateUser(user, keycloak.token, id).then((response) => {
+        toast.success("Usuario editado exitosamente", {
           timeout: 2000,
         });
-        emit('user-created')
+        emit('user-updated')
       }).catch((error) => {
         toast.error("Ha ocurrido un error", {
           timeout: 2000,
@@ -118,7 +133,6 @@ export default {
 
     const onSubmit = handleSubmit((values, actions) => {
       let userFormatted = {}
-      let passwordFormatted = {}
       let groupsFormatted = {}
 
       userFormatted = {
@@ -129,21 +143,13 @@ export default {
         email: values.email,
         groups: [],
         emailVerified: true,
-        credentials: []
       }
 
-      passwordFormatted = {
-        type: "password",
-        value: values.password,
-        temporary: false
-      }
+      groupsFormatted = groupsUserFormatted.value.map(item => item.label)
 
-      groupsFormatted = groups.value.map(item => item.label)
-
-      userFormatted.credentials.push(passwordFormatted)
       userFormatted.groups = groupsFormatted
 
-      createUser(userFormatted);
+      updateUser(userFormatted, userId.value);
 
       actions.resetForm();
     });
@@ -158,10 +164,10 @@ export default {
       lastNameError,
       email,
       emailError,
-      password,
-      passwordError,
       groups,
+      groupsError,
       onSubmit,
+      groupsUserFormatted
     };
   },
 };

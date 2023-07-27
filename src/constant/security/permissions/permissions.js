@@ -1,5 +1,4 @@
 export const headersPermissionsTable = [
-  { label: "Id", field: "name" },
-  { label: "Permiso", field: "description" },
+  { label: "Nombre", field: "name" },
   { label: "Acciones", field: "actions" },
 ];

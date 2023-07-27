@@ -11,6 +11,22 @@ export default {
     };
     return Axios.get(URL, config);
   },
+  getUserDetails(accessToken, id) {
+    let config = {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+      },
+    };
+    return Axios.get(`${URL}/${id}`, config);
+  },
+  getUserGroups(accessToken, id) {
+    let config = {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+      },
+    };
+    return Axios.get(`${URL}/${id}/groups`, config);
+  },
   createUser(data, accessToken) {
     let config = {
       headers: {
@@ -18,5 +34,13 @@ export default {
       }
     };
     return Axios.post(URL, data, config);
-},
+  },
+  updateUser(data, accessToken, id) {
+    let config = {
+      headers: {
+        Authorization: 'Bearer ' + accessToken
+      }
+    };
+    return Axios.put(`${URL}/${id}`, data, config);
+  }
 };
