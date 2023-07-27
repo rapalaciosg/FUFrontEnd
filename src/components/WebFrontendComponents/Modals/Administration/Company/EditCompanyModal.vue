@@ -84,9 +84,9 @@ export default {
   },
   props: {
     data: {
-        type: Object,
-        default: {}
-    }
+      type: Object,
+      default: {},
+    },
   },
   emits: ["company-updated"],
   data() {
@@ -160,18 +160,28 @@ export default {
     );
 
     const findSelectValues = (data, id) => {
-        const filteredValue = data.value.find(item => item.value === id)
-        return filteredValue
-    }
+      const filteredValue = data.value.find((item) => item.value === id);
+      return filteredValue;
+    };
 
-    watch(() => props.data, (newValue) => {
-        company.companyId = newValue.companyId
-        name.value = newValue.name
-        prefix.value = newValue.prefix
-        address.value = newValue.address
-        provinceId.value = findSelectValues(provincesFormatted, newValue.provinceId)
-        companyTypeId.value = findSelectValues(companyTypesFormatted, newValue.companyTypeId)
-    }, { deep: true })
+    watch(
+      () => props.data,
+      (newValue) => {
+        company.companyId = newValue.companyId;
+        name.value = newValue.name;
+        prefix.value = newValue.prefix;
+        address.value = newValue.address;
+        provinceId.value = findSelectValues(
+          provincesFormatted,
+          newValue.provinceId
+        );
+        companyTypeId.value = findSelectValues(
+          companyTypesFormatted,
+          newValue.companyTypeId
+        );
+      },
+      { deep: true }
+    );
 
     const formValues = reactive({
       name: "",
@@ -229,18 +239,15 @@ export default {
     }));
 
     const onSubmit = handleSubmit((values, actions) => {
-        console.log('values => ', values);
       company.name = values.name;
       company.prefix = values.prefix.toUpperCase();
       company.address = values.address;
       company.provinceId = provinceId.value.value;
       company.companyTypeId = companyTypeId.value.value;
 
-      console.log('company => ', company);
-
       updateCompany()
         .then((response) => {
-            console.log('entro');
+          console.log("entro");
           emit("company-updated");
           toast.success("Compañia editada exitosamente", {
             timeout: 2000,
