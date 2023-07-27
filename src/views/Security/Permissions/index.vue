@@ -1,38 +1,39 @@
 <template>
   <div class="space-y-5">
-    <Card>
-      <h4>Administración de roles</h4>
-    </Card>
     <AdvancedTable
+      title="Listado de permisos"
       :headers="headersPermissionsTable"
       :data="permissionsList"
       :actions="actions"
       @open-modal="toggleModal"
-    />
+    >
+      <template v-slot:button>
+        <CreatePermissionModal title="Crear permiso" btnClass="btn-success" @permission-created="getPermissionsList()" />
+      </template>
+    </AdvancedTable>
+    <PermissionDetailsModal title="Detalles del permiso" :activeModal="isModalDetailsOpen" :showButton="false"  :data="permissionDetails" @close-modal="isModalDetailsOpen = false" />
+    <DeletePermissionModal title="Eliminar permiso" :activeModal="isModalDeleteOpen" :showButton="false" :permission="permissionDetails" @close-modal="isModalDeleteOpen = false" @permission-deleted="getPermissionsList()" />
+    <EditPermissionModal title="Editar permiso" :activeModal="isModalOpen" :showButton="false" :data="permissionDetails" @close-modal="isModalOpen = false" @permission-updated="getPermissionsList()" />
   </div>
 </template>
 
 <script>
 import { computed, reactive, ref, watch, onMounted } from "vue";
-import Card from "@/components/DashCodeComponents/Card";
-import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
-import Textinput from "@/components/DashCodeComponents/Textinput";
-import FromGroup from "@/components/DashCodeComponents/FromGroup";
-import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersPermissionsTable } from "@/constant/security/permissions/permissions.js";
 import permissionAdministrationService from "@/services/keycloak/permissionAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
-import UserDetailsModal from "@/components/WebFrontendComponents/Modals/Security/UserDetailsModal.vue";
+import DeletePermissionModal from "@/components/WebFrontendComponents/Modals/Security/Permissions/DeletePermissionModal.vue";
+import CreatePermissionModal from "@/components/WebFrontendComponents/Modals/Security/Permissions/CreatePermissionModal.vue";
+import EditPermissionModal from "@/components/WebFrontendComponents/Modals/Security/Permissions/EditPermissionModal.vue";
+import PermissionDetailsModal from "@/components/WebFrontendComponents/Modals/Security/Permissions/PermissionDetailsModal.vue";
 export default {
   components: {
-    Card,
-    VueSelect,
-    Button,
     AdvancedTable,
-    Textinput,
-    FromGroup,
-    UserDetailsModal,
+    DeletePermissionModal,
+    PermissionDetailsModal,
+    CreatePermissionModal,
+    EditPermissionModal
   },
   data() {
     return {
@@ -56,17 +57,22 @@ export default {
     },
   },
   setup() {
-    let usernameDetails = ref({});
+    let permissionDetails = ref({});
     let isModalOpen = ref(false);
+    let isModalDetailsOpen = ref(false);
+    let isModalDeleteOpen = ref(false);
 
     const toggleModal = (value) => {
-      if (value.action === "edit" || value.action === "details");
-      isModalOpen.value = true;
+      if (value.action === "edit")
+        isModalOpen.value = true;
+      if (value.action === "details")
+        isModalDetailsOpen.value = true;
+      if (value.action === "delete")
+        isModalDeleteOpen.value = true;
 
-      usernameDetails.value = value.row;
-      console.log(value.row);
+      permissionDetails.value = value.row;
     };
-    return { toggleModal, isModalOpen, usernameDetails };
+    return { toggleModal, isModalOpen, isModalDetailsOpen, isModalDeleteOpen, permissionDetails };
   },
 };
 </script>

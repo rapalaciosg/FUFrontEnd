@@ -97,6 +97,21 @@ export const menuItems = [
     ]
   },
   {
+    title: "Administración",
+    icon: "dashicons:admin-tools",
+    link: "#",
+    child: [
+      {
+        childtitle: "Compañia",
+        childlink: "company",
+      },
+      {
+        childtitle: "Sucursales",
+        childlink: "branch-office",
+      }
+    ]
+  },
+  {
     title: "Configuración",
     icon: "heroicons-outline:cog-8-tooth",
     link: "#",

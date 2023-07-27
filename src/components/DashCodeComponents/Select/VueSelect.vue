@@ -154,7 +154,7 @@ export default {
       type: Array,
     },
     modelValue: {
-      type: String || Object,
+      type: [String, Object],
       default: ""
     },
     value: {

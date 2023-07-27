@@ -77,7 +77,7 @@ keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
         app.component("downloadExcel", JsonExcel);
         app.mount("#app");
 
-        router.push('/home')
+        // router.push('/home')
 
         const themeSettingsStore = useThemeSettingsStore()
         if (localStorage.users === undefined) {

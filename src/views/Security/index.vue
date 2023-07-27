@@ -1,10 +1,16 @@
 <template>
   <div class="space-y-5">
-    <Card>
-      <h4>Administración de usuarios</h4>
-    </Card>
-    <AdvancedTable :headers="headersUsersTable" :data="usersList" :actions="actions" @open-modal="toggleModal" />
-    <UserDetailsModal title="Detalles de usuario" :activeModal="isModalOpen" :showButton="false" :isDetailModal="false" :data="usernameDetails" @close-modal="isModalOpen = false" />
+    <AdvancedTable title="Listado de usuarios" :headers="headersUsersTable" :data="usersList" :actions="actions" @open-modal="toggleModal" :filter="filterSelect">
+      <template v-slot:button>
+        <div class="grid grid-cols-2 gap-2">
+          <VueSelect :options="status" placeholder="Todos" v-model="filterSelect" />
+          <CreateUserModal title="Crear usuario" btnClass="btn-success" @user-created="getUserList()" />
+        </div>
+      </template>
+    </AdvancedTable>
+    <UserDetailsModal title="Detalles de usuario" :activeModal="isModalDetailsOpen" :showButton="false" :data="userDetails" @close-modal="isModalDetailsOpen = false" />
+    <EditUserModal title="Editar usuario" :activeModal="isModalEditOpen" :showButton="false" :data="userDetails" @close-modal="isModalEditOpen = false" @user-updated="getUserList()" />
+    <EnableDisableUserModal :title="(userDetails.enabled) ? 'Deshabilitar' : 'Habilitar'" :activeModal="isModalOpen" :showButton="false" :action="(userDetails.enabled) ? 'Deshabilitar' : 'Habilitar'" :user="userDetails" @close-modal="isModalOpen = false" />
   </div>
 </template>
 
@@ -20,6 +26,9 @@ import { headersUsersTable } from "@/constant/security/users.js";
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
 import UserDetailsModal from "@/components/WebFrontendComponents/Modals/Security/UserDetailsModal.vue";
+import CreateUserModal from "@/components/WebFrontendComponents/Modals/Security/CreateUserModal.vue";
+import EditUserModal from "@/components/WebFrontendComponents/Modals/Security/EditUserModal.vue";
+import EnableDisableUserModal from "@/components/WebFrontendComponents/Modals/Security/EnableDisableUserModal.vue";
 export default {
   components: {
     Card,
@@ -28,7 +37,10 @@ export default {
     AdvancedTable,
     Textinput,
     FromGroup,
-    UserDetailsModal
+    UserDetailsModal,
+    CreateUserModal,
+    EnableDisableUserModal,
+    EditUserModal
   },
   data() {
     return {
@@ -37,8 +49,12 @@ export default {
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
-        { name: "Eliminar", icon: "heroicons:trash", value: "delete" },
+        { name: "Habilitar", icon: "ps:checked", value: "enable/disable" },
       ],
+      status: [
+        { label: 'Habilitado', value: 'enabled' },
+        { label: 'Deshabilitado', value: 'disabled' },
+      ]
     };
   },
   mounted() {
@@ -52,16 +68,24 @@ export default {
     },
   },
   setup() {
-    let usernameDetails = ref({});
+    let userDetails = ref({});
+    let isModalDetailsOpen = ref(false);
+    let isModalEditOpen = ref(false);
     let isModalOpen = ref(false);
 
-    const toggleModal = (value) => {
-      if(value.action === 'edit' || value.action === 'details');
-        isModalOpen.value = true
+    let filterSelect = ref("");
 
-      usernameDetails.value = value.row
+    const toggleModal = (value) => {
+      if(value.action === 'details')
+        isModalDetailsOpen.value = true
+      if(value.action === 'edit')
+        isModalEditOpen.value = true
+      if(value.action === 'enable/disable')
+        isModalOpen.value = true
+      
+        userDetails.value = value.row;
     }
-    return { toggleModal, isModalOpen, usernameDetails }
+    return { toggleModal, isModalDetailsOpen, isModalOpen, userDetails, isModalEditOpen, filterSelect }
   }
 };
 </script>

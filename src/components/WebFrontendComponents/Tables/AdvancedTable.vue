@@ -5,13 +5,16 @@
         class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center"
       >
         <h5>{{ title }}</h5>
-        <InputGroup
-          v-model="searchTerm"
-          placeholder="Search"
+        <div class="flex space-x-2">
+          <InputGroup
+          v-model="searchInput"
+          placeholder="Buscar"
           type="text"
           prependIcon="heroicons-outline:search"
           merged
-        />
+          />
+          <slot name="button"></slot>
+        </div>
       </div>
 
       <vue-good-table
@@ -24,7 +27,7 @@
         }"
         :search-options="{
           enabled: true,
-          externalQuery: searchTerm,
+          externalQuery: searchTerm
         }"
         :select-options="{
           enabled: true,
@@ -37,6 +40,10 @@
         }"
       >
         <template v-slot:table-row="props">
+          <span v-if="props.column.field == 'enabled'" class="flex justify-center">
+            <img v-if="props.row.enabled" :src= "checkedImg" alt="" class="block object-cover" />
+            <img v-else :src= "disabledImg" alt="" class="block object-cover" />
+          </span>
           <span v-if="props.column.field == 'l'">
             <Icon v-if="props.row.l === 0" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
@@ -81,8 +88,10 @@
                   }
                    w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse `"
                   >
-                    <span class="text-base"><Icon :icon="item.icon" /></span>
-                    <span>{{ item.name }}</span>
+                    <span v-if="props.row.enabled && item.value === 'enable/disable'" class="text-base"><Icon :icon="'material-symbols:error-outline-rounded'" /></span>
+                    <span v-else class="text-base"><Icon :icon="item.icon" /></span>
+                    <span v-if="props.row.enabled && item.value === 'enable/disable'">Deshabilitar</span>
+                    <span v-else >{{ item.name }}</span>
                   </div>
                 </MenuItem>
               </template>
@@ -92,7 +101,7 @@
         <template #pagination-bottom="props">
           <div class="py-4 px-3">
             <Pagination
-              :total="50"
+              :total="total"
               :current="current"
               :per-page="perpage"
               :pageRange="pageRange"
@@ -118,6 +127,8 @@ import Icon from "@/components/DashCodeComponents/Icon";
 import InputGroup from "@/components/DashCodeComponents/InputGroup";
 import Pagination from "@/components/DashCodeComponents/Pagination";
 import Checkbox from "@/components/DashCodeComponents/Checkbox";
+import checkedImg from "@/assets/images/all-img/icons8-checked-25.png";
+import disabledImg from "@/assets/images/all-img/icons8-disabled-25.png";
 import { MenuItem } from "@headlessui/vue";
 export default {
   components: {
@@ -146,22 +157,70 @@ export default {
     actions: {
       type: Array,
       default: []
+    },
+    filter: {
+      type: String,
+      default: ""
     }
   },
 
   emits: ['open-modal'],
 
+  watch: {
+    data(newValue) {
+      this.total = newValue.length
+      let totalPage =  Math.ceil(newValue.length / this.perpage)
+      this.pageRange = totalPage
+      for (let i = 1; i <= totalPage; i++) {
+        this.options.push({ value: `${i}`, label: `${i}` })
+      }
+    },
+    filter(newValue) {
+      if (newValue) {
+        if (newValue.value === 'enabled') this.searchTerm = 'true'
+        else this.searchTerm = 'false'
+      } else {
+        this.searchTerm = ''
+      }
+    },
+    searchTerm(newValue) {
+      this.options = []
+      let dataFiltered = []
+      let totalPage =  0
+
+      dataFiltered = this.data.filter(x => (newValue === 'true') ? x.enabled : !x.enabled)
+
+      if (dataFiltered.length > 0) {
+        this.total = dataFiltered.length
+        totalPage = Math.ceil(dataFiltered.length / this.perpage)
+      }
+      if (newValue === "") {
+        this.total = this.data.length
+        totalPage = Math.ceil(this.data.length / this.perpage)
+      }
+
+      for (let i = 1; i <= totalPage; i++) {
+        this.options.push({ value: `${i}`, label: `${i}` })
+      }
+
+      this.pageRange = totalPage
+    },
+    searchInput(newValue) {
+      this.searchTerm = newValue
+    }
+  },
+
   data() {
     return {
+      checkedImg,
+      disabledImg,
       current: 1,
       perpage: 10,
-      pageRange: 5,
+      pageRange: 0,
       searchTerm: "",
-      options: [
-        { value: "1", label: "1" },
-        { value: "3", label: "3" },
-        { value: "5", label: "5" },
-      ],
+      searchInput: "",
+      options: [],
+      total: 0
     };
   },
 

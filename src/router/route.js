@@ -107,6 +107,22 @@ const routes = [
         },
       },
       {
+        path: "company",
+        name: "company",
+        component: () => import("@/views/Administration/Company"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "branch-office",
+        name: "branch-office",
+        component: () => import("@/views/Administration/BranchOffice"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "configuration",
         name: "configuration",
         component: () => import("@/views/Configuration"),

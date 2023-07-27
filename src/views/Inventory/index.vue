@@ -115,8 +115,8 @@ export default {
     }
 
     watch(() => route, newValue => {
-      variablesFrecuenciesByTruckId.truckId = newValue.value.value || newValue.value;
-      variablesFrecuenciesByDate.truckId = newValue.value.value || newValue.value;
+      variablesFrecuenciesByTruckId.truckId = newValue.value?.value || newValue.value;
+      variablesFrecuenciesByDate.truckId = newValue.value?.value || newValue.value;
       loadFrecuenciesByTruckId()
       if (startDate.value != "" && endDate.value != "") {
         loadFrecuenciesByDate()
