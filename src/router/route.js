@@ -123,6 +123,22 @@ const routes = [
         },
       },
       {
+        path: "driver",
+        name: "driver",
+        component: () => import("@/views/Administration/Driver"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "vehicle",
+        name: "vehicle",
+        component: () => import("@/views/Administration/Vehicle"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "configuration",
         name: "configuration",
         component: () => import("@/views/Configuration"),

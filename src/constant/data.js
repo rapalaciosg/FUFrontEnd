@@ -108,7 +108,15 @@ export const menuItems = [
       {
         childtitle: "Sucursales",
         childlink: "branch-office",
-      }
+      },
+      {
+        childtitle: "Conductores",
+        childlink: "driver",
+      },
+      {
+        childtitle: "Vehículo",
+        childlink: "vehicle",
+      },
     ]
   },
   {

@@ -1,57 +1,56 @@
 <template>
   <div class="space-y-5">
     <AdvancedTable
-      title="Sucursales"
-      :headers="headersBranchOfficesTable"
-      :data="branchOffices"
+      title="Listado de vehículos"
+      :headers="headersVehiclesTable"
+      :data="vehicles"
       :actions="actions"
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <CreateBranchOfficeModal
-          title="Crear sucursal"
+        <CreateVehicleModal
+          title="Crear vehículo"
           btnClass="btn-success"
-          @branch-office-created="loadBranchOffices()"
+          @vehicle-created="loadVehicles()"
         />
       </template>
     </AdvancedTable>
-    <branchOfficeDetailsModal
-      title="Detalles de sucursal"
+    <VehicleDetailsModal
+      title="Detalles del vehículo"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
-      :data="branchOfficeDetails"
+      :data="vehicleDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <EditRolModal
-      title="Editar rol"
+    <!-- <EditRolModal
+      title="Editar vehículo"
       :activeModal="isModalOpen"
       :showButton="false"
-      :data="rolDetails"
+      :data="vehicleDetails"
       @close-modal="isModalOpen = false"
-      @rol-updated="getRolesList()"
+      @vehicle-updated="loadVehicles()"
     />
     <DeleteRolModal
-      title="Eliminar rol"
+      title="Eliminar vehículo"
       :activeModal="isModalDeleteOpen"
       :showButton="false"
-      :rol="rolDetails"
+      :vehicle="vehicleDetails"
       @close-modal="isModalDeleteOpen = false"
-    />
+      @vehicle-deleted="loadVehicles()"
+    /> -->
   </div>
 </template>
 
 <script>
 import { computed, reactive, ref, watch, onMounted } from "vue";
-import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import { headersBranchOfficesTable } from "@/constant/administration/branchOffice/constantBranchOffice.js";
-import CreateRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/CreateRolModal.vue";
+import { headersVehiclesTable } from "@/constant/administration/vehicle/constantVehicle.js";
+import CreateVehicleModal from "@/components/WebFrontendComponents/Modals/Administration/Vehicle/CreateVehicleModal.vue";
 import DeleteRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/DeleteRolModal.vue";
 import EditRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/EditRolModal.vue";
-import branchOfficeDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/branchOfficeDetailsModal.vue";
-import CreateBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/CreateBranchOfficeModal.vue";
+import VehicleDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/Vehicle/VehicleDetailsModal.vue";
 
-import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
+import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
 import {
   useLazyQuery,
   provideApolloClient,
@@ -62,14 +61,14 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
-    CreateBranchOfficeModal,
-    branchOfficeDetailsModal,
+    CreateVehicleModal,
+    VehicleDetailsModal,
     DeleteRolModal,
     EditRolModal,
   },
   data() {
     return {
-      headersBranchOfficesTable,
+      headersVehiclesTable,
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -80,25 +79,25 @@ export default {
   mounted() {},
   methods: {},
   setup() {
-    let branchOfficeDetails = ref({});
+    let vehicleDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
 
-    const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_BRANCH_OFFICES)
+    const queryGetVehicles = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_VEHICLES)
     );
 
-    const branchOffices = computed(
-      () => queryGetBranchOffices.result.value?.srvBranchOffice ?? []
+    const vehicles = computed(
+      () => queryGetVehicles.result.value?.srvVehicle ?? []
     );
 
-    const loadBranchOffices = () => {
-      queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
+    const loadVehicles = () => {
+      queryGetVehicles.load() || queryGetVehicles.refetch();
     };
 
     onMounted(() => {
-      loadBranchOffices();
+      loadVehicles();
     });
 
     const toggleModal = (value) => {
@@ -108,16 +107,16 @@ export default {
 
       if (value.action === "delete") isModalDeleteOpen.value = true;
 
-      branchOfficeDetails.value = value.row;
+      vehicleDetails.value = value.row;
     };
     return {
       toggleModal,
       isModalOpen,
-      branchOfficeDetails,
+      vehicleDetails,
       isModalDetailsOpen,
       isModalDeleteOpen,
-      branchOffices,
-      loadBranchOffices
+      vehicles,
+      loadVehicles,
     };
   },
 };

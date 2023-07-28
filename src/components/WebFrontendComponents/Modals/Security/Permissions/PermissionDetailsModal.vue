@@ -1,7 +1,7 @@
 <template>
   <modal-base :closeModal="closeModal">
     <template v-slot:modal-body>
-      <div class="grid grid-cols-2 gap-5 py-6">
+      <div class="grid grid-cols-2 gap-5 px-4 py-6">
         <p class="font-medium">Nombre del permiso:</p>
         <p>{{ data.name }}</p>
         <p class="font-medium">Descripción del permiso:</p>
