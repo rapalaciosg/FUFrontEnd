@@ -50,7 +50,7 @@ import DetailsCompanyModal from "@/components/WebFrontendComponents/Modals/Admin
 import DeleteCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DeleteCompanyModal.vue";
 import EditCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/EditCompanyModal.vue";
 
-import { GET_COMPANIES } from "@/services/administration/company/companyGraphql.js";
+import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
 import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
@@ -80,7 +80,7 @@ export default {
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
 
-    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_COMPANIES));
+    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES));
 
     const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
 

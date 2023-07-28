@@ -173,11 +173,11 @@ export default {
         address.value = newValue.address;
         provinceId.value = findSelectValues(
           provincesFormatted,
-          newValue.provinceId
+          newValue.province.provinceId
         );
         companyTypeId.value = findSelectValues(
           companyTypesFormatted,
-          newValue.companyTypeId
+          newValue.companyType.companyTypeId
         );
       },
       { deep: true }
@@ -247,7 +247,6 @@ export default {
 
       updateCompany()
         .then((response) => {
-          console.log("entro");
           emit("company-updated");
           toast.success("Compañia editada exitosamente", {
             timeout: 2000,

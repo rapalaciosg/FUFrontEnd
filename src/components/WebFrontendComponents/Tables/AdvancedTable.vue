@@ -40,8 +40,8 @@
         }"
       >
         <template v-slot:table-row="props">
-          <span v-if="props.column.field == 'enabled'" class="flex justify-center">
-            <img v-if="props.row.enabled" :src= "checkedImg" alt="" class="block object-cover" />
+          <span v-if="props.column.field == 'enabled' || props.column.field == 'active'" class="flex justify-center">
+            <img v-if="props.row.enabled || props.row.active" :src= "checkedImg" alt="" class="block object-cover" />
             <img v-else :src= "disabledImg" alt="" class="block object-cover" />
           </span>
           <span v-if="props.column.field == 'l'">

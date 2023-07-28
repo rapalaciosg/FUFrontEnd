@@ -1,57 +1,56 @@
 <template>
   <div class="space-y-5">
     <AdvancedTable
-      title="Sucursales"
-      :headers="headersBranchOfficesTable"
-      :data="branchOffices"
+      title="Listado de conductores"
+      :headers="headersDriversTable"
+      :data="drivers"
       :actions="actions"
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <CreateBranchOfficeModal
-          title="Crear sucursal"
+        <CreateRolModal
+          title="Crear conductor"
           btnClass="btn-success"
-          @branch-office-created="loadBranchOffices()"
+          @driver-created="loadDrivers()"
         />
       </template>
     </AdvancedTable>
-    <branchOfficeDetailsModal
-      title="Detalles de sucursal"
+    <DriverDetailsModal
+      title="Detalles del conductor"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
-      :data="branchOfficeDetails"
+      :data="driverDetails"
       @close-modal="isModalDetailsOpen = false"
     />
     <EditRolModal
-      title="Editar rol"
+      title="Editar conductor"
       :activeModal="isModalOpen"
       :showButton="false"
-      :data="rolDetails"
+      :data="driverDetails"
       @close-modal="isModalOpen = false"
-      @rol-updated="getRolesList()"
+      @driver-updated="loadDrivers()"
     />
     <DeleteRolModal
-      title="Eliminar rol"
+      title="Eliminar conductor"
       :activeModal="isModalDeleteOpen"
       :showButton="false"
-      :rol="rolDetails"
+      :driver="driverDetails"
       @close-modal="isModalDeleteOpen = false"
+      @driver-deleted="loadDrivers()"
     />
   </div>
 </template>
 
 <script>
 import { computed, reactive, ref, watch, onMounted } from "vue";
-import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import { headersBranchOfficesTable } from "@/constant/administration/branchOffice/constantBranchOffice.js";
+import { headersDriversTable } from "@/constant/administration/driver/constantDriver.js";
 import CreateRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/CreateRolModal.vue";
 import DeleteRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/DeleteRolModal.vue";
 import EditRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/EditRolModal.vue";
-import branchOfficeDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/branchOfficeDetailsModal.vue";
-import CreateBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/CreateBranchOfficeModal.vue";
+import DriverDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/Driver/DriverDetailsModal.vue";
 
-import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
+import { GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
 import {
   useLazyQuery,
   provideApolloClient,
@@ -62,14 +61,14 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
-    CreateBranchOfficeModal,
-    branchOfficeDetailsModal,
+    CreateRolModal,
+    DriverDetailsModal,
     DeleteRolModal,
     EditRolModal,
   },
   data() {
     return {
-      headersBranchOfficesTable,
+      headersDriversTable,
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -80,25 +79,25 @@ export default {
   mounted() {},
   methods: {},
   setup() {
-    let branchOfficeDetails = ref({});
+    let driverDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
 
-    const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_BRANCH_OFFICES)
+    const queryGetDrivers = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_DRIVERS)
     );
 
-    const branchOffices = computed(
-      () => queryGetBranchOffices.result.value?.srvBranchOffice ?? []
+    const drivers = computed(
+      () => queryGetDrivers.result.value?.srvDriver ?? []
     );
 
-    const loadBranchOffices = () => {
-      queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
+    const loadDrivers = () => {
+      queryGetDrivers.load() || queryGetDrivers.refetch();
     };
 
     onMounted(() => {
-      loadBranchOffices();
+      loadDrivers();
     });
 
     const toggleModal = (value) => {
@@ -108,16 +107,16 @@ export default {
 
       if (value.action === "delete") isModalDeleteOpen.value = true;
 
-      branchOfficeDetails.value = value.row;
+      driverDetails.value = value.row;
     };
     return {
       toggleModal,
       isModalOpen,
-      branchOfficeDetails,
+      driverDetails,
       isModalDetailsOpen,
       isModalDeleteOpen,
-      branchOffices,
-      loadBranchOffices
+      drivers,
+      loadDrivers,
     };
   },
 };

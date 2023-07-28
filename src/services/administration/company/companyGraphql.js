@@ -1,14 +1,20 @@
 import gql from "graphql-tag";
 
-export const GET_COMPANIES = gql`
+export const GET_ALL_COMPANIES = gql`
   query getCompanies {
     srvCompanies {
       companyId
       name
       prefix
       address
-      provinceId
-      companyTypeId
+      province {
+        provinceId
+        name
+      }
+      companyType {
+        companyTypeId
+        name
+      }
       sequential
     }
   }

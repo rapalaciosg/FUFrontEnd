@@ -3,8 +3,8 @@ export const headersCompanyTable = [
   { label: "Nombre", field: "name" },
   { label: "Prefijo", field: "prefix" },
   { label: "Dirección", field: "address" },
-  { label: "Provincia Id", field: "provinceId" },
-  { label: "Tipo de compañia", field: "companyTypeId" },
+  { label: "Provincia", field: "province.name" },
+  { label: "Tipo de compañia", field: "companyType.name" },
   { label: "Secuencial", field: "sequential" },
   { label: "Acciones", field: "actions" },
 ];
