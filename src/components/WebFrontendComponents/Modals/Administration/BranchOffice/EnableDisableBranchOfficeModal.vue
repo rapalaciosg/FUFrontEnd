@@ -79,9 +79,9 @@ export default {
         branchOffice.email = newValue.email
         branchOffice.phone = newValue.phone
         branchOffice.ruc = newValue.ruc
-        branchOffice.companyId = newValue.companyId
+        branchOffice.companyId = newValue.company.companyId
         branchOffice.active = newValue.active
-        branchOffice.provinceId = newValue.provinceId
+        branchOffice.provinceId = newValue.province.provinceId
         branchOffice.updatedBy = keycloak.tokenParsed.preferred_username
       },
       { deep: true }
