@@ -3,13 +3,19 @@ import gql from "graphql-tag";
 export const GET_ALL_BRANCH_OFFICES = gql`
   query getBranchOffices {
     srvBranchOffice {
-      companyId
+      company{
+        companyId
+        name
+      }
       ruc
       dv
       address
       phone
       email
-      provinceId
+      province{
+        provinceId
+        name
+      }
       branchOfficeId
       branchOfficeName
       createdBy

@@ -196,11 +196,11 @@ export default {
         branchOffice.createdBy = keycloak.tokenParsed.preferred_username;
         provinceId.value = findSelectValues(
           provincesFormatted,
-          newValue.provinceId
+          newValue.province.provinceId
         );
         companyId.value = findSelectValues(
           companiesFormatted,
-          newValue.companyId
+          newValue.company.companyId
         );
       },
       { deep: true }
