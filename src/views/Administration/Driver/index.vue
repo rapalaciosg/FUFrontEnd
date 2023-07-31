@@ -6,13 +6,21 @@
       :data="drivers"
       :actions="actions"
       @open-modal="toggleModal"
+      :filter="filterSelect"
     >
       <template v-slot:button>
-        <CreateRolModal
-          title="Crear conductor"
-          btnClass="btn-success"
-          @driver-created="loadDrivers()"
-        />
+        <div class="grid grid-cols-2 gap-2">
+          <VueSelect
+            :options="status"
+            placeholder="Todos"
+            v-model="filterSelect"
+          />
+          <CreateDriverModal
+            title="Crear conductor"
+            btnClass="btn-success"
+            @driver-created="loadDrivers()"
+          />
+        </div>
       </template>
     </AdvancedTable>
     <DriverDetailsModal
@@ -22,7 +30,7 @@
       :data="driverDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <EditRolModal
+    <EditDriverModal
       title="Editar conductor"
       :activeModal="isModalOpen"
       :showButton="false"
@@ -30,13 +38,14 @@
       @close-modal="isModalOpen = false"
       @driver-updated="loadDrivers()"
     />
-    <DeleteRolModal
-      title="Eliminar conductor"
-      :activeModal="isModalDeleteOpen"
+    <EnableDisableDriverModal
+      :title="driverDetails.active ? 'Deshabilitar' : 'Habilitar'"
+      :activeModal="isModalEnableDisableOpen"
       :showButton="false"
+      :action="driverDetails.active ? 'Deshabilitar' : 'Habilitar'"
       :driver="driverDetails"
-      @close-modal="isModalDeleteOpen = false"
-      @driver-deleted="loadDrivers()"
+      @close-modal="isModalEnableDisableOpen = false"
+      @driver-updated="loadDrivers()"
     />
   </div>
 </template>
@@ -44,10 +53,11 @@
 <script>
 import { computed, reactive, ref, watch, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
+import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { headersDriversTable } from "@/constant/administration/driver/constantDriver.js";
-import CreateRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/CreateRolModal.vue";
-import DeleteRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/DeleteRolModal.vue";
-import EditRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/EditRolModal.vue";
+import EnableDisableDriverModal from "@/components/WebFrontendComponents/Modals/Administration/Driver/EnableDisableDriverModal.vue";
+import CreateDriverModal from "@/components/WebFrontendComponents/Modals/Administration/Driver/CreateDriverModal.vue";
+import EditDriverModal from "@/components/WebFrontendComponents/Modals/Administration/Driver/EditDriverModal.vue";
 import DriverDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/Driver/DriverDetailsModal.vue";
 
 import { GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
@@ -61,10 +71,11 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
-    CreateRolModal,
+    VueSelect,
+    CreateDriverModal,
     DriverDetailsModal,
-    DeleteRolModal,
-    EditRolModal,
+    EnableDisableDriverModal,
+    EditDriverModal,
   },
   data() {
     return {
@@ -72,7 +83,11 @@ export default {
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
-        { name: "Eliminar", icon: "heroicons:trash", value: "delete" },
+        { name: "Habilitar", icon: "ps:checked", value: "enable/disable" },
+      ],
+      status: [
+        { label: "Habilitado", value: "enabled" },
+        { label: "Deshabilitado", value: "disabled" },
       ],
     };
   },
@@ -82,7 +97,9 @@ export default {
     let driverDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
-    let isModalDeleteOpen = ref(false);
+    let isModalEnableDisableOpen = ref(false);
+
+    let filterSelect = ref("");
 
     const queryGetDrivers = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_DRIVERS)
@@ -105,7 +122,8 @@ export default {
 
       if (value.action === "details") isModalDetailsOpen.value = true;
 
-      if (value.action === "delete") isModalDeleteOpen.value = true;
+      if (value.action === "enable/disable")
+        isModalEnableDisableOpen.value = true;
 
       driverDetails.value = value.row;
     };
@@ -114,9 +132,10 @@ export default {
       isModalOpen,
       driverDetails,
       isModalDetailsOpen,
-      isModalDeleteOpen,
+      isModalEnableDisableOpen,
       drivers,
       loadDrivers,
+      filterSelect,
     };
   },
 };

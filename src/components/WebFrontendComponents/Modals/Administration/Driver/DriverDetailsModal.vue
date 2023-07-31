@@ -8,8 +8,8 @@
         <p>{{ data.name }}</p>
         <p class="font-medium">Apellido:</p>
         <p>{{ data.lastName }}</p>
-        <p class="font-medium">Sucursal Id:</p>
-        <p>{{ data.branchOfficeId }}</p>
+        <p class="font-medium">Sucursal:</p>
+        <p>{{ data.branchOffice.branchOfficeName }}</p>
         <p class="font-medium">Código:</p>
         <p>{{ data.code }}</p>
         <p class="font-medium">Código de caja:</p>

@@ -6,13 +6,13 @@
       :data="branchOffices"
       :actions="actions"
       @open-modal="toggleModal"
+      :filter="filterSelect"
     >
       <template v-slot:button>
-        <CreateBranchOfficeModal
-          title="Crear sucursal"
-          btnClass="btn-success"
-          @branch-office-created="loadBranchOffices()"
-        />
+        <div class="grid grid-cols-2 gap-2">
+          <VueSelect :options="status" placeholder="Todos" v-model="filterSelect" />
+          <CreateBranchOfficeModal title="Crear sucursal" btnClass="btn-success" @branch-office-created="loadBranchOffices()" />
+        </div>
       </template>
     </AdvancedTable>
     <branchOfficeDetailsModal
@@ -22,34 +22,27 @@
       :data="branchOfficeDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <EditRolModal
-      title="Editar rol"
+    <EditBranchOfficeModal
+      title="Editar sucursal"
       :activeModal="isModalOpen"
       :showButton="false"
-      :data="rolDetails"
+      :data="branchOfficeDetails"
       @close-modal="isModalOpen = false"
-      @rol-updated="getRolesList()"
+      @branch-office-updated="loadBranchOffices()"
     />
-    <DeleteRolModal
-      title="Eliminar rol"
-      :activeModal="isModalDeleteOpen"
-      :showButton="false"
-      :rol="rolDetails"
-      @close-modal="isModalDeleteOpen = false"
-    />
+    <EnableDisableBranchOfficeModal :title="(branchOfficeDetails.active) ? 'Deshabilitar' : 'Habilitar'" :activeModal="isModalEnableDisableOpen" :showButton="false" :action="(branchOfficeDetails.active) ? 'Deshabilitar' : 'Habilitar'" :branchOffice="branchOfficeDetails" @close-modal="isModalEnableDisableOpen = false" @branch-office-updated="loadBranchOffices()" />
   </div>
 </template>
 
 <script>
 import { computed, reactive, ref, watch, onMounted } from "vue";
-import Button from "@/components/DashCodeComponents/Button";
+import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersBranchOfficesTable } from "@/constant/administration/branchOffice/constantBranchOffice.js";
-import CreateRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/CreateRolModal.vue";
-import DeleteRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/DeleteRolModal.vue";
-import EditRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/EditRolModal.vue";
 import branchOfficeDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/branchOfficeDetailsModal.vue";
 import CreateBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/CreateBranchOfficeModal.vue";
+import EditBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/EditBranchOfficeModal.vue";
+import EnableDisableBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/EnableDisableBranchOfficeModal.vue";
 
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import {
@@ -64,8 +57,9 @@ export default {
     AdvancedTable,
     CreateBranchOfficeModal,
     branchOfficeDetailsModal,
-    DeleteRolModal,
-    EditRolModal,
+    EnableDisableBranchOfficeModal,
+    EditBranchOfficeModal,
+    VueSelect
   },
   data() {
     return {
@@ -73,8 +67,12 @@ export default {
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
-        { name: "Eliminar", icon: "heroicons:trash", value: "delete" },
+        { name: "Habilitar", icon: "ps:checked", value: "enable/disable" },
       ],
+      status: [
+        { label: 'Habilitado', value: 'enabled' },
+        { label: 'Deshabilitado', value: 'disabled' },
+      ]
     };
   },
   mounted() {},
@@ -83,7 +81,9 @@ export default {
     let branchOfficeDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
-    let isModalDeleteOpen = ref(false);
+    let isModalEnableDisableOpen = ref(false);
+
+    let filterSelect = ref("");
 
     const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_BRANCH_OFFICES)
@@ -106,16 +106,17 @@ export default {
 
       if (value.action === "details") isModalDetailsOpen.value = true;
 
-      if (value.action === "delete") isModalDeleteOpen.value = true;
+      if(value.action === 'enable/disable') isModalEnableDisableOpen.value = true;
 
       branchOfficeDetails.value = value.row;
     };
     return {
       toggleModal,
       isModalOpen,
+      filterSelect,
       branchOfficeDetails,
       isModalDetailsOpen,
-      isModalDeleteOpen,
+      isModalEnableDisableOpen,
       branchOffices,
       loadBranchOffices
     };

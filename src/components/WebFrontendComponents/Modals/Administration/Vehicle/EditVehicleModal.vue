@@ -16,6 +16,7 @@
             placeholder="Codigo"
             v-model="code"
             :error="codeError"
+            :maxlength="10"
           />
           <Textinput
             type="text"
@@ -23,6 +24,7 @@
             placeholder="Placa"
             v-model="licensePlate"
             :error="licensePlateError"
+            :maxlength="10"
           />
           <Textinput
             type="text"
@@ -66,7 +68,7 @@ import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
-import { CREATE_VEHICLE } from "@/services/administration/vehicle/vehicleGraphql.js";
+import { UPDATE_VEHICLE } from "@/services/administration/vehicle/vehicleGraphql.js";
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import {
   useLazyQuery,
@@ -81,8 +83,13 @@ export default {
     Textinput,
     VueSelect,
   },
-  props: [],
-  emits: ["driver-created"],
+  props: {
+    data: {
+      type: Object,
+      default: {}
+    }
+  },
+  emits: ["vehicle-updated"],
   data() {
     return {};
   },
@@ -128,17 +135,31 @@ export default {
       () => branchOffices.value,
       (newValue) => {
         branchOfficesFormatted.value = formatbranchOfficeSelect(branchOffices);
-        branchOfficeId.value = branchOfficesFormatted.value[0];
       },
       { deep: true }
     );
 
-    const formValues = reactive({
-      name: "",
-      code: "",
-      description: "",
-      licensePlate: "",
-    });
+    watch(
+      () => props.data,
+      (newValue) => {
+        vehicle.vehicleId = newValue.vehicleId;
+        vehicle.active = newValue.active;
+        name.value = newValue.name;
+        code.value = newValue.code;
+        description.value = newValue.description;
+        licensePlate.value = newValue.licensePlate;
+        branchOfficeId.value = findSelectValues(
+          branchOfficesFormatted,
+          newValue.branchOffice.branchOfficeId
+        );
+      },
+      { deep: true }
+    );
+
+    const findSelectValues = (data, id) => {
+      const filteredValue = data.value.find((item) => item.value === id);
+      return filteredValue;
+    };
 
     const vehicle = reactive({
       vehicleId: 0,
@@ -147,7 +168,7 @@ export default {
       description: "",
       licensePlate: "",
       branchOfficeId: 0,
-      active: true,
+      active: false,
     });
 
     const schema = yup.object({
@@ -158,8 +179,7 @@ export default {
     });
 
     const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
+      validationSchema: schema
     });
 
     watch(
@@ -191,7 +211,7 @@ export default {
       meta: licensePlateMeta,
     } = useField("licensePlate");
 
-    const { mutate: createVehicle } = useMutation(CREATE_VEHICLE, () => ({
+    const { mutate: updateVehicle } = useMutation(UPDATE_VEHICLE, () => ({
       variables: { inputModel: vehicle },
     }));
 
@@ -202,10 +222,10 @@ export default {
       vehicle.licensePlate = licensePlate;
       vehicle.branchOfficeId = branchOfficeId.value.value;
 
-      createVehicle()
+      updateVehicle()
         .then((response) => {
-          emit("vehicle-created");
-          toast.success("Vehículo creado exitosamente", {
+          emit("vehicle-updated");
+          toast.success("Vehículo actualizado exitosamente", {
             timeout: 2000,
           });
         })
