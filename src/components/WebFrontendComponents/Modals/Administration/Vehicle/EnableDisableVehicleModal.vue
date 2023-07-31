@@ -75,7 +75,7 @@ export default {
         vehicle.code = newValue.code;
         vehicle.description = newValue.description;
         vehicle.licensePlate = newValue.licensePlate;
-        vehicle.branchOfficeId = newValue.branchOfficeId;
+        vehicle.branchOfficeId = newValue.branchOffice.branchOfficeId;
         vehicle.active = newValue.active;
       },
       { deep: true }
