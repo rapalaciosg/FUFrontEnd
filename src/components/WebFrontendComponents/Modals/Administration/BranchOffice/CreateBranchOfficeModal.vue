@@ -30,6 +30,7 @@ import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 import keycloak from "@/security/KeycloakService";
+import moment from 'moment';
 
 import { CREATE_BRANCH_OFFICE } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import { GET_ALL_PROVINCES } from "@/services/catalogs/catalogsGraphql.js";
@@ -141,8 +142,7 @@ export default {
       provinceId: "",
       companyId: 0,
       active: true,
-      createdBy: "",
-      createdDate: new Date().toISOString(),
+      createdBy: ""
     });
 
     const schema = yup.object({
@@ -188,20 +188,19 @@ export default {
       branchOffice.companyId = companyId.value.value
       branchOffice.provinceId = provinceId.value.value
       branchOffice.createdBy = keycloak.tokenParsed.preferred_username
-      console.log('branchOffice => ', branchOffice);
 
-      // createBranchOffice()
-      //   .then((response) => {
-      //     emit("branch-office-created");
-      //     toast.success("Sucursal creada exitosamente", {
-      //       timeout: 2000,
-      //     });
-      //   })
-      //   .catch((error) => {
-      //     toast.error("Ha ocurrido un error", {
-      //       timeout: 2000,
-      //     });
-      //   });
+      createBranchOffice()
+        .then((response) => {
+          emit("branch-office-created");
+          toast.success("Sucursal creada exitosamente", {
+            timeout: 2000,
+          });
+        })
+        .catch((error) => {
+          toast.error("Ha ocurrido un error", {
+            timeout: 2000,
+          });
+        });
 
       closeModal.value = !closeModal.value;
       actions.resetForm();

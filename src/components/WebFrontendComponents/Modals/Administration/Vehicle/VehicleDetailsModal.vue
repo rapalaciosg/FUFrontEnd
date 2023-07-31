@@ -10,8 +10,8 @@
         <p>{{ data.code }}</p>
         <p class="font-medium">Descripción:</p>
         <p>{{ data.description }}</p>
-        <p class="font-medium">Sucursal Id:</p>
-        <p>{{ data.branchOfficeId }}</p>
+        <p class="font-medium">Sucursal:</p>
+        <p>{{ data.branchOffice.branchOfficeName }}</p>
         <p class="font-medium">Placa:</p>
         <p>{{ data.licensePlate }}</p>
       </div>

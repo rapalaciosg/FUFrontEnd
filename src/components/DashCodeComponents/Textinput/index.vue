@@ -29,6 +29,7 @@
         :readonly="isReadonly"
         :disabled="disabled"
         :validate="validate"
+        :maxlength="maxlength"
         v-if="!isMask"
       />
       <cleave
@@ -102,6 +103,10 @@ import Cleave from "vue-cleave-component";
 export default {
   components: { Icon, Cleave },
   props: {
+    maxlength: {
+      type: Number,
+      default: null
+    },
     placeholder: {
       type: String,
       default: "Search",

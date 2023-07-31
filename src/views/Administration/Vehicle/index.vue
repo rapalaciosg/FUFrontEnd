@@ -6,13 +6,17 @@
       :data="vehicles"
       :actions="actions"
       @open-modal="toggleModal"
+      :filter="filterSelect"
     >
       <template v-slot:button>
-        <CreateVehicleModal
-          title="Crear vehículo"
-          btnClass="btn-success"
-          @vehicle-created="loadVehicles()"
-        />
+        <div class="grid grid-cols-2 gap-2">
+          <VueSelect :options="status" placeholder="Todos" v-model="filterSelect" />
+          <CreateVehicleModal
+            title="Crear vehículo"
+            btnClass="btn-success"
+            @vehicle-created="loadVehicles()"
+          />
+        </div>
       </template>
     </AdvancedTable>
     <VehicleDetailsModal
@@ -22,7 +26,7 @@
       :data="vehicleDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <!-- <EditRolModal
+    <EditVehicleModal
       title="Editar vehículo"
       :activeModal="isModalOpen"
       :showButton="false"
@@ -30,25 +34,19 @@
       @close-modal="isModalOpen = false"
       @vehicle-updated="loadVehicles()"
     />
-    <DeleteRolModal
-      title="Eliminar vehículo"
-      :activeModal="isModalDeleteOpen"
-      :showButton="false"
-      :vehicle="vehicleDetails"
-      @close-modal="isModalDeleteOpen = false"
-      @vehicle-deleted="loadVehicles()"
-    /> -->
+    <EnableDisableVehicleModal :title="(vehicleDetails.active) ? 'Deshabilitar' : 'Habilitar'" :activeModal="isModalEnableDisableOpen" :showButton="false" :action="(vehicleDetails.active) ? 'Deshabilitar' : 'Habilitar'" :vehicle="vehicleDetails" @close-modal="isModalEnableDisableOpen = false" @vehicle-updated="loadVehicles()" />
   </div>
 </template>
 
 <script>
 import { computed, reactive, ref, watch, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
+import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { headersVehiclesTable } from "@/constant/administration/vehicle/constantVehicle.js";
 import CreateVehicleModal from "@/components/WebFrontendComponents/Modals/Administration/Vehicle/CreateVehicleModal.vue";
-import DeleteRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/DeleteRolModal.vue";
-import EditRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/EditRolModal.vue";
+import EnableDisableVehicleModal from "@/components/WebFrontendComponents/Modals/Administration/Vehicle/EnableDisableVehicleModal.vue";
 import VehicleDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/Vehicle/VehicleDetailsModal.vue";
+import EditVehicleModal from "@/components/WebFrontendComponents/Modals/Administration/Vehicle/EditVehicleModal.vue";
 
 import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
 import {
@@ -61,10 +59,11 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
+    VueSelect,
     CreateVehicleModal,
     VehicleDetailsModal,
-    DeleteRolModal,
-    EditRolModal,
+    EnableDisableVehicleModal,
+    EditVehicleModal,
   },
   data() {
     return {
@@ -72,8 +71,12 @@ export default {
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
-        { name: "Eliminar", icon: "heroicons:trash", value: "delete" },
+        { name: "Habilitar", icon: "ps:checked", value: "enable/disable" },
       ],
+      status: [
+        { label: 'Habilitado', value: 'enabled' },
+        { label: 'Deshabilitado', value: 'disabled' },
+      ]
     };
   },
   mounted() {},
@@ -82,7 +85,9 @@ export default {
     let vehicleDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
-    let isModalDeleteOpen = ref(false);
+    let isModalEnableDisableOpen = ref(false);
+
+    let filterSelect = ref("");
 
     const queryGetVehicles = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_VEHICLES)
@@ -105,7 +110,7 @@ export default {
 
       if (value.action === "details") isModalDetailsOpen.value = true;
 
-      if (value.action === "delete") isModalDeleteOpen.value = true;
+      if(value.action === 'enable/disable') isModalEnableDisableOpen.value = true;
 
       vehicleDetails.value = value.row;
     };
@@ -114,8 +119,9 @@ export default {
       isModalOpen,
       vehicleDetails,
       isModalDetailsOpen,
-      isModalDeleteOpen,
+      isModalEnableDisableOpen,
       vehicles,
+      filterSelect,
       loadVehicles,
     };
   },

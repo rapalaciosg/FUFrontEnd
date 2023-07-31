@@ -12,6 +12,13 @@
           />
           <Textinput
             type="text"
+            label="Apellido"
+            placeholder="Apellido"
+            v-model="lastName"
+            :error="lastNameError"
+          />
+          <Textinput
+            type="text"
             label="Codigo"
             placeholder="Codigo"
             v-model="code"
@@ -19,23 +26,23 @@
           />
           <Textinput
             type="text"
-            label="Placa"
-            placeholder="Placa"
-            v-model="licensePlate"
-            :error="licensePlateError"
-          />
-          <Textinput
-            type="text"
-            label="Descripción"
-            placeholder="Descripción"
-            v-model="description"
-            :error="descriptionError"
+            label="Código de caja"
+            placeholder="Código de caja"
+            v-model="boxCode"
+            :error="boxCodeError"
           />
           <VueSelect
             label="Sucursal"
             :options="branchOfficesFormatted"
             placeholder="Seleccione una sucursal"
             v-model="branchOfficeId"
+            :clearable="false"
+          />
+          <VueSelect
+            label="Usuarios"
+            :options="usersList"
+            placeholder="Seleccione un usuario"
+            v-model="user"
             :clearable="false"
           />
         </div>
@@ -65,8 +72,10 @@ import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+import userAdministrationService from "@/services/keycloak/userAdministrationService";
+import keycloak from "@/security/KeycloakService.js";
 
-import { CREATE_VEHICLE } from "@/services/administration/vehicle/vehicleGraphql.js";
+import { CREATE_DRIVER } from "@/services/administration/driver/driverGraphql.js";
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import {
   useLazyQuery,
@@ -82,7 +91,7 @@ export default {
     VueSelect,
   },
   props: [],
-  emits: ["driver-created"],
+  emits: ["vehicle-created"],
   data() {
     return {};
   },
@@ -92,11 +101,15 @@ export default {
   setup(props, { emit }) {
     const toast = useToast();
 
+    const user = ref(null);
+
     let closeModal = ref(false);
 
     let branchOfficesFormatted = ref([]);
 
     const branchOfficeId = ref({});
+
+    const usersList = ref([]);
 
     const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_BRANCH_OFFICES)
@@ -112,9 +125,28 @@ export default {
 
     const initilize = () => {
       loadBranchOffices();
+      getUserList();
     };
 
     onMounted(() => initilize());
+
+    const getUserList = () => {
+      userAdministrationService.getUsers(keycloak.token).then((response) => {
+        usersList.value = formatUserSelect(response.data);
+      });
+    }
+
+    watch(() => usersList.value, (newValue) => {
+      user.value = newValue[0];
+    }, {deep: true})
+
+    const formatUserSelect = (data) => {
+      const valueFormated = data.map((item) => ({
+        value: item.id,
+        label: item.username,
+      }));
+      return valueFormated;
+    }
 
     const formatbranchOfficeSelect = (data) => {
       const valueFormated = data.value.map((item) => ({
@@ -135,26 +167,28 @@ export default {
 
     const formValues = reactive({
       name: "",
+      lastName: "",
       code: "",
-      description: "",
-      licensePlate: "",
+      boxCode: "",
     });
 
-    const vehicle = reactive({
-      vehicleId: 0,
-      name: "",
-      code: "",
-      description: "",
-      licensePlate: "",
+    const driver = reactive({
+      driverId: 0,
       branchOfficeId: 0,
+      name: "",
+      lastName: "",
+      code: "",
+      boxCode: "",
       active: true,
+      keycloakUserId: "",
+      keycloakUser: "",
     });
 
     const schema = yup.object({
       name: yup.string().required("Nombre requerido"),
-      code: yup.string().required("Código requerido").max(10),
-      description: yup.string().required("Descripción requerida"),
-      licensePlate: yup.string().required("Placa requerida").max(10),
+      lastName: yup.string().required("Apellido requerido"),
+      code: yup.string().required("Código requerido"),
+      boxCode: yup.string().required("Código de caja requerido"),
     });
 
     const { handleSubmit, resetForm } = useForm({
@@ -176,36 +210,38 @@ export default {
       meta: nameMeta,
     } = useField("name");
     const {
+      value: lastName,
+      errorMessage: lastNameError,
+      meta: lastNameMeta,
+    } = useField("lastName");
+    const {
       value: code,
       errorMessage: codeError,
       meta: codeMeta,
     } = useField("code");
     const {
-      value: description,
-      errorMessage: descriptionError,
-      meta: descriptionMeta,
-    } = useField("description");
-    const {
-      value: licensePlate,
-      errorMessage: licensePlateError,
-      meta: licensePlateMeta,
-    } = useField("licensePlate");
+      value: boxCode,
+      errorMessage: boxCodeError,
+      meta: boxCodeMeta,
+    } = useField("boxCode");
 
-    const { mutate: createVehicle } = useMutation(CREATE_VEHICLE, () => ({
-      variables: { inputModel: vehicle },
+    const { mutate: createDriver } = useMutation(CREATE_DRIVER, () => ({
+      variables: { inputModel: driver },
     }));
 
     const onSubmit = handleSubmit((values, actions) => {
-      vehicle.name = values.name;
-      vehicle.code = values.code.toUpperCase();
-      vehicle.description = values.description;
-      vehicle.licensePlate = licensePlate;
-      vehicle.branchOfficeId = branchOfficeId.value.value;
+      driver.name = values.name;
+      driver.lastName = values.lastName;
+      driver.code = values.code.toUpperCase();
+      driver.boxCode = values.boxCode.toUpperCase();
+      driver.branchOfficeId = branchOfficeId.value.value;
+      driver.keycloakUser = user.value.label;
+      driver.keycloakUserId = user.value.value;
 
-      createVehicle()
+      createDriver()
         .then((response) => {
-          emit("vehicle-created");
-          toast.success("Vehículo creado exitosamente", {
+          emit("driver-created");
+          toast.success("Conductor creado exitosamente", {
             timeout: 2000,
           });
         })
@@ -225,13 +261,15 @@ export default {
       nameError,
       code,
       codeError,
-      description,
-      descriptionError,
-      licensePlate,
-      licensePlateError,
+      lastName,
+      lastNameError,
+      boxCode,
+      boxCodeError,
       onSubmit,
       branchOfficesFormatted,
       branchOfficeId,
+      user,
+      usersList
     };
   },
 };
