@@ -6,5 +6,6 @@ export const headersCompanyTable = [
   { label: "Provincia", field: "province.name" },
   { label: "Tipo de compañia", field: "companyType.name" },
   { label: "Secuencial", field: "sequential" },
+  { label: "Distribuidor", field: "isDistributor" },
   { label: "Acciones", field: "actions" },
 ];
