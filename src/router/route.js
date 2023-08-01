@@ -27,6 +27,14 @@ const routes = [
         },
       },
       {
+        path: "routes",
+        name: "routes",
+        component: () => import("@/views/Routes/RoutesManagement"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "tracking",
         name: "tracking",
         component: () => import("@/views/Routes/Tracking"),
@@ -59,9 +67,9 @@ const routes = [
         },
       },
       {
-        path: "article",
-        name: "article",
-        component: () => import("@/views/Inventory/CreateArticle"),
+        path: "products",
+        name: "products",
+        component: () => import("@/views/Inventory/Products"),
         meta: {
           hide: true,
         },

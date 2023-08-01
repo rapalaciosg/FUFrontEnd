@@ -123,7 +123,7 @@
 <script>
 // import { Icon } from "@iconify/vue";
 import { defineComponent } from "vue";
-import { menuItems } from "../../../constant/data";
+import { menuItems } from "../../../constant/menuItems/menuItems.js";
 import Navmenu from "./Navmenu";
 import { gsap } from "gsap";
 import { SimpleBar } from "simplebar-vue3";

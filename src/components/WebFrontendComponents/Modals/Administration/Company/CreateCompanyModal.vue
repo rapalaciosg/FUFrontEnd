@@ -8,6 +8,7 @@
           <Textinput type="text" label="Dirección" placeholder="Dirección" v-model="address" :error="addressError" />
           <VueSelect label="Provincias" :options="provincesFormatted" placeholder="Seleccione una provincia" v-model="provinceId" :clearable="false" />
           <VueSelect label="Tipos de compañias" :options="companyTypesFormatted" placeholder="Seleccione un tipo de compañia" v-model="companyTypeId" :clearable="false" />
+          <Checkbox label="Distribuidor" :modelValue="isDistributor" />
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
           <button
@@ -33,6 +34,7 @@ import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 import { CREATE_COMPANY } from "@/services/administration/company/companyGraphql.js";
 import { GET_ALL_PROVINCES } from "@/services/catalogs/catalogsGraphql.js";
@@ -45,6 +47,7 @@ export default {
     ModalBase,
     Textinput,
     VueSelect,
+    Checkbox
   },
   props: [],
   emits: ["company-created"],
@@ -58,6 +61,8 @@ export default {
     const toast = useToast();
 
     let closeModal = ref(false);
+
+    const isDistributor = ref(false);
 
     let provincesFormatted = ref([]);
     let companyTypesFormatted = ref([]);
@@ -147,16 +152,18 @@ export default {
       company.provinceId = provinceId.value.value
       company.companyTypeId = companyTypeId.value.value
 
-      createCompany().then((response) => {
-            emit('company-created')
-            toast.success("Compañia creada exitosamente", {
-                timeout: 2000,
-              });
-          }).catch((error) => {
-            toast.error("Ha ocurrido un error", {
-                timeout: 2000,
-              });
-          })
+      console.log('isDistributor => ', isDistributor.value);
+
+      // createCompany().then((response) => {
+      //       emit('company-created')
+      //       toast.success("Compañia creada exitosamente", {
+      //           timeout: 2000,
+      //         });
+      //     }).catch((error) => {
+      //       toast.error("Ha ocurrido un error", {
+      //           timeout: 2000,
+      //         });
+      //     })
 
       closeModal.value = !closeModal.value;
       actions.resetForm();
@@ -174,7 +181,8 @@ export default {
       companyTypeId,
       onSubmit,
       companyTypesFormatted,
-      provincesFormatted
+      provincesFormatted,
+      isDistributor
     };
   },
 };

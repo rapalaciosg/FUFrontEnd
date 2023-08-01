@@ -16,6 +16,7 @@ export const GET_ALL_COMPANIES = gql`
         name
       }
       sequential
+      isDistributor
     }
   }
 `;

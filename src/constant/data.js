@@ -57,8 +57,8 @@ export const menuItems = [
         childlink: "inventory",
       },
       {
-        childtitle: "Crear articulos",
-        childlink: "article",
+        childtitle: "Productos",
+        childlink: "products",
       },
     ]
   },

@@ -40,6 +40,10 @@
         }"
       >
         <template v-slot:table-row="props">
+          <span v-if="props.column.field == 'isDistributor'" class="flex justify-center">
+            <Checkbox v-if="props.row.isDistributor" checked disabled />
+            <Checkbox v-else disabled />
+          </span>
           <span v-if="props.column.field == 'enabled' || props.column.field == 'active'" class="flex justify-center">
             <img v-if="props.row.enabled || props.row.active" :src= "checkedImg" alt="" class="block object-cover" />
             <img v-else :src= "disabledImg" alt="" class="block object-cover" />
