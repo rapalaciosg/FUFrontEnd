@@ -15,3 +15,33 @@ export const GET_ALL_PRODUCTS = gql`
     }
   }
 `;
+
+export const CREATE_PRODUCT = gql`
+  mutation createProductMut($inputModel: ProductInputModelInput!) {
+    createProduct(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;
+
+export const UPDATE_PRODUCT = gql`
+  mutation updateProductMut($inputModel: ProductInputModelInput!) {
+    updateProduct(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;
+
+export const DELETE_PRODUCT = gql`
+  mutation deleteProductMut($id: Int!) {
+    deleteProduct(id: $id) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;

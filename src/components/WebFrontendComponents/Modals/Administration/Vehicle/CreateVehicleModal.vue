@@ -82,7 +82,7 @@ export default {
     VueSelect,
   },
   props: [],
-  emits: ["driver-created"],
+  emits: ["vehicle-created"],
   data() {
     return {};
   },
@@ -199,7 +199,7 @@ export default {
       vehicle.name = values.name;
       vehicle.code = values.code.toUpperCase();
       vehicle.description = values.description;
-      vehicle.licensePlate = licensePlate;
+      vehicle.licensePlate = values.licensePlate;
       vehicle.branchOfficeId = branchOfficeId.value.value;
 
       createVehicle()

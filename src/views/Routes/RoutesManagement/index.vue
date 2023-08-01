@@ -15,14 +15,14 @@
         />
       </template>
     </AdvancedTable>
-    <DetailsCompanyModal
-      title="Detalles de la compañia"
+    <DetailsRoutesModal
+      title="Detalles de ruta"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
       :data="routeDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <EditCompanyModal
+    <!-- <EditCompanyModal
       title="Editar comapañia"
       :activeModal="isModalOpen"
       :showButton="false"
@@ -37,7 +37,7 @@
       :company="routeDetails"
       @close-modal="isModalDeleteOpen = false"
       @company-deleted="loadRoutes()"
-    />
+    /> -->
   </div>
 </template>
 
@@ -46,7 +46,7 @@ import { computed, ref, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersRoutesTable } from "@/constant/routes/routes/constantRoutes.js";
 import CreateCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/CreateCompanyModal.vue";
-import DetailsCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DetailsCompanyModal.vue";
+import DetailsRoutesModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DetailsRoutesModal.vue";
 import DeleteCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DeleteCompanyModal.vue";
 import EditCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/EditCompanyModal.vue";
 
@@ -62,7 +62,7 @@ export default {
   components: {
     AdvancedTable,
     CreateCompanyModal,
-    DetailsCompanyModal,
+    DetailsRoutesModal,
     DeleteCompanyModal,
     EditCompanyModal,
   },

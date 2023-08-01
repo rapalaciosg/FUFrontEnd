@@ -8,35 +8,35 @@
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <CreateCompanyModal
+        <CreateProductModal
           title="Crear producto"
           btnClass="btn-success"
-          @company-created="loadProducts()"
+          @product-created="loadProducts()"
         />
       </template>
     </AdvancedTable>
-    <DetailsCompanyModal
-      title="Detalles de la compañia"
+    <DetailsProductsModal
+      title="Detalles de producto"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
       :data="productsDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <EditCompanyModal
-      title="Editar comapañia"
+    <EditProductModal
+      title="Editar producto"
       :activeModal="isModalOpen"
       :showButton="false"
       :data="productsDetails"
       @close-modal="isModalOpen = false"
-      @company-updated="loadProducts()"
+      @product-updated="loadProducts()"
     />
-    <DeleteCompanyModal
+    <DeleteProductModal
       title="Eliminar compañia"
       :activeModal="isModalDeleteOpen"
       :showButton="false"
-      :company="productsDetails"
+      :product="productsDetails"
       @close-modal="isModalDeleteOpen = false"
-      @company-deleted="loadProducts()"
+      @product-deleted="loadProducts()"
     />
   </div>
 </template>
@@ -45,10 +45,10 @@
 import { computed, ref, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersProductsTable } from "@/constant/inventory/products/constantProducts.js";
-import CreateCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/CreateCompanyModal.vue";
-import DetailsCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DetailsCompanyModal.vue";
-import DeleteCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DeleteCompanyModal.vue";
-import EditCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/EditCompanyModal.vue";
+import DetailsProductsModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DetailsProductsModal.vue";
+import CreateProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/CreateProductModal.vue";
+import EditProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/EditProductModal.vue";
+import DeleteProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DeleteProductModal.vue";
 
 import { GET_ALL_PRODUCTS } from "@/services/inventory/products/productsGraphql.js";
 import {
@@ -61,10 +61,10 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
-    CreateCompanyModal,
-    DetailsCompanyModal,
-    DeleteCompanyModal,
-    EditCompanyModal,
+    CreateProductModal,
+    DetailsProductsModal,
+    DeleteProductModal,
+    EditProductModal,
   },
   data() {
     return {
