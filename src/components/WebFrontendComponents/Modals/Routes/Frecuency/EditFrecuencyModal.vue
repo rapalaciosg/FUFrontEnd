@@ -1,3 +1,8 @@
+<template>
+  <h1>Edit inventory</h1>
+</template>
+
+<script></script>
 <!-- <template>
   <modal-base @save="editFrecuency()" :closeModal="closeModal">
     <template v-slot:modal-body>

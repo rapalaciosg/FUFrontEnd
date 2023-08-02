@@ -1,3 +1,8 @@
+<template>
+  <h1>Create inventory</h1>
+</template>
+
+<script></script>
 <!-- <template>
   <modal-base @save="createTransfer()" :closeModal="closeModal">
     <template v-slot:modal-body>
