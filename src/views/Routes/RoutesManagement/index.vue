@@ -5,13 +5,14 @@
       :headers="headersRoutesTable"
       :data="routes"
       :actions="actions"
+      :showSelectOptions="false"
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <CreateCompanyModal
+        <CreateRouteModal
           title="Crear ruta"
           btnClass="btn-success"
-          @company-created="loadRoutes()"
+          @route-created="loadRoutes()"
         />
       </template>
     </AdvancedTable>
@@ -22,22 +23,22 @@
       :data="routeDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <!-- <EditCompanyModal
-      title="Editar comapañia"
+    <EditRouteModal
+      title="Editar ruta"
       :activeModal="isModalOpen"
       :showButton="false"
       :data="routeDetails"
       @close-modal="isModalOpen = false"
-      @company-updated="loadRoutes()"
+      @route-updated="loadRoutes()"
     />
-    <DeleteCompanyModal
-      title="Eliminar compañia"
+    <DeleteRouteModal
+      title="Eliminar ruta"
       :activeModal="isModalDeleteOpen"
       :showButton="false"
-      :company="routeDetails"
+      :route="routeDetails"
       @close-modal="isModalDeleteOpen = false"
-      @company-deleted="loadRoutes()"
-    /> -->
+      @route-deleted="loadRoutes()"
+    />
   </div>
 </template>
 
@@ -45,10 +46,10 @@
 import { computed, ref, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersRoutesTable } from "@/constant/routes/routes/constantRoutes.js";
-import CreateCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/CreateCompanyModal.vue";
 import DetailsRoutesModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DetailsRoutesModal.vue";
-import DeleteCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DeleteCompanyModal.vue";
-import EditCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/EditCompanyModal.vue";
+import CreateRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/CreateRouteModal.vue";
+import DeleteRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DeleteRouteModal.vue";
+import EditRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/EditRouteModal.vue";
 
 import { GET_ALL_ROUTES } from "@/services/routes/routes/routesGraphql.js";
 import {
@@ -61,10 +62,10 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
-    CreateCompanyModal,
+    CreateRouteModal,
     DetailsRoutesModal,
-    DeleteCompanyModal,
-    EditCompanyModal,
+    DeleteRouteModal,
+    EditRouteModal,
   },
   data() {
     return {

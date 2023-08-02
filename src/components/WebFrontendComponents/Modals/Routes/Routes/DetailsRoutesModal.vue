@@ -17,7 +17,7 @@
         <p class="font-medium">Secuencial de clientes:</p>
         <p>{{ data.customerSequential }}</p>
         <p class="font-medium">Creación de clientes:</p>
-        <p>{{ data.activeCustomerCreation }}</p>
+        <Checkbox :checked="data.activeCustomerCreation" disabled />
       </div>
       <div
         class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
@@ -36,10 +36,12 @@
 <script>
 import { ref } from "vue";
 import ModalBase from "../../ModalBase.vue";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 export default {
   components: {
     ModalBase,
+    Checkbox
   },
   props: {
     data: {
