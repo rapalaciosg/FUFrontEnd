@@ -26,7 +26,7 @@ import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import CreateClientModal from "@/components/WebFrontendComponents/Modals/Clients/CreateClientModal.vue";
 import EditClientModal from "@/components/WebFrontendComponents/Modals/Clients/EditClientModal.vue";
-import { headersClientsTable } from "@/constant/clients/constantClient.js";
+import { headersClientsTable } from "@/constant/clients/customers/constantCustomers.js";
 import { useClientsStore } from "@/store/clients/clientsStore.js";
 
 import { GET_ALL_CLIENTS_QUERY, GET_CLIENT_QUERY } from "@/services/clients/clientsGraphql.js";

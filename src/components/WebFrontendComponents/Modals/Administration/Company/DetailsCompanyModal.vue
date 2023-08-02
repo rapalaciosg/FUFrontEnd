@@ -14,6 +14,8 @@
         <p>{{ data.companyType.name }}</p>
         <p class="font-medium">Secuencial:</p>
         <p>{{ data.sequential }}</p>
+        <p class="font-medium">Distribuidor:</p>
+        <Checkbox :checked="data.isDistributor" disabled />
       </div>
       <div
         class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
@@ -32,10 +34,12 @@
 <script>
 import { ref } from "vue";
 import ModalBase from "../../ModalBase.vue";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 export default {
   components: {
     ModalBase,
+    Checkbox,
   },
   props: {
     data: {

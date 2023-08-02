@@ -22,7 +22,7 @@
 <script>
 import { ref, watch, reactive } from "vue";
 import { useToast } from "vue-toastification";
-import ModalBase from "../ModalBase.vue";
+import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import userAdministrationService from "@/services/keycloak/userAdministrationService";

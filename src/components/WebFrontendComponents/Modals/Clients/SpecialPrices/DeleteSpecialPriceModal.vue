@@ -1,9 +1,9 @@
 <template>
   <modal-base :closeModal="closeModal">
     <template v-slot:modal-body>
-      <form @submit.prevent="deleteProduct">
+      <form @submit.prevent="deleteSpecialPrice">
         <div class="grid grid-cols-1 gap-5">
-          <h5>¿Desea eliminar este producto: {{ product.code }}?</h5>
+          <h5>¿Desea eliminar este precio especial: {{ specialPrice.specialPriceId }}?</h5>
         </div>
         <div
           class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
@@ -29,7 +29,7 @@ import ModalBase from "../../ModalBase.vue";
 import { useToast } from "vue-toastification";
 import keycloak from "@/security/KeycloakService.js";
 
-import { DELETE_PRODUCT } from "@/services/inventory/products/productsGraphql.js";
+import { DELETE_SPECIAL_PRICE } from "@/services/clients/specialPrices/specialPricesGraphql.js";
 import { useMutation } from "@vue/apollo-composable";
 
 export default {
@@ -37,12 +37,12 @@ export default {
     ModalBase,
   },
   props: {
-    product: {
+    specialPrice: {
       type: Object,
       default: {},
     },
   },
-  emits: ["product-deleted"],
+  emits: ["special-price-deleted"],
   data() {
     return {};
   },
@@ -51,25 +51,25 @@ export default {
 
     let closeModal = ref(false);
 
-    const productId = ref("");
+    const specialPriceId = ref("");
 
     watch(
-      () => props.product,
+      () => props.specialPrice,
       (newValue) => {
-        productId.value = newValue.productId;
+        specialPriceId.value = newValue.specialPriceId;
       },
       { deep: true }
     );
 
-    const { mutate: deleteProductMut } = useMutation(DELETE_PRODUCT, () => ({
-      variables: { id: productId.value },
+    const { mutate: deleteSpecialPricetMut } = useMutation(DELETE_SPECIAL_PRICE, () => ({
+      variables: { id: specialPriceId.value },
     }));
 
-    const deleteProduct = () => {
-      deleteProductMut()
+    const deleteSpecialPrice = () => {
+      deleteSpecialPricetMut()
         .then((response) => {
-          emit("product-deleted");
-          toast.success("Producto eliminado exitosamente", {
+          emit("special-price-deleted");
+          toast.success("Precio especial eliminado exitosamente", {
             timeout: 2000,
           });
         })
@@ -81,7 +81,7 @@ export default {
       closeModal.value = !closeModal.value;
     };
 
-    return { closeModal, deleteProduct };
+    return { closeModal, deleteSpecialPrice };
   },
 };
 </script>

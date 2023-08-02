@@ -40,7 +40,7 @@
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, watch } from "vue";
+import { computed, defineComponent, onMounted, ref, watch } from "vue";
 export default defineComponent({
   name: "Checkbox",
   inheritAttrs: false,
@@ -87,10 +87,6 @@ export default defineComponent({
     const onChange = () => {
       ck.value = !ck.value;
     };
-
-    watch(() => ck.value, (newValue) => {
-      console.log('newValue => ', newValue);
-    })
 
     const localValue = computed({
       get: () => props.modelValue,

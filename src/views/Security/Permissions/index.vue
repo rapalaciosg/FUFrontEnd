@@ -5,6 +5,7 @@
       :headers="headersPermissionsTable"
       :data="permissionsList"
       :actions="actions"
+      :showSelectOptions="false"
       @open-modal="toggleModal"
     >
       <template v-slot:button>

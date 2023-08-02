@@ -5,6 +5,7 @@
       :headers="headersProductsTable"
       :data="products"
       :actions="actions"
+      :showSelectOptions="false"
       @open-modal="toggleModal"
     >
       <template v-slot:button>

@@ -29,19 +29,15 @@
           enabled: true,
           externalQuery: searchTerm
         }"
-        :select-options="{
-          enabled: true,
-          selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
-          selectioninfoClass: 'custom-class',
-          selectionText: 'rows selected',
-          clearSelectionText: 'clear',
-          disableSelectinfo: true, // disable the select info-500 panel on top
-          selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
-        }"
+        :select-options="(showSelectOptions) ? selectOptions : {}"
       >
         <template v-slot:table-row="props">
           <span v-if="props.column.field == 'isDistributor'" class="flex justify-center">
             <Checkbox v-if="props.row.isDistributor" checked disabled />
+            <Checkbox v-else disabled />
+          </span>
+          <span v-if="props.column.field == 'activeCustomerCreation'" class="flex justify-center">
+            <Checkbox v-if="props.row.activeCustomerCreation" checked disabled />
             <Checkbox v-else disabled />
           </span>
           <span v-if="props.column.field == 'enabled' || props.column.field == 'active'" class="flex justify-center">
@@ -77,7 +73,7 @@
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'actions'">
-            <Dropdown classMenuItems=" w-[140px]">
+            <Dropdown classMenuItems="w-[140px]">
               <span class="text-xl"
                 ><Icon icon="heroicons-outline:dots-vertical"
               /></span>
@@ -92,11 +88,11 @@
                   }
                    w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse `"
                   >
-                    <span v-if="props.row.enabled && item.value === 'enable/disable'" class="text-base"><Icon :icon="'material-symbols:error-outline-rounded'" /></span>
-                    <span v-if="props.row.active && item.value === 'enable/disable'" class="text-base"><Icon :icon="'material-symbols:error-outline-rounded'" /></span>
+                    <span v-if="props.row.enabled && item.value === 'enable/disable'" class="text-base"><Icon :icon="iconDisable" /></span>
+                    <span v-else-if="props.row.active && item.value === 'enable/disable'" class="text-base"><Icon :icon="iconDisable" /></span>
                     <span v-else class="text-base"><Icon :icon="item.icon" /></span>
                     <span v-if="props.row.enabled && item.value === 'enable/disable'">Deshabilitar</span>
-                    <span v-if="props.row.active && item.value === 'enable/disable'">Deshabilitar</span>
+                    <span v-else-if="props.row.active && item.value === 'enable/disable'">Deshabilitar</span>
                     <span v-else >{{ item.name }}</span>
                   </div>
                 </MenuItem>
@@ -167,6 +163,10 @@ export default {
     filter: {
       type: String,
       default: ""
+    },
+    showSelectOptions: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -218,6 +218,7 @@ export default {
 
   data() {
     return {
+      iconDisable: "material-symbols:error-outline-rounded",
       checkedImg,
       disabledImg,
       current: 1,
@@ -226,7 +227,16 @@ export default {
       searchTerm: "",
       searchInput: "",
       options: [],
-      total: 0
+      total: 0,
+      selectOptions: {
+        enabled: true,
+        selectOnCheckboxOnly: true, // only select when checkbox is clicked instead of the row
+        selectioninfoClass: 'custom-class',
+        selectionText: 'rows selected',
+        clearSelectionText: 'clear',
+        disableSelectinfo: true, // disable the select info-500 panel on top
+        selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
+      }
     };
   },
 

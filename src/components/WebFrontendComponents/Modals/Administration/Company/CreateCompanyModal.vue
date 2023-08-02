@@ -8,7 +8,12 @@
           <Textinput type="text" label="Dirección" placeholder="Dirección" v-model="address" :error="addressError" />
           <VueSelect label="Provincias" :options="provincesFormatted" placeholder="Seleccione una provincia" v-model="provinceId" :clearable="false" />
           <VueSelect label="Tipos de compañias" :options="companyTypesFormatted" placeholder="Seleccione un tipo de compañia" v-model="companyTypeId" :clearable="false" />
-          <Checkbox label="Distribuidor" :modelValue="isDistributor" />
+          <div>
+            <label class="ltr:inline-block rtl:block input-label">Distribuidor</label>
+            <div class="pt-2">
+              <Checkbox label="Distribuidor" v-model="isDistributor" />
+            </div>
+          </div>
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
           <button
@@ -151,22 +156,22 @@ export default {
       company.address = values.address
       company.provinceId = provinceId.value.value
       company.companyTypeId = companyTypeId.value.value
+      company.isDistributor = isDistributor.value
 
-      console.log('isDistributor => ', isDistributor.value);
-
-      // createCompany().then((response) => {
-      //       emit('company-created')
-      //       toast.success("Compañia creada exitosamente", {
-      //           timeout: 2000,
-      //         });
-      //     }).catch((error) => {
-      //       toast.error("Ha ocurrido un error", {
-      //           timeout: 2000,
-      //         });
-      //     })
+      createCompany().then((response) => {
+            emit('company-created')
+            toast.success("Compañia creada exitosamente", {
+                timeout: 2000,
+              });
+          }).catch((error) => {
+            toast.error("Ha ocurrido un error", {
+                timeout: 2000,
+              });
+          })
 
       closeModal.value = !closeModal.value;
       actions.resetForm();
+      isDistributor.value = false;
     });
 
     return {

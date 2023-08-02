@@ -38,6 +38,12 @@
             v-model="companyTypeId"
             :clearable="false"
           />
+          <div>
+            <label class="ltr:inline-block rtl:block input-label">Distribuidor</label>
+            <div class="pt-2">
+              <Checkbox label="Distribuidor" v-model="isDistributor" :checked="defaultValue" />
+            </div>
+          </div>
         </div>
         <div
           class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
@@ -65,6 +71,7 @@ import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 import { UPDATE_COMPANY } from "@/services/administration/company/companyGraphql.js";
 import { GET_ALL_PROVINCES } from "@/services/catalogs/catalogsGraphql.js";
@@ -81,6 +88,7 @@ export default {
     ModalBase,
     Textinput,
     VueSelect,
+    Checkbox
   },
   props: {
     data: {
@@ -99,6 +107,9 @@ export default {
     const toast = useToast();
 
     let closeModal = ref(false);
+
+    const isDistributor = ref(false);
+    const defaultValue = ref(false);
 
     let provincesFormatted = ref([]);
     let companyTypesFormatted = ref([]);
@@ -171,6 +182,9 @@ export default {
         name.value = newValue.name;
         prefix.value = newValue.prefix;
         address.value = newValue.address;
+        isDistributor.value = newValue.isDistributor;
+        if (isDistributor.value) defaultValue.value = true
+        else defaultValue.value = false
         provinceId.value = findSelectValues(
           provincesFormatted,
           newValue.province.provinceId
@@ -197,6 +211,7 @@ export default {
       provinceId: "",
       companyTypeId: "",
       sequential: 1,
+      isDistributor: false
     });
 
     const schema = yup.object({
@@ -244,6 +259,7 @@ export default {
       company.address = values.address;
       company.provinceId = provinceId.value.value;
       company.companyTypeId = companyTypeId.value.value;
+      company.isDistributor = isDistributor.value;
 
       updateCompany()
         .then((response) => {
@@ -275,6 +291,8 @@ export default {
       onSubmit,
       companyTypesFormatted,
       provincesFormatted,
+      isDistributor,
+      defaultValue
     };
   },
 };

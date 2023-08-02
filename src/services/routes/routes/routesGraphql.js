@@ -17,3 +17,33 @@ export const GET_ALL_ROUTES = gql`
     }
   }
 `;
+
+export const CREATE_ROUTE = gql`
+  mutation createRouteMut($inputModel: RouteInputModelInput!) {
+    createRoute(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;
+
+export const UPDATE_ROUTE = gql`
+  mutation updateRouteMut($inputModel: RouteInputModelInput!) {
+    updateRoute(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;
+
+export const DELETE_ROUTE = gql`
+  mutation deleteRouteMut($id: Int!) {
+    deleteRoute(id: $id) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;

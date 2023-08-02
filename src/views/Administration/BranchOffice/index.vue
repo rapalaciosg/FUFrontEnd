@@ -5,6 +5,7 @@
       :headers="headersBranchOfficesTable"
       :data="branchOffices"
       :actions="actions"
+      :showSelectOptions="false"
       @open-modal="toggleModal"
       :filter="filterSelect"
     >
@@ -15,7 +16,7 @@
         </div>
       </template>
     </AdvancedTable>
-    <branchOfficeDetailsModal
+    <DetailsBranchOffice
       title="Detalles de sucursal"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
@@ -39,7 +40,7 @@ import { computed, reactive, ref, watch, onMounted } from "vue";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersBranchOfficesTable } from "@/constant/administration/branchOffice/constantBranchOffice.js";
-import branchOfficeDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/branchOfficeDetailsModal.vue";
+import DetailsBranchOffice from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/DetailsBranchOffice.vue";
 import CreateBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/CreateBranchOfficeModal.vue";
 import EditBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/EditBranchOfficeModal.vue";
 import EnableDisableBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/EnableDisableBranchOfficeModal.vue";
@@ -56,7 +57,7 @@ export default {
   components: {
     AdvancedTable,
     CreateBranchOfficeModal,
-    branchOfficeDetailsModal,
+    DetailsBranchOffice,
     EnableDisableBranchOfficeModal,
     EditBranchOfficeModal,
     VueSelect

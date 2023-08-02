@@ -1,43 +1,43 @@
 <template>
   <div class="space-y-5">
     <AdvancedTable
-      title="Listado de rutas"
-      :headers="headersRoutesTable"
-      :data="routes"
+      title="Listado de clientes"
+      :headers="headersCustomersTable"
+      :data="customers"
       :actions="actions"
       :showSelectOptions="false"
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <CreateRouteModal
-          title="Crear ruta"
+        <CreateProductModal
+          title="Crear cliente"
           btnClass="btn-success"
-          @route-created="loadRoutes()"
+          @customer-created="loadCustomers()"
         />
       </template>
     </AdvancedTable>
-    <DetailsRoutesModal
-      title="Detalles de ruta"
+    <DetailsProductsModal
+      title="Detalles de cliente"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
-      :data="routeDetails"
+      :data="customerDetails"
       @close-modal="isModalDetailsOpen = false"
     />
-    <EditRouteModal
-      title="Editar ruta"
+    <EditProductModal
+      title="Editar cliente"
       :activeModal="isModalOpen"
       :showButton="false"
-      :data="routeDetails"
+      :data="customerDetails"
       @close-modal="isModalOpen = false"
-      @route-updated="loadRoutes()"
+      @customer-updated="loadCustomers()"
     />
-    <DeleteRouteModal
-      title="Eliminar ruta"
+    <DeleteProductModal
+      title="Eliminar cliente"
       :activeModal="isModalDeleteOpen"
       :showButton="false"
-      :route="routeDetails"
+      :customer="customerDetails"
       @close-modal="isModalDeleteOpen = false"
-      @route-deleted="loadRoutes()"
+      @customer-deleted="loadCustomers()"
     />
   </div>
 </template>
@@ -45,13 +45,13 @@
 <script>
 import { computed, ref, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import { headersRoutesTable } from "@/constant/routes/routes/constantRoutes.js";
-import DetailsRoutesModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DetailsRoutesModal.vue";
-import CreateRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/CreateRouteModal.vue";
-import DeleteRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DeleteRouteModal.vue";
-import EditRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/EditRouteModal.vue";
+import { headersCustomersTable } from "@/constant/clients/customers/constantCustomers.js";
+import DetailsProductsModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DetailsProductsModal.vue";
+import CreateProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/CreateProductModal.vue";
+import EditProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/EditProductModal.vue";
+import DeleteProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DeleteProductModal.vue";
 
-import { GET_ALL_ROUTES } from "@/services/routes/routes/routesGraphql.js";
+import { GET_ALL_CUSTOMERS } from "@/services/clients/customers/customersGraphql.js";
 import {
   useLazyQuery,
   provideApolloClient,
@@ -62,14 +62,14 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
-    CreateRouteModal,
-    DetailsRoutesModal,
-    DeleteRouteModal,
-    EditRouteModal,
+    CreateProductModal,
+    DetailsProductsModal,
+    DeleteProductModal,
+    EditProductModal,
   },
   data() {
     return {
-      headersRoutesTable,
+      headersCustomersTable,
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -80,25 +80,25 @@ export default {
   mounted() {},
   methods: {},
   setup() {
-    let routeDetails = ref({});
+    let customerDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
 
-    const queryGetRoutes = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_ROUTES)
+    const queryGetCustomers = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_CUSTOMERS)
     );
 
-    const routes = computed(
-      () => queryGetRoutes.result.value?.srvRoutes ?? []
+    const customers = computed(
+      () => queryGetCustomers.result.value?.srvCustomer ?? []
     );
 
-    const loadRoutes = () => {
-      queryGetRoutes.load() || queryGetRoutes.refetch();
+    const loadCustomers = () => {
+      queryGetCustomers.load() || queryGetCustomers.refetch();
     };
 
     onMounted(() => {
-      loadRoutes();
+      loadCustomers();
     });
 
     const toggleModal = (value) => {
@@ -108,16 +108,16 @@ export default {
 
       if (value.action === "delete") isModalDeleteOpen.value = true;
 
-      routeDetails.value = value.row;
+      productsDetails.value = value.row;
     };
     return {
       toggleModal,
       isModalOpen,
-      routeDetails,
+      customerDetails,
       isModalDetailsOpen,
       isModalDeleteOpen,
-      routes,
-      loadRoutes,
+      customers,
+      loadCustomers,
     };
   },
 };
