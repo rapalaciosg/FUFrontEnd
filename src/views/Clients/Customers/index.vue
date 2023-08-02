@@ -1,43 +1,43 @@
 <template>
   <div class="space-y-5">
     <AdvancedTable
-      title="Listado de productos"
-      :headers="headersProductsTable"
-      :data="products"
+      title="Listado de clientes"
+      :headers="headersCustomersTable"
+      :data="customers"
       :actions="actions"
       :showSelectOptions="false"
       @open-modal="toggleModal"
     >
       <template v-slot:button>
         <CreateProductModal
-          title="Crear producto"
+          title="Crear cliente"
           btnClass="btn-success"
-          @product-created="loadProducts()"
+          @customer-created="loadCustomers()"
         />
       </template>
     </AdvancedTable>
     <DetailsProductsModal
-      title="Detalles de producto"
+      title="Detalles de cliente"
       :activeModal="isModalDetailsOpen"
       :showButton="false"
-      :data="productsDetails"
+      :data="customerDetails"
       @close-modal="isModalDetailsOpen = false"
     />
     <EditProductModal
-      title="Editar producto"
+      title="Editar cliente"
       :activeModal="isModalOpen"
       :showButton="false"
-      :data="productsDetails"
+      :data="customerDetails"
       @close-modal="isModalOpen = false"
-      @product-updated="loadProducts()"
+      @customer-updated="loadCustomers()"
     />
     <DeleteProductModal
-      title="Eliminar compañia"
+      title="Eliminar cliente"
       :activeModal="isModalDeleteOpen"
       :showButton="false"
-      :product="productsDetails"
+      :customer="customerDetails"
       @close-modal="isModalDeleteOpen = false"
-      @product-deleted="loadProducts()"
+      @customer-deleted="loadCustomers()"
     />
   </div>
 </template>
@@ -45,13 +45,13 @@
 <script>
 import { computed, ref, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import { headersProductsTable } from "@/constant/inventory/products/constantProducts.js";
+import { headersCustomersTable } from "@/constant/clients/customers/constantCustomers.js";
 import DetailsProductsModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DetailsProductsModal.vue";
 import CreateProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/CreateProductModal.vue";
 import EditProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/EditProductModal.vue";
 import DeleteProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DeleteProductModal.vue";
 
-import { GET_ALL_PRODUCTS } from "@/services/inventory/products/productsGraphql.js";
+import { GET_ALL_CUSTOMERS } from "@/services/clients/customers/customersGraphql.js";
 import {
   useLazyQuery,
   provideApolloClient,
@@ -69,7 +69,7 @@ export default {
   },
   data() {
     return {
-      headersProductsTable,
+      headersCustomersTable,
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
@@ -80,25 +80,25 @@ export default {
   mounted() {},
   methods: {},
   setup() {
-    let productsDetails = ref({});
+    let customerDetails = ref({});
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
 
-    const queryGetProducts = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_PRODUCTS)
+    const queryGetCustomers = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_CUSTOMERS)
     );
 
-    const products = computed(
-      () => queryGetProducts.result.value?.srvProducts ?? []
+    const customers = computed(
+      () => queryGetCustomers.result.value?.srvCustomer ?? []
     );
 
-    const loadProducts = () => {
-      queryGetProducts.load() || queryGetProducts.refetch();
+    const loadCustomers = () => {
+      queryGetCustomers.load() || queryGetCustomers.refetch();
     };
 
     onMounted(() => {
-      loadProducts();
+      loadCustomers();
     });
 
     const toggleModal = (value) => {
@@ -113,11 +113,11 @@ export default {
     return {
       toggleModal,
       isModalOpen,
-      productsDetails,
+      customerDetails,
       isModalDetailsOpen,
       isModalDeleteOpen,
-      products,
-      loadProducts,
+      customers,
+      loadCustomers,
     };
   },
 };

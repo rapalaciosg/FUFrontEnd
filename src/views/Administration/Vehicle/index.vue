@@ -5,6 +5,7 @@
       :headers="headersVehiclesTable"
       :data="vehicles"
       :actions="actions"
+      :showSelectOptions="false"
       @open-modal="toggleModal"
       :filter="filterSelect"
     >

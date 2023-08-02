@@ -16,12 +16,10 @@
 
 <script>
 import { ref, watch, onMounted } from "vue";
-import ModalBase from "../ModalBase.vue";
+import ModalBase from "../../ModalBase.vue";
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import { useToast } from "vue-toastification";
 import keycloak from "@/security/KeycloakService.js";
-import { useField, useForm } from "vee-validate";
-import * as yup from "yup";
 
 export default {
   components: {

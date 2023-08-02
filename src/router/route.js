@@ -45,7 +45,7 @@ const routes = [
       {
         path: "clients",
         name: "clients",
-        component: () => import("@/views/Clients"),
+        component: () => import("@/views/Clients/Customers"),
         meta: {
           hide: true,
         },
@@ -93,7 +93,7 @@ const routes = [
       {
         path: "users",
         name: "users",
-        component: () => import("@/views/Security"),
+        component: () => import("@/views/Security/Users"),
         meta: {
           hide: true,
         },

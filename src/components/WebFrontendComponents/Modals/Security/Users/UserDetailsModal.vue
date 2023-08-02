@@ -38,7 +38,7 @@
 
 <script>
 import { ref } from "vue";
-import ModalBase from "../ModalBase.vue";
+import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";

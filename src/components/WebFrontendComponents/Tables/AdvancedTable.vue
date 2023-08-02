@@ -88,11 +88,11 @@
                   }
                    w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm  last:mb-0 cursor-pointer first:rounded-t last:rounded-b flex  space-x-2 items-center rtl:space-x-reverse `"
                   >
-                    <span v-if="props.row.enabled && item.value === 'enable/disable'" class="text-base"><Icon :icon="'material-symbols:error-outline-rounded'" /></span>
-                    <span v-if="props.row.active && item.value === 'enable/disable'" class="text-base"><Icon :icon="'material-symbols:error-outline-rounded'" /></span>
+                    <span v-if="props.row.enabled && item.value === 'enable/disable'" class="text-base"><Icon :icon="iconDisable" /></span>
+                    <span v-else-if="props.row.active && item.value === 'enable/disable'" class="text-base"><Icon :icon="iconDisable" /></span>
                     <span v-else class="text-base"><Icon :icon="item.icon" /></span>
                     <span v-if="props.row.enabled && item.value === 'enable/disable'">Deshabilitar</span>
-                    <span v-if="props.row.active && item.value === 'enable/disable'">Deshabilitar</span>
+                    <span v-else-if="props.row.active && item.value === 'enable/disable'">Deshabilitar</span>
                     <span v-else >{{ item.name }}</span>
                   </div>
                 </MenuItem>
@@ -218,6 +218,7 @@ export default {
 
   data() {
     return {
+      iconDisable: "material-symbols:error-outline-rounded",
       checkedImg,
       disabledImg,
       current: 1,

@@ -5,6 +5,7 @@
       :headers="headersDriversTable"
       :data="drivers"
       :actions="actions"
+      :showSelectOptions="false"
       @open-modal="toggleModal"
       :filter="filterSelect"
     >

@@ -1,239 +1,271 @@
 <template>
-  <modal-base @save="createSpecialPrice()" :closeModal="closeModal">
+  <modal-base :closeModal="closeModal">
     <template v-slot:modal-body>
-      <div class="grid grid-cols-2 gap-5">
-        <Textinput name="pn" type="text" label="Customer id" placeholder="Customer id" v-model="specialPrice.clienteID" :error="errorFields.clienteID" />
-        <FromGroup name="d1" label="Fecha inicial" :error="errorFields.fechaInicial">
-          <flat-pickr
-            class="form-control"
-            id="d1"
-            placeholder="Fecha inicial"
-            v-model="specialPrice.fechaInicial"
-            :config="config"
+      <form @submit.prevent="onSubmit">
+        <div class="grid grid-cols-2 gap-5 py-6">
+          <VueSelect
+            label="Cliente"
+            :options="customersFormatted"
+            placeholder="Seleccione un cliente"
+            v-model="customerId"
+            :clearable="false"
           />
-        </FromGroup>
-        <Textinput name="pn" type="text" label="Sucursal id" placeholder="Sucursal id" v-model="specialPrice.sucursal" :error="errorFields.sucursal" />
-        <FromGroup name="d1" label="Fecha final" :error="errorFields.fechaFinal">
-          <flat-pickr
-            class="form-control"
-            id="d1"
-            placeholder="Fecha final"
-            v-model="specialPrice.fechaFinal"
-            :config="config"
+          <VueSelect
+            label="Sucursal"
+            :options="branchOfficesFormatted"
+            placeholder="Seleccione una sucursal"
+            v-model="branchOfficeId"
+            :clearable="false"
           />
-        </FromGroup>
-        <VueSelect :options="options" label="Ruta" placeholder="Ruta" v-model="route" :error="errorFields.ruta" />
-        <VueSelect :options="statusList" label="Estado" placeholder="Estado" v-model="status" :error="errorFields.estatus" />
-        <VueSelect :options="articlesFormatted" label="Artículo" placeholder="Artículo" v-model="article" :error="errorFields.articuloID" />
-        <VueSelect :options="companiesFormatted" label="Empresa" placeholder="Empresa" v-model="company" :error="errorFields.empresa" />
-        <Textinput name="pn" type="number" label="Ajuste precio" placeholder="Ajuste precio" v-model="specialPrice.ajustePrecio" :error="errorFields.ajustePrecio" />
-      </div>
+          <VueSelect
+            label="Producto"
+            :options="productsFormatted"
+            placeholder="Seleccione un producto"
+            v-model="productId"
+            :clearable="false"
+          />
+          <Textinput
+            type="number"
+            label="Ajuste precio"
+            placeholder="Ajuste precio"
+            v-model="adjustment"
+            :error="adjustmentError"
+          />
+        </div>
+        <div
+          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
+        >
+          <button
+            class="btn btn-secondary block text-center"
+            @click="closeModal = !closeModal"
+          >
+            Cerrar
+          </button>
+          <button type="submit" class="btn btn-success block text-center">
+            Guardar
+          </button>
+        </div>
+      </form>
     </template>
   </modal-base>
 </template>
 
 <script>
-import { computed, reactive, ref, watch, onMounted } from "vue";
+import { ref, watch, reactive, computed, onMounted } from "vue";
+import { useToast } from "vue-toastification";
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
-import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
-import { articleList } from "../../../../../constant/clients/specialPrices/constantSpecialPrices.js";
-import { useToast } from "vue-toastification";
+import { useField, useForm } from "vee-validate";
+import * as yup from "yup";
 
-import { GET_COMPANIES_QUERY, GET_ALL_ARTICLES, CREATE_SPECIAL_PRICE } from "@/services/clients/specialPrices/specialPricesGraphql.js";
-import { provideApolloClient, useLazyQuery, useMutation } from "@vue/apollo-composable";
+import { CREATE_SPECIAL_PRICE } from "@/services/clients/specialPrices/specialPricesGraphql.js";
+import { GET_ALL_PRODUCTS } from "@/services/inventory/products/productsGraphql.js";
+import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
+import { GET_ALL_CUSTOMERS } from "@/services/clients/customers/customersGraphql.js";
+import {
+  useLazyQuery,
+  provideApolloClient,
+  useMutation,
+} from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
   components: {
     ModalBase,
     Textinput,
-    FromGroup,
     VueSelect,
   },
+  props: [],
+  emits: ["special-price-created"],
   data() {
-    return {
-      articleList,
-      statusList: [
-        { value: "ALTA", label: "ALTA" },
-        { value: "BAJA", label: "BAJA" }
-      ],
-      options: [
-        { value: "ML01", label: "ML01" },
-        { value: "ML02", label: "ML02" },
-        { value: "ML03", label: "ML03" },
-        { value: "ML04", label: "ML04" },
-        { value: "ML05", label: "ML05" },
-        { value: "ML", label: "ML" },
-      ],
-    }
+    return {};
   },
-  setup(props) {
-    const variablesCompanies = reactive({ route: "" });
-    const variablesArticles = reactive({ truckId: "" });
-
+  watch: {},
+  mounted() {},
+  methods: {},
+  setup(props, { emit }) {
     const toast = useToast();
+
     let closeModal = ref(false);
 
-    let companiesFormatted = ref([]);
-    let articlesFormatted = ref([]);
+    let productsFormatted = ref([]);
+    let branchOfficesFormatted = ref([]);
+    let customersFormatted = ref([]);
 
-    let route = ref("");
-    let article = ref("");
-    let status = ref("");
-    let company = ref("");
+    const productId = ref({});
+    const customerId = ref({});
+    const branchOfficeId = ref({});
 
-    const specialPrice = reactive({
-      clienteID: "",
-      sucursal: "",
-      articuloID: "",
-      ajustePrecio: "",
-      fechaInicial: "",
-      fechaFinal: "",
-      ruta: "",
-      estatus: "",
-      empresa: ""
-    })
+    const queryGetProducts = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_PRODUCTS)
+    );
 
-    const errorFields = reactive({
-      clienteID: "",
-      sucursal: "",
-      articuloID: "",
-      ajustePrecio: "",
-      fechaInicial: "",
-      fechaFinal: "",
-      ruta: "",
-      estatus: "",
-      empresa: ""
-    })
+    const queryGetCustomers = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_CUSTOMERS)
+    );
 
-    const isEmpty = (data) => {
-      Object.values(data).every(x => (x === null || x === '') ? errorFields[x] = "Este campo es requerido." : "" );
-      setTimeout(() => {
-        Object.values(data).every(x => data[x] = "");
-      }, 3000);
-    }
+    const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_BRANCH_OFFICES)
+    );
 
-    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_COMPANIES_QUERY, variablesCompanies));
-    const queryGetArticles = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_ARTICLES, variablesArticles));
+    const products = computed(
+      () => queryGetProducts.result.value?.srvProducts ?? []
+    );
 
-    const companies = computed(() => queryGetCompanies.result.value?.srvEmpresa ?? []);
-    const articles = computed(() => queryGetArticles.result.value?.srvArticulosRuta ?? []);
+    const branchOffices = computed(
+      () => queryGetBranchOffices.result.value?.srvBranchOffice ?? []
+    );
 
-    const formatValuesSelect = (data) => {
-      const valueFormated = data.value.map(item => ({ value: item.empresaID, label: item.nombre }));
+    const customers = computed(
+      () => queryGetCustomers.result.value?.srvCustomer ?? []
+    );
+
+    const loadProducts = () => {
+      queryGetProducts.load() || queryGetProducts.refetch();
+    };
+
+    const loadBrancOffices = () => {
+      queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
+    };
+
+    const loadCustomers = () => {
+      queryGetCustomers.load() || queryGetCustomers.refetch();
+    };
+
+    const initilize = () => {
+      loadProducts();
+      loadBrancOffices();
+      loadCustomers();
+    };
+
+    onMounted(() => initilize());
+
+    const formatBranchOfficeSelect = (data) => {
+      const valueFormated = data.value.map((item) => ({
+        value: item.branchOfficeId,
+        label: item.branchOfficeName,
+      }));
       return valueFormated;
-    }
+    };
 
-    const formatValuesArticlesSelect = (data) => {
-      const valueFormated = data.value.map(item => ({ value: item.nombreCorto, label: item.nombreCorto }));
+    const formatProductsSelect = (data) => {
+      const valueFormated = data.value.map((item) => ({
+        value: item.productId,
+        label: item.code,
+      }));
       return valueFormated;
-    }
+    };
 
-    onMounted(() => {
-      Object.keys(specialPrice).every(x => specialPrice[x] = "")
-    })
+    const formatCustomersSelect = (data) => {
+      const valueFormated = data.value.map((item) => ({
+        value: item.customerId,
+        label: `${item.name} ${item.lastName}`,
+      }));
+      return valueFormated;
+    };
 
-    watch(() => companies, (newValue) => {
-      companiesFormatted.value = formatValuesSelect(companies)
-    }, { deep: true })
+    watch(
+      () => products.value,
+      (newValue) => {
+        productsFormatted.value = formatProductsSelect(products);
+        productId.value = productsFormatted.value[0];
+      },
+      { deep: true }
+    );
 
-    watch(() => articles, (newValue) => {
-      articlesFormatted.value = formatValuesArticlesSelect(articles)
-    }, { deep: true })
+    watch(
+      () => customers.value,
+      (newValue) => {
+        customersFormatted.value = formatCustomersSelect(customers);
+        customerId.value = customersFormatted.value[0];
+      },
+      { deep: true }
+    );
 
-    watch(() => route, newValue => {
-      variablesCompanies.route = newValue.value.value;
-      variablesArticles.truckId = newValue.value.value;
-      queryGetCompanies.load();
-      queryGetArticles.load();
-    }, { deep: true })
+    watch(
+      () => branchOffices.value,
+      (newValue) => {
+        branchOfficesFormatted.value = formatBranchOfficeSelect(branchOffices);
+        branchOfficeId.value = branchOfficesFormatted.value[0];
+      },
+      { deep: true }
+    );
 
-    const config = ref({
-      dateFormat: 'm-d-Y'
+    const formValues = reactive({
+      adjustment: 0,
     });
 
-    const createSpecialPrice = () => {
-      if (specialPrice.clienteID === "") {
-        errorFields.clienteID = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.clienteID = ""
-        }, 3000);
-      }
-      if (specialPrice.sucursal == "") {
-        errorFields.sucursal = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.sucursal = ""
-        }, 3000);
-      }
-      if (route.value == "") {
-        errorFields.ruta = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.ruta = ""
-        }, 3000);
-      }
-      if (article.value == "") {
-        errorFields.articuloID = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.articuloID = ""
-        }, 3000);
-      }
-      if (specialPrice.ajustePrecio == "") {
-        errorFields.ajustePrecio = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.ajustePrecio = ""
-        }, 3000);
-      }
-      if (status.value == "") {
-        errorFields.estatus = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.estatus = ""
-        }, 3000);
-      }
-      if (specialPrice.fechaInicial == "") {
-        errorFields.fechaInicial = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.fechaInicial = ""
-        }, 3000);
-      }
-      if (specialPrice.fechaFinal == "") {
-        errorFields.fechaFinal = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.fechaFinal = ""
-        }, 3000);
-      }
-      if (company.value == "") {
-        errorFields.empresa = "Este campo es requerido."
-        setTimeout(() => {
-          errorFields.empresa = ""
-        }, 3000);
-      } else {
-        specialPrice.empresa = company.value.value
-        specialPrice.estatus = status.value.value
-        specialPrice.ruta = route.value.value
-        specialPrice.articuloID = article.value.value
-        specialPrice.sucursal = +specialPrice.sucursal
-        specialPrice.ajustePrecio = parseFloat(specialPrice.ajustePrecio)
-        createSpecialPriceMut()
-          .then((response) => {
-            if (response.data.createAjustePrecio.message === '"AJUSTE CREADO"') {
-              toast.success("Precio especial creado exitosamente", {
-                timeout: 2000,
-              });
-            } else {
-              toast.error("Ha ocurrido un error", {
-                timeout: 2000,
-              });
-            }
-          })
-        closeModal.value = true
-      }
-    }
+    const specialPrice = reactive({
+      specialPriceId: 0,
+      productId: 0,
+      branchOfficeId: 0,
+      customerId: 0,
+      adjustment: 0,
+    });
 
-    const { mutate: createSpecialPriceMut } = useMutation(CREATE_SPECIAL_PRICE, () => ({ variables: { clientAjustePrecio: specialPrice } }));
+    const schema = yup.object({
+      adjustment: yup.number().required("Ajuste precio requerido"),
+    });
 
-    return { specialPrice, companiesFormatted, articlesFormatted, createSpecialPrice, route, config, errorFields, article, status, company, closeModal }
-  }
+    const { handleSubmit, resetForm } = useForm({
+      validationSchema: schema,
+      initialValues: formValues,
+    });
+
+    watch(
+      () => closeModal.value,
+      (newValue) => {
+        resetForm();
+      },
+      { deep: true }
+    );
+
+    const {
+      value: adjustment,
+      errorMessage: adjustmentError,
+      meta: adjustmentMeta,
+    } = useField("adjustment");
+
+    const { mutate: createSpecialPrice } = useMutation(CREATE_SPECIAL_PRICE, () => ({
+      variables: { inputModel: specialPrice },
+    }));
+
+    const onSubmit = handleSubmit((values, actions) => {
+      specialPrice.adjustment = +values.adjustment;
+      specialPrice.productId = productId.value.value;
+      specialPrice.branchOfficeId = branchOfficeId.value.value;
+      specialPrice.customerId = customerId.value.value;
+
+      createSpecialPrice()
+        .then((response) => {
+          emit("special-price-created");
+          toast.success("Precio especial creado exitosamente", {
+            timeout: 2000,
+          });
+        })
+        .catch((error) => {
+          toast.error("Ha ocurrido un error", {
+            timeout: 2000,
+          });
+        });
+
+      closeModal.value = !closeModal.value;
+      actions.resetForm();
+    });
+
+    return {
+      closeModal,
+      adjustment,
+      adjustmentError,
+      onSubmit,
+      productsFormatted,
+      productId,
+      branchOfficesFormatted,
+      branchOfficeId,
+      customersFormatted,
+      customerId,
+    };
+  },
 };
 </script>
