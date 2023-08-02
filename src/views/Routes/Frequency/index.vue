@@ -4,14 +4,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         <VueSelect :options="options" placeholder="Ruta o Camión" v-model="route" />
         <div class="grid grid-cols-2 gap-x-5">
-          <!-- <Button class="h-[40px]" text="Buscar" btnClass="btn-warning" /> -->
           <download-excel class="btn-info rounded pt-2 text-center" :data="frecuencies" name="filename.xls">Exportar</download-excel>
-          <!-- <Button class="h-[40px]" text="Exportar" btnClass="btn-success" /> -->
         </div>
       </div>
     </Card>
-    <AdvancedTable :headers="headersFrecuencyTable" :data="frecuencies" :actions="actions" @open-modal="toggleModal" />
-    <EditFrecuencyModal title="Crear registro de frecuencia" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="frecuency" @frecuency-edited="refreshFrecuenciesList" />
+    <!-- <AdvancedTable :headers="headersFrecuencyTable" :data="frecuencies" :actions="actions" @open-modal="toggleModal" />
+    <EditFrecuencyModal title="Crear registro de frecuencia" btnClass="btn-success" :activeModal="isModalOpen" :showButton="false" @close-modal="isModalOpen = false" :data="frecuency" @frecuency-edited="refreshFrecuenciesList" /> -->
   </div>
 </template>
 
