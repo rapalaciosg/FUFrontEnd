@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <modal-base @save="editFrecuency()" :closeModal="closeModal">
     <template v-slot:modal-body>
       <label class="inline-flex text-sm cursor-pointer">
@@ -22,7 +22,6 @@
           >Cliente detalle</span
         >
       </label>
-      <!-- Frecuency Section -->
       <div v-if="check === true" class="grid grid-cols-2 gap-x-5 gap-y-1 pt-6">
         <Textinput
           class="col-span-2 mb-6"
@@ -110,7 +109,6 @@
           :checked="weekDays.sunday"
         />
       </div>
-      <!-- Client Section -->
       <div v-else class="grid grid-cols-2 gap-x-5 gap-y-1 pt-6">
         <Textinput
           label="Ruta"
@@ -505,4 +503,4 @@ export default {
     };
   },
 };
-</script>
+</script> -->
