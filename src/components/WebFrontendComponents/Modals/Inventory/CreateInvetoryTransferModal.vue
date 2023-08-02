@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <modal-base @save="createTransfer()" :closeModal="closeModal">
     <template v-slot:modal-body>
       <div class="grid grid-cols-2 gap-5">
@@ -176,4 +176,4 @@ export default {
     return { articlesFormatted, route, routes, inventoryTransfer, routesReceptor, config, errorFields, createTransfer };
   },
 };
-</script>
+</script> -->
