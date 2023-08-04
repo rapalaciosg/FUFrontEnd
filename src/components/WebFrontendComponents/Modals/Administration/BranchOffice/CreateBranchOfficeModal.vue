@@ -33,7 +33,7 @@ import keycloak from "@/security/KeycloakService";
 import moment from 'moment';
 
 import { CREATE_BRANCH_OFFICE } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
-import { GET_ALL_PROVINCES } from "@/services/catalogs/catalogsGraphql.js";
+import { GET_ALL_PROVINCES } from "@/services/catalogs/provinces/provincesGraphql.js";
 import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
 import {
   useLazyQuery,

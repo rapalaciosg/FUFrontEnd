@@ -16,6 +16,7 @@ export const GET_ALL_SPECIAL_PRICES = gql`
       product {
         productId
         code
+        name
       }
       adjustment
     }

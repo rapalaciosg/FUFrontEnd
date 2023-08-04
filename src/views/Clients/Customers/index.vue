@@ -9,7 +9,7 @@
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <CreateProductModal
+        <CreateCustomerModal
           title="Crear cliente"
           btnClass="btn-success"
           @customer-created="loadCustomers()"
@@ -47,9 +47,9 @@ import { computed, ref, onMounted } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersCustomersTable } from "@/constant/clients/customers/constantCustomers.js";
 import DetailsProductsModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DetailsProductsModal.vue";
-import CreateProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/CreateProductModal.vue";
 import EditProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/EditProductModal.vue";
 import DeleteProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DeleteProductModal.vue";
+import CreateCustomerModal from "@/components/WebFrontendComponents/Modals/Clients/Customers/CreateCustomerModal.vue";
 
 import { GET_ALL_CUSTOMERS } from "@/services/clients/customers/customersGraphql.js";
 import {
@@ -62,7 +62,7 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     AdvancedTable,
-    CreateProductModal,
+    CreateCustomerModal,
     DetailsProductsModal,
     DeleteProductModal,
     EditProductModal,

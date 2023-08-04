@@ -4,7 +4,11 @@ export const GET_ALL_CUSTOMERS = gql`
   query getCustomers {
     srvCustomer {
       customerId
-      routeId
+      route {
+        routeId
+        name
+        customerPrefix
+      }
       code
       name
       lastName
@@ -13,7 +17,10 @@ export const GET_ALL_CUSTOMERS = gql`
       houseNumber
       latitude
       longitude
-      customerTypeId
+      customerType {
+        customerTypeId
+        name
+      }
       contactName
       phone
       email
@@ -39,6 +46,16 @@ export const GET_ALL_CUSTOMERS = gql`
         name
       }
       active
+    }
+  }
+`;
+
+export const CREATE_CUSTOMER = gql`
+  mutation createCustomerMut($inputModel: CustomerInputModelInput!) {
+    createCustomer(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
     }
   }
 `;

@@ -5,6 +5,13 @@
         <div class="grid grid-cols-2 gap-5 py-6">
           <Textinput
             type="text"
+            label="Nombre"
+            placeholder="Nombre"
+            v-model="name"
+            :error="nameError"
+          />
+          <Textinput
+            type="text"
             label="Código"
             placeholder="Código"
             v-model="code"
@@ -134,6 +141,7 @@ export default {
     );
 
     const formValues = reactive({
+      name: "",
       code: "",
       tag: "",
       basePrice: 0,
@@ -143,6 +151,7 @@ export default {
     const product = reactive({
       productId: 0,
       companyId: 0,
+      name: "",
       code: "",
       tag: "",
       basePrice: 0,
@@ -150,6 +159,7 @@ export default {
     });
 
     const schema = yup.object({
+      name: yup.string().required("Nombre requerido"),
       code: yup.string().required("Código requerido").max(10),
       tag: yup.string().required("Tag requerido").max(50),
       basePrice: yup.number().required("Precio base requerido"),
@@ -175,6 +185,11 @@ export default {
       meta: tagMeta,
     } = useField("tag");
     const {
+      value: name,
+      errorMessage: nameError,
+      meta: nameMeta,
+    } = useField("name");
+    const {
       value: code,
       errorMessage: codeError,
       meta: codeMeta,
@@ -195,6 +210,7 @@ export default {
     }));
 
     const onSubmit = handleSubmit((values, actions) => {
+      product.name = values.name;
       product.tag = values.tag.toUpperCase();
       product.code = values.code.toUpperCase();
       product.basePrice = +values.basePrice;
@@ -222,6 +238,8 @@ export default {
       closeModal,
       tag,
       tagError,
+      name,
+      nameError,
       code,
       codeError,
       basePrice,
