@@ -3,7 +3,7 @@ export const headersSpecialPricesTable = [
   { label: "Nombre del cliente", field: "customer.name" },
   { label: "Apellido del cliente", field: "customer.lastName" },
   { label: "Sucursal", field: "branchOffice.branchOfficeName" },
-  { label: "Articulo", field: "product.code" },
+  { label: "Articulo", field: "product.name" },
   { label: "Ajuste precio", field: "adjustment" },
   { label: "Acciones", field: "actions" },
 ];

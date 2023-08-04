@@ -8,6 +8,7 @@ export const GET_ALL_PRODUCTS = gql`
         companyId
         name
       }
+      name
       code
       tag
       basePrice

@@ -1,6 +1,6 @@
 export const headersCustomersTable = [
   { label: "Id", field: "customerId" },
-  { label: "Ruta", field: "routeId" },
+  { label: "Ruta", field: "route.name" },
   { label: "Código", field: "code" },
   { label: "Nombre", field: "name" },
   { label: "Apellido", field: "lastName" },
@@ -13,7 +13,7 @@ export const headersCustomersTable = [
   { label: "Celular", field: "phone" },
   { label: "Correo", field: "email" },
   { label: "Dv", field: "dv" },
-  { label: "Tipo de cliente", field: "customerTypeId" },
+  { label: "Tipo de cliente", field: "customerType.name" },
   { label: "Provincia", field: "province.name" },
   { label: "Distrito", field: "district.name" },
   { label: "Corregimiento", field: "township.name" },

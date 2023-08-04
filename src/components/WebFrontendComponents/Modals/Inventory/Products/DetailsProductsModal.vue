@@ -4,10 +4,12 @@
       <div class="grid grid-cols-2 gap-5 px-4 py-6">
         <p class="font-medium">Id:</p>
         <p>{{ data.productId }}</p>
-        <p class="font-medium">Compañia:</p>
-        <p>{{ data.company.name }}</p>
+        <p class="font-medium">Nombre:</p>
+        <p>{{ data.name }}</p>
         <p class="font-medium">Código:</p>
         <p>{{ data.code }}</p>
+        <p class="font-medium">Compañia:</p>
+        <p>{{ data.company.name }}</p>
         <p class="font-medium">Tag:</p>
         <p>{{ data.tag }}</p>
         <p class="font-medium">Precio base:</p>

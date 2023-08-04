@@ -31,13 +31,21 @@
             v-model="customerPrefix"
             :error="customerPrefixError"
           />
-          <VueSelect
+          <Textinput
+            type="number"
+            label="Secuencial de cliente"
+            placeholder="Secuencial de cliente"
+            v-model="customerSequential"
+            :error="customerSequentialError"
+            disabled
+          />
+          <!-- <VueSelect
             label="Compañia"
             :options="companiesFormatted"
             placeholder="Seleccione una compañia"
             v-model="companyId"
             :clearable="false"
-          />
+          /> -->
           <div>
             <label class="ltr:inline-block rtl:block input-label">Creación de cliente</label>
             <div class="pt-2">
@@ -103,14 +111,14 @@ export default {
 
     let closeModal = ref(false);
 
-    let companiesFormatted = ref([]);
+    // let companiesFormatted = ref([]);
 
-    const companyId = ref({});
+    // const companyId = ref({});
     const activeCustomerCreation = ref(false);
 
-    const queryGetCompanies = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_COMPANIES)
-    );
+    // const queryGetCompanies = provideApolloClient(apolloClient)(() =>
+    //   useLazyQuery(GET_ALL_COMPANIES)
+    // );
 
     const queryGetRoutes = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_ROUTES)
@@ -120,41 +128,41 @@ export default {
       () => queryGetRoutes.result.value?.srvRoutes ?? []
     );
 
-    const companies = computed(
-      () => queryGetCompanies.result.value?.srvCompanies ?? []
-    );
+    // const companies = computed(
+    //   () => queryGetCompanies.result.value?.srvCompanies ?? []
+    // );
 
     const loadRoutes = () => {
       queryGetRoutes.load() || queryGetRoutes.refetch();
     };
 
-    const loadCompanies = () => {
-      queryGetCompanies.load() || queryGetCompanies.refetch();
-    };
+    // const loadCompanies = () => {
+    //   queryGetCompanies.load() || queryGetCompanies.refetch();
+    // };
 
     const initilize = () => {
-      loadCompanies();
+      // loadCompanies();
       loadRoutes();
     };
 
     onMounted(() => initilize());
 
-    const formatCompanySelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.companyId,
-        label: item.name,
-      }));
-      return valueFormated;
-    };
+    // const formatCompanySelect = (data) => {
+    //   const valueFormated = data.value.map((item) => ({
+    //     value: item.companyId,
+    //     label: item.name,
+    //   }));
+    //   return valueFormated;
+    // };
 
-    watch(
-      () => companies.value,
-      (newValue) => {
-        companiesFormatted.value = formatCompanySelect(companies);
-        companyId.value = companiesFormatted.value[0];
-      },
-      { deep: true }
-    );
+    // watch(
+    //   () => companies.value,
+    //   (newValue) => {
+    //     companiesFormatted.value = formatCompanySelect(companies);
+    //     companyId.value = companiesFormatted.value[0];
+    //   },
+    //   { deep: true }
+    // );
 
     const getSequential = (data) => {
       const listSequentials = data.value.map(item => item.customerSequential);
@@ -165,7 +173,8 @@ export default {
     watch(
       () => routes.value,
       (newValue) => {
-        route.customerSequential = getSequential(routes);
+        // route.customerSequential = getSequential(routes);
+        customerSequential.value = getSequential(routes);
       },
       { deep: true }
     );
@@ -179,7 +188,6 @@ export default {
 
     const route = reactive({
       routeId: 0,
-      companyId: 0,
       code: "",
       name: "",
       description: "",
@@ -204,7 +212,7 @@ export default {
       () => closeModal.value,
       (newValue) => {
         resetForm();
-        companyId.value = companiesFormatted.value[0];
+        // companyId.value = companiesFormatted.value[0];
         activeCustomerCreation.value = false;
       },
       { deep: true }
@@ -230,6 +238,11 @@ export default {
       errorMessage: customerPrefixError,
       meta: customerPrefixMeta,
     } = useField("customerPrefix");
+    const {
+      value: customerSequential,
+      errorMessage: customerSequentialError,
+      meta: customerSequentialMeta,
+    } = useField("customerSequential");
 
     const { mutate: createRoute } = useMutation(CREATE_ROUTE, () => ({
       variables: { inputModel: route },
@@ -240,7 +253,8 @@ export default {
       route.code = values.code.toUpperCase();
       route.description = values.description;
       route.customerPrefix = values.customerPrefix;
-      route.companyId = companyId.value.value;
+      route.customerSequential = values.customerSequential;
+      // route.companyId = companyId.value.value;
       route.activeCustomerCreation = activeCustomerCreation.value;
 
       createRoute()
@@ -271,9 +285,11 @@ export default {
       descriptionError,
       customerPrefix,
       customerPrefixError,
+      customerSequential,
+      customerSequentialError,
       onSubmit,
-      companiesFormatted,
-      companyId,
+      // companiesFormatted,
+      // companyId,
       activeCustomerCreation
     };
   },

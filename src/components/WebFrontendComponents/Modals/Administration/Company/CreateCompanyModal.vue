@@ -42,7 +42,7 @@ import * as yup from "yup";
 import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 import { CREATE_COMPANY } from "@/services/administration/company/companyGraphql.js";
-import { GET_ALL_PROVINCES } from "@/services/catalogs/catalogsGraphql.js";
+import { GET_ALL_PROVINCES } from "@/services/catalogs/provinces/provincesGraphql.js";
 import { GET_ALL_COMPANY_TYPES } from "@/services/catalogs/companyType/companyTypeGraphql.js";
 import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";

@@ -5,7 +5,7 @@
         <p class="font-medium">Id:</p>
         <p>{{ data.specialPriceId }}</p>
         <p class="font-medium">Producto:</p>
-        <p>{{ data.product.code }}</p>
+        <p>{{ data.product.name }}</p>
         <p class="font-medium">Sucursal:</p>
         <p>{{ data.branchOffice.branchOfficeName }}</p>
         <p class="font-medium">Cliente:</p>

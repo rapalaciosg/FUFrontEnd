@@ -141,29 +141,11 @@ export default {
 
     onMounted(() => initilize());
 
-    const formatBranchOfficeSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.branchOfficeId,
-        label: item.branchOfficeName,
-      }));
-      return valueFormated;
-    };
+    const formatBranchOfficeSelect = (data) => data.value.map((item) => ({ value: item.branchOfficeId, label: item.branchOfficeName }));
 
-    const formatProductsSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.productId,
-        label: item.code,
-      }));
-      return valueFormated;
-    };
+    const formatProductsSelect = (data) => data.value.map((item) => ({ value: item.productId, label: item.name }));
 
-    const formatCustomersSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.customerId,
-        label: `${item.name} ${item.lastName}`,
-      }));
-      return valueFormated;
-    };
+    const formatCustomersSelect = (data) => data.value.map((item) => ({ value: item.customerId, label: `${item.name} ${item.lastName}` }));
 
     watch(
       () => products.value,
