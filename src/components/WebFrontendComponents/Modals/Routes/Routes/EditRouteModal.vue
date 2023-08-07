@@ -31,6 +31,14 @@
             v-model="customerPrefix"
             :error="customerPrefixError"
           />
+          <Textinput
+            type="number"
+            label="Secuencial de cliente"
+            placeholder="Secuencial de cliente"
+            v-model="customerSequential"
+            :error="customerSequentialError"
+            disabled
+          />
           <VueSelect
             label="Compañia"
             :options="companiesFormatted"
@@ -38,16 +46,17 @@
             v-model="companyId"
             :clearable="false"
           />
+          <VueSelect
+            :label="(routeSettings.routeBy.value === 'D' ? 'Conducrores' : 'Vehículos')"
+            :options="driverVehicleFormatted"
+            placeholder="Seleccione una opción"
+            v-model="driverVehicleId"
+            :clearable="false"
+          />
           <div>
-            <label class="ltr:inline-block rtl:block input-label"
-              >Creación de cliente</label
-            >
+            <label class="ltr:inline-block rtl:block input-label">Creación de cliente</label>
             <div class="pt-2">
-              <Checkbox
-                label="Creación de cliente"
-                v-model="activeCustomerCreation"
-                :checked="defaultValue"
-              />
+              <Checkbox label="Creación de cliente" v-model="activeCustomerCreation" :checked="defaultValue" />
             </div>
           </div>
         </div>
@@ -79,8 +88,11 @@ import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
-import { UPDATE_ROUTE } from "@/services/routes/routes/routesGraphql";
+import { UPDATE_ROUTE } from '@/services/routes/routes/routesGraphql';
 import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
+import { GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
+import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
+import { GET_ALL_ROUTES } from "@/services/routes/routes/routesGraphql.js";
 import {
   useLazyQuery,
   provideApolloClient,
@@ -93,9 +105,13 @@ export default {
     ModalBase,
     Textinput,
     VueSelect,
-    Checkbox,
+    Checkbox
   },
   props: {
+    routeSettings: {
+      type: Object,
+      default: {}
+    },
     data: {
       type: Object,
       default: {}
@@ -113,8 +129,10 @@ export default {
 
     let closeModal = ref(false);
 
+    let driverVehicleFormatted = ref([]);
     let companiesFormatted = ref([]);
 
+    const driverVehicleId = ref({});
     const companyId = ref({});
     const activeCustomerCreation = ref(false);
     const defaultValue = ref(false);
@@ -123,19 +141,76 @@ export default {
       useLazyQuery(GET_ALL_COMPANIES)
     );
 
+    const queryGetRoutes = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_ROUTES)
+    );
+
+    const queryGetDrivers = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_DRIVERS)
+    );
+
+    const queryGetVehicles = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_VEHICLES)
+    );
+
     const companies = computed(
       () => queryGetCompanies.result.value?.srvCompanies ?? []
+    );
+
+    const routes = computed(
+      () => queryGetRoutes.result.value?.srvRoutes ?? []
+    );
+
+    const drivers = computed(
+      () => queryGetDrivers.result.value?.srvDriver ?? []
+    );
+
+    const vehicles = computed(
+      () => queryGetVehicles.result.value?.srvVehicle ?? []
     );
 
     const loadCompanies = () => {
       queryGetCompanies.load() || queryGetCompanies.refetch();
     };
 
+    const loadRoutes = () => {
+      queryGetRoutes.load() || queryGetRoutes.refetch();
+    };
+
+    const loadDrivers = () => {
+      queryGetDrivers.load() || queryGetDrivers.refetch();
+    };
+
+    const loadVehicles = () => {
+      queryGetVehicles.load() || queryGetVehicles.refetch();
+    };
+
     const initilize = () => {
+      loadRoutes();
       loadCompanies();
     };
 
     onMounted(() => initilize());
+
+    watch(() => props.routeSettings, (newValue) => {
+      if (newValue.routeBy.value === "D") loadDrivers();
+      else loadVehicles();
+    }, { deep: true });
+
+    watch(() => companies.value, (newValue) => {
+      companiesFormatted.value = formatCompanySelect(companies);
+      companyId.value = companiesFormatted.value[0];
+    }, { deep: true })
+
+    watch(() => drivers.value, (newValue) => {
+      driverVehicleFormatted.value = formatDriverSelect(drivers);
+      driverVehicleId.value = driverVehicleFormatted.value[0];
+    }, { deep: true })
+
+    watch(() => vehicles.value, (newValue) => {
+      driverVehicleFormatted.value = formatVehicleSelect(vehicles, props.routeSettings.routeName.value);
+      driverVehicleId.value = driverVehicleFormatted.value[0];
+    }, { deep: true })
 
     const formatCompanySelect = (data) => {
       const valueFormated = data.value.map((item) => ({
@@ -145,11 +220,75 @@ export default {
       return valueFormated;
     };
 
+    const formatDriverSelect = (data) => {
+      const valueFormated = data.value.map((item) => ({
+        value: item.vehicleId,
+        label: item.code,
+      }));
+      return valueFormated;
+    };
+
+    const formatVehicleSelect = (data, routeName) => {
+      let valueFormated = [];
+
+      if (routeName === "VC") {
+        valueFormated = data.value.map((item) => ({
+          value: item.vehicleId,
+          label: item.code,
+        }));
+      } else {
+        valueFormated = data.value.map((item) => ({
+          value: item.vehicleId,
+          label: item.licensePlate,
+        }));
+      }
+      return valueFormated;
+    };
+
+    watch(() => props.data, (newValue) => {
+      console.log('newValue => ', newValue);
+      route.routeId = newValue.routeId;
+      customerSequential.value = newValue.customerSequential;
+      activeCustomerCreation.value = newValue.activeCustomerCreation;
+      name.value = newValue.name;
+      code.value = newValue.code;
+      description.value = newValue.description;
+      customerPrefix.value = newValue.customerPrefix;
+      if (activeCustomerCreation.value) defaultValue.value = true;
+      else defaultValue.value = false;
+      if (props.routeSettings.routeBy.value === "V") {
+        driverVehicleId.value = findSelectValues(
+          driverVehicleFormatted,
+          newValue.vehicle.vehicleId
+        );
+      } else {
+        driverVehicleId.value = findSelectValues(
+          driverVehicleFormatted,
+          newValue.driver.driverId
+        );
+      }
+      companyId.value = findSelectValues(
+          companiesFormatted,
+          newValue.company.companyId
+        );
+    }, { deep: true });
+
+    const findSelectValues = (data, id) => {
+      const filteredValue = data.value.find((item) => item.value === id);
+      return filteredValue;
+    };
+
+    // const getSequential = (data) => {
+    //   const listSequentials = data.value.map(item => item.customerSequential);
+    //   const max = Math.max(...listSequentials);
+    //   return max + 1;
+    // }
+
     watch(
-      () => companies.value,
+      () => routes.value,
       (newValue) => {
-        companiesFormatted.value = formatCompanySelect(companies);
-        companyId.value = companiesFormatted.value[0];
+        //route.customerSequential = getSequential(routes);
+        //customerSequential.value = getSequential(routes);
       },
       { deep: true }
     );
@@ -170,13 +309,15 @@ export default {
       customerPrefix: "",
       customerSequential: 0,
       activeCustomerCreation: false,
+      vehicleId: null,
+      driverId: null
     });
 
     const schema = yup.object({
       code: yup.string().required("Código requerido").max(10),
       name: yup.string().required("Nombre requerido"),
       description: yup.string().required("Descripción requerida"),
-      customerPrefix: yup.string().required("Prefijo de cliente requerido"),
+      customerPrefix: yup.string().required("Prefijo de cliente requerido").max(10),
     });
 
     const { handleSubmit, resetForm } = useForm({
@@ -188,33 +329,11 @@ export default {
       () => closeModal.value,
       (newValue) => {
         resetForm();
+        driverVehicleId.value = driverVehicleFormatted.value[0];
+        activeCustomerCreation.value = false;
       },
       { deep: true }
     );
-
-    watch(
-      () => props.data,
-      (newValue) => {
-        route.routeId = newValue.routeId;
-        activeCustomerCreation.value = newValue.activeCustomerCreation;
-        name.value = newValue.name;
-        code.value = newValue.code;
-        description.value = newValue.description;
-        customerPrefix.value = newValue.customerPrefix;
-        if (activeCustomerCreation.value) defaultValue.value = true
-        else defaultValue.value = false
-        companyId.value = findSelectValues(
-          companiesFormatted,
-          newValue.company.companyId
-        );
-      },
-      { deep: true }
-    );
-
-    const findSelectValues = (data, id) => {
-      const filteredValue = data.value.find((item) => item.value === id);
-      return filteredValue;
-    };
 
     const {
       value: name,
@@ -236,6 +355,11 @@ export default {
       errorMessage: customerPrefixError,
       meta: customerPrefixMeta,
     } = useField("customerPrefix");
+    const {
+      value: customerSequential,
+      errorMessage: customerSequentialError,
+      meta: customerSequentialMeta,
+    } = useField("customerSequential");
 
     const { mutate: updateRoute } = useMutation(UPDATE_ROUTE, () => ({
       variables: { inputModel: route },
@@ -245,9 +369,12 @@ export default {
       route.name = values.name;
       route.code = values.code.toUpperCase();
       route.description = values.description;
-      route.customerPrefix = values.customerPrefix;
+      route.customerPrefix = values.customerPrefix.toUpperCase();
+      route.customerSequential = values.customerSequential;
       route.companyId = companyId.value.value;
       route.activeCustomerCreation = activeCustomerCreation.value;
+      if (props.routeSettings.routeBy.value === "V") route.vehicleId = driverVehicleId.value.value;
+      else route.driverId = driverVehicleId.value.value;
 
       updateRoute()
         .then((response) => {
@@ -277,11 +404,15 @@ export default {
       descriptionError,
       customerPrefix,
       customerPrefixError,
+      customerSequential,
+      customerSequentialError,
       onSubmit,
+      activeCustomerCreation,
+      driverVehicleFormatted,
+      driverVehicleId,
+      defaultValue,
       companiesFormatted,
       companyId,
-      activeCustomerCreation,
-      defaultValue
     };
   },
 };

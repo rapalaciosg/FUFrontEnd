@@ -16,6 +16,12 @@
         <p>{{ data.customerPrefix }}</p>
         <p class="font-medium">Secuencial de clientes:</p>
         <p>{{ data.customerSequential }}</p>
+        <p class="font-medium">Sucursal:</p>
+        <p>{{ data.branchOffice.branchOfficeName }}</p>
+        <p class="font-medium">Conductor:</p>
+        <p>{{ data.driver.code }}</p>
+        <p class="font-medium">Vehículo:</p>
+        <p>{{ (routeSettings.routeName.value === 'VC') ? data.vehicle.code : data.vehicle.licensePlate }}</p>
         <p class="font-medium">Creación de clientes:</p>
         <Checkbox :checked="data.activeCustomerCreation" disabled />
       </div>
@@ -44,6 +50,10 @@ export default {
     Checkbox
   },
   props: {
+    routeSettings: {
+      type: Object,
+      default: {}
+    },
     data: {
       type: Object,
       default: {},
