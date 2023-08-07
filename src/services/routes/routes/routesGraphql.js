@@ -14,6 +14,22 @@ export const GET_ALL_ROUTES = gql`
       customerPrefix
       customerSequential
       activeCustomerCreation
+      vehicle {
+        vehicleId
+        name
+        code
+        licensePlate
+      }
+      driver {
+        driverId
+        name
+        lastName
+        code
+      }
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
     }
   }
 `;
