@@ -20,8 +20,8 @@ export const GET_ALL_BRANCH_OFFICES = gql`
       branchOfficeName
       createdBy
       createdDate
-      updatedBy
-      updatedDate
+      updateBy
+      updateDate
       active
     }
   }
