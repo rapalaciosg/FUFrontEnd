@@ -16,6 +16,7 @@
             placeholder="Código"
             v-model="code"
             :error="codeError"
+            disabled
           />
           <Textinput
             type="text"
@@ -88,11 +89,10 @@ import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
-import { CREATE_ROUTE } from '@/services/routes/routes/routesGraphql';
-import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
+import { CREATE_ROUTE, GET_ALL_ROUTES } from '@/services/routes/routes/routesGraphql';
+import { GET_ALL_COMPANIES, UPDATE_COMPANY } from "@/services/administration/company/companyGraphql.js";
 import { GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
 import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
-import { GET_ALL_ROUTES } from "@/services/routes/routes/routesGraphql.js";
 import {
   useLazyQuery,
   provideApolloClient,
@@ -131,6 +131,10 @@ export default {
     const driverVehicleId = ref({});
     const companyId = ref({});
     const activeCustomerCreation = ref(false);
+
+    const companyPrefix = ref('');
+    const companySequential = ref('');
+    const sequential = ref('');
 
     const queryGetCompanies = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_COMPANIES)
@@ -240,17 +244,54 @@ export default {
       return valueFormated;
     };
 
-    const getSequential = (data) => {
+    const generateSequential = (num, totalLength) => String(num).padStart(totalLength, '0');
+
+    const getCompanyPrefix = (data, companyId) => {
+      const company = data.value.find(item => item.companyId === companyId);
+      return company.prefix;
+    }
+
+    const getCustomerSequential = (data) => {
       const listSequentials = data.value.map(item => item.customerSequential);
       const max = Math.max(...listSequentials);
-      return max + 1;
+      return max;
+    }
+
+    const getCompanySequential = (data) => {
+      const listSequentials = data.value.map(item => item.sequential);
+      const max = Math.max(...listSequentials);
+      return max;
     }
 
     watch(
       () => routes.value,
       (newValue) => {
-        //route.customerSequential = getSequential(routes);
-        customerSequential.value = getSequential(routes);
+        customerSequential.value = getCustomerSequential(routes);
+      },
+      { deep: true }
+    );
+
+    const companySelected = ref({});
+
+    watch(
+      () => companyId.value,
+      (newValue) => {
+        companyPrefix.value = getCompanyPrefix(companies, newValue.value);
+        companySequential.value = getCompanySequential(companies);
+        sequential.value = generateSequential(companySequential.value, 4);
+
+        code.value = `${companyPrefix.value}-${sequential.value}`;
+
+        companySelected.value = companies.value.find(item => item.companyId === newValue.value);
+
+        company.companyId = companySelected.value.companyId;
+        company.address = companySelected.value.address;
+        company.companyTypeId = companySelected.value.companyType.companyTypeId;
+        company.isDistributor = companySelected.value.isDistributor;
+        company.name = companySelected.value.name;
+        company.prefix = companySelected.value.prefix;
+        company.provinceId = companySelected.value.province.provinceId;
+        company.sequential = companySelected.value.sequential + 1;
       },
       { deep: true }
     );
@@ -273,6 +314,17 @@ export default {
       activeCustomerCreation: false,
       vehicleId: null,
       driverId: null
+    });
+
+    const company = reactive({
+      companyId: 0,
+      name: "",
+      prefix: "",
+      address: "",
+      provinceId: "",
+      companyTypeId: 0,
+      sequential: 0,
+      isDistributor: false
     });
 
     const schema = yup.object({
@@ -327,9 +379,13 @@ export default {
       variables: { inputModel: route },
     }));
 
+    const { mutate: updateCompanySequential } = useMutation(UPDATE_COMPANY, () => ({
+      variables: { inputModel: company },
+    }));
+
     const onSubmit = handleSubmit((values, actions) => {
       route.name = values.name;
-      route.code = values.code.toUpperCase();
+      route.code = values.code;
       route.description = values.description;
       route.customerPrefix = values.customerPrefix.toUpperCase();
       route.customerSequential = values.customerSequential;
@@ -344,6 +400,17 @@ export default {
           toast.success("Ruta creada exitosamente", {
             timeout: 2000,
           });
+          updateCompanySequential()
+            .then(() => {
+              toast.success("Secuencial de la compañía actualizado", {
+                timeout: 2000,
+              });
+            })
+            .catch((error) => {
+              toast.error("Error al actualizar el secuencial de la compañía", {
+                timeout: 2000,
+              });
+            })
         })
         .catch((error) => {
           toast.error("Ha ocurrido un error", {

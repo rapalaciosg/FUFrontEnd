@@ -3,18 +3,36 @@
     <AdvancedTable
       title="Listado de rutas"
       :headers="headersTable"
-      :data="routes"
+      :data="routesList"
       :actions="actions"
       :showSelectOptions="false"
       @open-modal="toggleModal"
     >
       <template v-slot:button>
-        <Button
+        <div class="grid grid-cols-4 gap-2">
+          <div class="col-span-2">
+            <VueSelect
+              :options="companiesFormatted"
+              placeholder="Todos"
+              v-model="companyId"
+              :clearable="(companyId) ? true : false"
+            />
+          </div>
+          <download-excel 
+            class="btn-info rounded pt-2 text-center" 
+            :data="routesList"
+            :fields="headersRoutesListExport"
+            name="filename.xls"
+          >
+          Exportar
+          </download-excel>
+          <Button
           class="h-[40px]"
           text="Crear ruta"
           btnClass="btn-success"
           @click="toggleModal()"
         />
+        </div>
       </template>
     </AdvancedTable>
     <CreateRouteModal
@@ -64,6 +82,7 @@
 import { computed, ref, onMounted, watch, reactive, onBeforeMount } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import Button from "@/components/DashCodeComponents/Button";
+import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { headersRoutesTable } from "@/constant/routes/routes/constantRoutes.js";
 
 import DetailsRoutesModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DetailsRoutesModal.vue";
@@ -72,14 +91,16 @@ import DeleteRouteModal from "@/components/WebFrontendComponents/Modals/Routes/R
 import EditRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/EditRouteModal.vue";
 import NotificationRouteSettingModal from "@/components/WebFrontendComponents/Modals/Settings/RoutesSettings/NofiticationRouteSettingModal.vue";
 
-import { GET_ALL_ROUTES } from "@/services/routes/routes/routesGraphql.js";
+import { GET_ALL_ROUTES, GET_ROUTES_BY_COMPANY } from "@/services/routes/routes/routesGraphql.js";
 import { GET_ROUTES_SETTINGS } from "@/services/settings/routeSettings/routeSettingsGraphql";
+import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
   components: {
     Button,
+    VueSelect,
     AdvancedTable,
     CreateRouteModal,
     DetailsRoutesModal,
@@ -108,15 +129,29 @@ export default {
     let isModalNotificationRouteSettingsOpen = ref(false);
 
     let headersTable = ref([]);
+    let routesInitialList = ref([]);
     let routesList = ref([]);
+    let headersRoutesListExport = ref({});
+
+    let companiesFormatted = ref([]);
+
+    const companyId = ref(null);
+
+    const variablesRoutesByCompany = reactive({ id: 0 });
 
     let routeSettings = reactive({
       routeBy: null,
       routeName: null,
     });
 
+    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES));
+
     const queryGetRoutes = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_ROUTES)
+    );
+
+    const queryGetRoutesByCompany = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ROUTES_BY_COMPANY, variablesRoutesByCompany)
     );
 
     const queryGetRoutesSettings = provideApolloClient(apolloClient)(() =>
@@ -125,6 +160,10 @@ export default {
 
     const routes = computed(() => queryGetRoutes.result.value?.srvRoutes ?? []);
 
+    const routesByCompany = computed(() => queryGetRoutesByCompany.result.value?.srvRoutesByCompanyId ?? []);
+
+    const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
+
     const routesSettings = computed(
       () => queryGetRoutesSettings.result.value?.srvRouteSetting ?? []
     );
@@ -132,6 +171,14 @@ export default {
     const loadRoutes = () => {
       queryGetRoutes.load() || queryGetRoutes.refetch();
     };
+
+    const loadRoutesByCompany = () => {
+      queryGetRoutesByCompany.load() || queryGetRoutesByCompany.refetch();
+    };
+
+    const loadCompanies = () => {
+      queryGetCompanies.load() || queryGetCompanies.refetch()
+    }
 
     const loadRoutesSettings = () => {
       queryGetRoutesSettings.load() || queryGetRoutesSettings.refetch();
@@ -143,14 +190,36 @@ export default {
 
     onMounted(() => {
       loadRoutes();
+      loadCompanies();
     });
 
     watch(
       () => routes.value,
       (newValue) => {
-        console.log('routes => ', newValue);
+        routesList.value = routes.value;
+        routesInitialList.value = routes.value;
       }
     );
+
+    watch(
+      () => routesByCompany.value,
+      (newValue) => {
+        routesList.value = routesByCompany.value;
+      }
+    );
+
+    watch(() => companies.value, (newValue) => {
+      companiesFormatted.value = formatCompanySelect(companies);
+    }, { deep: true })
+
+    watch(() => companyId.value, (newValue) => {
+      if (newValue && newValue.value != 0) {
+        variablesRoutesByCompany.id = (newValue) ? newValue.value : 0;
+        loadRoutesByCompany();
+      } else {
+        routesList.value = routesInitialList.value;
+      }
+    }, { deep: true })
 
     watch(
       () => routesSettings.value,
@@ -168,11 +237,34 @@ export default {
 
         if (routeSettings.routeBy && routeSettings.routeName.value === "VLP") {
           headersTable.value = formatTableHeaders(headersRoutesTable, "Vehículo", "vehicle.licensePlate");
+          headersRoutesListExport.value = formatHeadersRoutesListExport(headersTable.value);
         } else {
           headersTable.value = formatTableHeaders(headersRoutesTable, "Vehículo", "vehicle.code");
+          headersRoutesListExport.value = formatHeadersRoutesListExport(headersTable.value);
         }
       }
     );
+
+    const formatHeadersRoutesListExport = (data) => {
+      let array = new Map();
+      for (let index = 0; index < data.length; index++) {
+        array.set(data[index].label, data[index].field)
+      }
+      let valueFormatted = Array.from(array).reduce((obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      }, {});
+      delete valueFormatted.Editar;
+      return valueFormatted;
+    }
+
+    const formatCompanySelect = (data) => {
+      const valueFormated = data.value.map((item) => ({
+        value: item.companyId,
+        label: item.name,
+      }));
+      return valueFormated;
+    };
 
     const formatTableHeaders = (data, label, value) => {
       const index = 8;
@@ -216,6 +308,10 @@ export default {
       routes,
       headersTable,
       loadRoutes,
+      companiesFormatted,
+      companyId,
+      routesList,
+      headersRoutesListExport,
     };
   },
 };

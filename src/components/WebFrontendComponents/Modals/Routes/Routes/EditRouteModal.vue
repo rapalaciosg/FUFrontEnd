@@ -16,6 +16,7 @@
             placeholder="Código"
             v-model="code"
             :error="codeError"
+            disabled
           />
           <Textinput
             type="text"
