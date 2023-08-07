@@ -34,6 +34,40 @@ export const GET_ALL_ROUTES = gql`
   }
 `;
 
+export const GET_ROUTES_BY_COMPANY = gql`
+  query getRoutesByCompany($id: Int!) {
+    srvRoutesByCompanyId(id: $id) {
+      routeId
+      company {
+        companyId
+        name
+      }
+      code
+      name
+      description
+      customerPrefix
+      customerSequential
+      activeCustomerCreation
+      vehicle {
+        vehicleId
+        name
+        code
+        licensePlate
+      }
+      driver {
+        driverId
+        name
+        lastName
+        code
+      }
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
+    }
+  }
+`;
+
 export const CREATE_ROUTE = gql`
   mutation createRouteMut($inputModel: RouteInputModelInput!) {
     createRoute(inputModel: $inputModel) {
