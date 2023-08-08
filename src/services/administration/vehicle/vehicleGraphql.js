@@ -17,6 +17,40 @@ export const GET_ALL_VEHICLES = gql`
   }
 `;
 
+export const GET_VEHICLES_BY_BRANCH_OFFICE = gql`
+  query getVehiclesByBranchOffice($id: Int!) {
+    srvVehicleByBranchOffice(id: $id) {
+      vehicleId
+      name
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
+      code
+      licensePlate
+      description
+      active
+    }
+  }
+`;
+
+export const GET_VEHICLES_BY_LICENSE_PLATE = gql`
+  query getVehiclesByLicensePlate($plate: String!) {
+    srvVehicleByPlate(plate: $plate) {
+      vehicleId
+      name
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
+      code
+      licensePlate
+      description
+      active
+    }
+  }
+`;
+
 export const CREATE_VEHICLE = gql`
   mutation createVehicleMut($inputModel: VehicleInputModelInput!) {
     createVehicle(inputModel: $inputModel) {

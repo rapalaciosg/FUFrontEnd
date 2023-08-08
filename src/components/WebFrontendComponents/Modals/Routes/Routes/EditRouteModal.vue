@@ -48,7 +48,7 @@
             :clearable="false"
           />
           <VueSelect
-            :label="(routeSettings.routeBy.value === 'D' ? 'Conducrores' : 'Vehículos')"
+            :label="(routeSettings.routeBy.value === 'D' ? 'Conductores' : 'Vehículos')"
             :options="driverVehicleFormatted"
             placeholder="Seleccione una opción"
             v-model="driverVehicleId"

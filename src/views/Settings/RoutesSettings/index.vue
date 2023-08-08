@@ -2,7 +2,7 @@
   <div class="space-y-5">
     <Card title="Configuración de rutas">
       <div class="grid grid-cols-1 gap-4 justify-items-center">
-        <h4>¿Desea configurar las rutas?</h4>
+        <h4>{{ (!isConfigured) ? '¿Desea configurar las rutas?' : '¿Ver configuración de rutas?' }}</h4>
         <Button
           class="h-[40px]"
           text="Configurar rutas"
@@ -44,7 +44,7 @@ export default {
   setup() {
     let isModalOpen = ref(false);
 
-    let isConfigured = ref(false);
+    let isConfigured = ref(null);
 
     let isModalRouteSettingsOpen = ref(false);
 
@@ -83,12 +83,7 @@ export default {
         // routeSettings.routeBy = { code: 'ROUTE_BY', value: null }
         // routeSettings.routeName = { code: 'ROUTE_NAME', value: null }
 
-        if (
-          routeSettings.routeBy ||
-          (routeSettings.routeBy.value === "V" || routeSettings.routeBy.value === "D") ||
-          routeSettings.routeName ||
-          (routeSettings.routeName.value === "VC" || routeSettings.routeName.value === "VLP" || routeSettings.routeName.value === "DC")
-        ) {
+        if ( routeSettings.routeBy.value || routeSettings.routeName.value) {
           isConfigured.value = true;
         } else {
           isConfigured.value = false;

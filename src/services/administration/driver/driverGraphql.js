@@ -19,6 +19,44 @@ export const GET_ALL_DRIVERS = gql`
   }
 `;
 
+export const GET_DRIVERS_BY_BRANCH_OFFICE = gql`
+  query getDriversByBranchOffice($id: Int!) {
+    srvDriverByOffice(id: $id) {
+      driverId
+      name
+      lastName
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
+      code
+      boxCode
+      active
+      keycloakUserId
+      keycloakUser
+    }
+  }
+`;
+
+export const GET_DRIVERS_BY_CODE = gql`
+  query getDriversByCode($code: String!) {
+    srvDriverByCode(code: $code) {
+      driverId
+      name
+      lastName
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
+      code
+      boxCode
+      active
+      keycloakUserId
+      keycloakUser
+    }
+  }
+`;
+
 export const CREATE_DRIVER = gql`
   mutation createDriveMut($inputModel: DriverInputModelInput!) {
     createDrive(inputModel: $inputModel) {
