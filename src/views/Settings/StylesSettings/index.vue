@@ -63,7 +63,6 @@ import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import DropZone from "@/components/WebFrontendComponents/Form/FileInput/DropZone.vue";
-import { routesData, routesDateTwo } from "../../constant/basic-tablle-data.js";
 export default {
   components: {
     Card,
