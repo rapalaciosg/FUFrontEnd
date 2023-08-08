@@ -15,7 +15,7 @@
         </button>
         <button
           class="btn btn-success block text-center"
-          @click="closeModal = !closeModal"
+          @click="goToRoutesSettingsModal"
         >
           Configurar
         </button>
@@ -38,7 +38,7 @@ export default {
   props: {
     data: {},
   },
-  emits: [],
+  emits: ["open-route-setting-modal"],
   data() {
     return {
       rolDetails: {},
@@ -50,7 +50,12 @@ export default {
   setup(props, { emit }) {
     let closeModal = ref(false);
 
-    return { closeModal };
+    const goToRoutesSettingsModal = () => {
+      closeModal.value = !closeModal.value;
+      emit("open-route-setting-modal");
+    }
+    
+    return { closeModal, goToRoutesSettingsModal };
   },
 };
 </script>

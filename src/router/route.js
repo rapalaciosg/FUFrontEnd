@@ -147,9 +147,17 @@ const routes = [
         },
       },
       {
-        path: "configuration",
-        name: "configuration",
-        component: () => import("@/views/Configuration"),
+        path: "styles-setttings",
+        name: "styles-setttings",
+        component: () => import("@/views/Settings/StylesSettings"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
+        path: "routes-setttings",
+        name: "routes-setttings",
+        component: () => import("@/views/Settings/RoutesSettings"),
         meta: {
           hide: true,
         },

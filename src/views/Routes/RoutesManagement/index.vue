@@ -31,7 +31,7 @@
           text="Crear ruta"
           btnClass="btn-success"
           @click="toggleModal()"
-        />
+          />
         </div>
       </template>
     </AdvancedTable>
@@ -74,6 +74,16 @@
       :activeModal="isModalNotificationRouteSettingsOpen"
       :showButton="false"
       @close-modal="isModalNotificationRouteSettingsOpen = false"
+      @open-route-setting-modal="isModalRouteSettingsOpen = true"
+    />
+    <RoutesSettingsModalVue
+      title="Configurar rutas"
+      btnClass="btn-success"
+      :showButton="false"
+      :activeModal="isModalRouteSettingsOpen"
+      :isConfigured="isConfigured"
+      :routesSettings="routeSettings"
+      @close-modal="isModalRouteSettingsOpen = false"
     />
   </div>
 </template>
@@ -89,6 +99,7 @@ import DetailsRoutesModal from "@/components/WebFrontendComponents/Modals/Routes
 import CreateRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/CreateRouteModal.vue";
 import DeleteRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DeleteRouteModal.vue";
 import EditRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/EditRouteModal.vue";
+import RoutesSettingsModalVue from '@/components/WebFrontendComponents/Modals/Settings/RoutesSettings/RoutesSettingsModal.vue';
 import NotificationRouteSettingModal from "@/components/WebFrontendComponents/Modals/Settings/RoutesSettings/NofiticationRouteSettingModal.vue";
 
 import { GET_ALL_ROUTES, GET_ROUTES_BY_COMPANY } from "@/services/routes/routes/routesGraphql.js";
@@ -107,6 +118,7 @@ export default {
     DeleteRouteModal,
     EditRouteModal,
     NotificationRouteSettingModal,
+    RoutesSettingsModalVue,
   },
   data() {
     return {
@@ -127,6 +139,7 @@ export default {
     let isModalDeleteOpen = ref(false);
     let isModalCreateOpen = ref(false);
     let isModalNotificationRouteSettingsOpen = ref(false);
+    let isModalRouteSettingsOpen = ref(false);
 
     let headersTable = ref([]);
     let routesInitialList = ref([]);
@@ -312,6 +325,7 @@ export default {
       companyId,
       routesList,
       headersRoutesListExport,
+      isModalRouteSettingsOpen,
     };
   },
 };
