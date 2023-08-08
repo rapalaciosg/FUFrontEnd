@@ -125,7 +125,11 @@ export const menuItems = [
     child: [
       {
         childtitle: "Configuración de estilos",
-        childlink: "configuration",
+        childlink: "styles-setttings",
+      },
+      {
+        childtitle: "Configuración de rutas",
+        childlink: "routes-setttings",
       },
     ],
   },
