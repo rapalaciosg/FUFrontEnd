@@ -1,23 +1,14 @@
 <template>
   <div class="space-y-5">
-    <AdvancedTable
-      title="Listado de rutas"
-      :headers="headersTable"
-      :data="routesList"
-      :actions="actions"
-      :showSelectOptions="false"
-      @open-modal="toggleModal"
-    >
-      <template v-slot:button>
-        <div class="grid grid-cols-4 gap-2">
-          <div class="col-span-2">
-            <VueSelect
-              :options="companiesFormatted"
-              placeholder="Todos"
-              v-model="companyId"
-              :clearable="(companyId) ? true : false"
-            />
-          </div>
+    <Card>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <VueSelect
+          :options="companiesFormatted"
+          placeholder="Seleccione una compañía"
+          v-model="companyId"
+          :clearable="(companyId) ? true : false"
+        />
+        <div class="grid grid-cols-2 gap-x-5">
           <download-excel 
             class="btn-info rounded pt-2 text-center" 
             :data="routesList"
@@ -27,14 +18,22 @@
           Exportar
           </download-excel>
           <Button
-          class="h-[40px]"
-          text="Crear ruta"
-          btnClass="btn-success"
-          @click="toggleModal()"
+            class="h-[40px]"
+            text="Crear ruta"
+            btnClass="btn-success"
+            @click="toggleModal()"
           />
         </div>
-      </template>
-    </AdvancedTable>
+      </div>
+    </Card>
+    <AdvancedTable
+      title="Listado de rutas"
+      :headers="headersTable"
+      :data="routesList"
+      :actions="actions"
+      :showSelectOptions="false"
+      @open-modal="toggleModal"
+    ></AdvancedTable>
     <CreateRouteModal
       title="Crear ruta"
       btnClass="btn-success"
@@ -91,6 +90,7 @@
 <script>
 import { computed, ref, onMounted, watch, reactive, onBeforeMount } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
+import Card from "@/components/DashCodeComponents/Card";
 import Button from "@/components/DashCodeComponents/Button";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import { headersRoutesTable } from "@/constant/routes/routes/constantRoutes.js";
@@ -111,6 +111,7 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     Button,
+    Card,
     VueSelect,
     AdvancedTable,
     CreateRouteModal,
@@ -267,7 +268,7 @@ export default {
         obj[key] = value;
         return obj;
       }, {});
-      delete valueFormatted.Editar;
+      delete valueFormatted.Acciones;
       return valueFormatted;
     }
 

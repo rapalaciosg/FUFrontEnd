@@ -9,5 +9,5 @@ export const headersRoutesTable = [
   { label: "Sucursal", field: "branchOffice.branchOfficeName" },
   { label: "Driver", field: "driver.code" },
   { label: "Creación de clientes", field: "activeCustomerCreation" },
-  { label: "Editar", field: "actions" }
+  { label: "Acciones", field: "actions" }
 ];
