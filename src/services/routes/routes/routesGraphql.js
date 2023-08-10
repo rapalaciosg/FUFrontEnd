@@ -68,6 +68,53 @@ export const GET_ROUTES_BY_COMPANY = gql`
   }
 `;
 
+export const GET_ROUTES_BY_USER_ID = gql`
+  query getRoutesByUser($userId: UUID!) {
+    srvRoutesByUserId(userId: $userId) {
+      routeId
+      code
+      name
+      description
+      customerPrefix
+      customerSequential
+      activeCustomerCreation
+      vehicle {
+        active
+        code
+        description
+        licensePlate
+        name
+        vehicleId
+      }
+      driver {
+        active
+        boxCode
+        code
+        driverId
+        keycloakUser
+        keycloakUserId
+        lastName
+        name
+      }
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+        active
+        address
+        email
+      }
+      company {
+        companyId
+        name
+        address
+        companyTypeId
+        isDistributor
+        prefix
+      }
+    }
+  }
+`;
+
 export const CREATE_ROUTE = gql`
   mutation createRouteMut($inputModel: RouteInputModelInput!) {
     createRoute(inputModel: $inputModel) {

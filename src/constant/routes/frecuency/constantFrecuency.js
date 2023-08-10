@@ -1,6 +1,6 @@
 export const headersFrecuencyTable = [
   { label: "Id", field: "customerFrequencyId" },
-  { label: "Cliente", field: "customerName" },
+  { label: "Cliente", field: "customer.name" },
   { label: "Frecuencia", field: "frequency" },
   { label: "Última visita", field: "lasstVisit" },
   { label: "Próxima visita", field: "nextVisit" },

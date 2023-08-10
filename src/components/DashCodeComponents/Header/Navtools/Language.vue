@@ -68,6 +68,7 @@
 <script setup>
 import langImg1 from "@/assets/images/flags/usa.png"
 import langImg2 from "@/assets/images/flags/gn.png"
+import langImg3 from "@/assets/images/flags/es.png"
 import { ref } from "vue";
 import {
   Listbox,
@@ -77,6 +78,7 @@ import {
 } from "@headlessui/vue";
 
 const months = [
+  { name: "Es", image: langImg3 },
   { name: "En", image: langImg1 },
   { name: "Gn", image: langImg2 },
 ];

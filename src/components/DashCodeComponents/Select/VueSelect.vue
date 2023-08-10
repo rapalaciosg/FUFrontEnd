@@ -166,17 +166,6 @@ export default {
       default: ""
     }
   },
-  // watch: {
-  //   value(newValue) {
-  //     this.$emit('selected-value', newValue)
-  //   }
-  // },
-  // emits: ['selected-value', 'update:modelValue'],
-  // data() {
-  //   return {
-  //     value: this.modelValue
-  //   }
-  // }
 };
 </script>
 <style lang="scss">
@@ -234,6 +223,12 @@ export default {
   }
   .vs__dropdown-option--disabled {
     @apply bg-slate-50 dark:bg-slate-700;
+  }
+  .vs__open-indicator{
+    @apply bg-white dark:bg-slate-900;
+  }
+  .vs__search {
+    @apply bg-white dark:bg-slate-900;
   }
 }
 </style>

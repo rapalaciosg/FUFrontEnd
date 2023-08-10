@@ -63,8 +63,10 @@
       :activeModal="isModalOpen"
       :showButton="false"
       :data="driverDetails"
+      :asociationDeleted="asociationDeleted"
       @close-modal="isModalOpen = false"
       @driver-updated="loadDrivers()"
+      @delete-asociation="toggleModalDeleteVehicleDriver"
     />
     <EnableDisableDriverModal
       :title="driverDetails.active ? 'Deshabilitar' : 'Habilitar'"
@@ -74,6 +76,14 @@
       :driver="driverDetails"
       @close-modal="isModalEnableDisableOpen = false"
       @driver-updated="loadDrivers()"
+    />
+    <DeleteVehicleDriverModalVue
+      title="Eliminar asociación"
+      :activeModal="isModalDeleteVehicleDriverOpen"
+      :showButton="false"
+      :data="vehicleDriverInputModel"
+      @close-modal="isModalDeleteVehicleDriverOpen = false"
+      @asociation-deleted="asociationDeleted = true"
     />
   </div>
 </template>
@@ -88,6 +98,7 @@ import CreateDriverModal from "@/components/WebFrontendComponents/Modals/Adminis
 import EditDriverModal from "@/components/WebFrontendComponents/Modals/Administration/Driver/EditDriverModal.vue";
 import DriverDetailsModal from "@/components/WebFrontendComponents/Modals/Administration/Driver/DriverDetailsModal.vue";
 import Card from "@/components/DashCodeComponents/Card";
+import DeleteVehicleDriverModalVue from '@/components/WebFrontendComponents/Modals/Administration/VehicleDriver/DeleteVehicleDriverModal.vue';
 
 import { GET_ALL_DRIVERS, GET_DRIVERS_BY_BRANCH_OFFICE, GET_DRIVERS_BY_CODE } from "@/services/administration/driver/driverGraphql.js";
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
@@ -107,6 +118,7 @@ export default {
     DriverDetailsModal,
     EnableDisableDriverModal,
     EditDriverModal,
+    DeleteVehicleDriverModalVue,
   },
   data() {
     return {
@@ -133,6 +145,12 @@ export default {
     let isModalOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalEnableDisableOpen = ref(false);
+
+    const asociationDeleted = ref(false);
+
+    let isModalDeleteVehicleDriverOpen = ref(false);
+
+    const vehicleDriverInputModel = ref({});
 
     const variablesDriversByBranchOffice = reactive({ id: 0 });
     const variablesDriversByCode = reactive({ code: "" });
@@ -278,6 +296,12 @@ export default {
       return valueFormated;
     };
 
+    const toggleModalDeleteVehicleDriver = (data) => {
+      isModalDeleteVehicleDriverOpen.value = true;
+
+      vehicleDriverInputModel.value = data;
+    }
+
     const toggleModal = (value) => {
       if (value.action === "edit") isModalOpen.value = true;
 
@@ -302,6 +326,10 @@ export default {
       filterValue,
       filtersOptions,
       headersDriversListExport,
+      toggleModalDeleteVehicleDriver,
+      isModalDeleteVehicleDriverOpen,
+      vehicleDriverInputModel,
+      asociationDeleted,
     };
   },
 };
