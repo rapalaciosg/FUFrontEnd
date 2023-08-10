@@ -24,29 +24,6 @@ export const GET_ALL_FREQUENCIES = gql`
   }
 `;
 
-export const GET_FREQUENCIAS = gql`
-  query getFrecuenciaRutas($route: String!) {
-    srvFrecuenciaRuta(route: $route) {
-      idReg
-      cliente
-      sucCliente
-      frecuencia
-      proximaVisita
-      visitaAnterior
-      observaciones
-      l
-      m
-      mi
-      j
-      v
-      s
-      d
-      empresa
-      ruta
-    }
-  }
-`;
-
 export const GET_FREQUENCIES_BY_ROUTE_ID = gql`
   query getFrequencyByRouteId($id: Int!) {
     srvCustomerFrequencyByRouteId(id: $id) {
@@ -71,13 +48,26 @@ export const GET_FREQUENCIES_BY_ROUTE_ID = gql`
   }
 `;
 
-export const UPDATE_FREQUENCY = gql`
-  mutation updateFrecuencyMut(
-    $frecuenciaCliente: FrequencyResponseModelInput!
+export const CREATE_FRECUENCY = gql`
+  mutation createCustomerFrecuencyMut(
+    $inputModel: CustomerFrequencyInputModelInput!
   ) {
-    updateFrecuency(frecuenciaCliente: $frecuenciaCliente) {
+    createCustomerFrequency(inputModel: $inputModel) {
       statusCode
       message
+      idObject
+    }
+  }
+`;
+
+export const UPDATE_FREQUENCY = gql`
+  mutation updateCustomerFrecuencyMut(
+    $inputModel: CustomerFrequencyInputModelInput!
+  ) {
+    updateCustomerFrequency(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
     }
   }
 `;

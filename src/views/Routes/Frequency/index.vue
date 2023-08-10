@@ -11,12 +11,16 @@
         <div class="grid grid-cols-2 gap-x-5">
           <download-excel 
             class="btn-info rounded pt-2 text-center" 
-            :data="vehiclesList"
-            :fields="headersVehiclesListExport"
+            :data="frecuenciesList"
             name="filename.xls"
           >
           Exportar
           </download-excel>
+          <CreateFrequencyModal
+            title="Crear frecuencia"
+            btnClass="btn-success"
+            @frequency-created="loadFrecuenciesByRoute()"
+          />
         </div>
       </div>
     </Card>
@@ -28,13 +32,6 @@
       :showSelectOptions="false"
       @open-modal="toggleModal"
     >
-      <!-- <template v-slot:button>
-        <CreateProductModal
-          title="Crear producto"
-          btnClass="btn-success"
-          @product-created="loadFrecuency()"
-        />
-      </template> -->
     </AdvancedTable>
     <!-- <DetailsFrecuencyModal
       title="Detalles de frecuencia"
@@ -42,15 +39,15 @@
       :showButton="false"
       :data="frecuencyDetails"
       @close-modal="isModalDetailsOpen = false"
-    />
-    <EditProductModal
-      title="Editar producto"
+    /> -->
+    <EditFrequencyModal
+      title="Editar frecuencia"
       :activeModal="isModalOpen"
       :showButton="false"
       :data="frecuencyDetails"
       @close-modal="isModalOpen = false"
-      @product-updated="loadFrecuency()"
-    /> -->
+      @frequency-updated="loadFrecuenciesByRoute()"
+    />
   </div>
 </template>
 
@@ -59,8 +56,8 @@ import { computed, ref, onMounted, reactive, watch, onBeforeMount } from "vue";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import { headersFrecuencyTable } from "@/constant/routes/frecuency/constantFrecuency.js";
 import DetailsFrecuencyModal from "@/components/WebFrontendComponents/Modals/Routes/Frecuency/DetailsFrecuencyModal.vue";
-import CreateProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/CreateProductModal.vue";
-import EditProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/EditProductModal.vue";
+import CreateFrequencyModal from "@/components/WebFrontendComponents/Modals/Routes/Frecuency/CreateFrequencyModal.vue";
+import EditFrequencyModal from "@/components/WebFrontendComponents/Modals/Routes/Frecuency/EditFrequencyModal.vue";
 import DeleteProductModal from "@/components/WebFrontendComponents/Modals/Inventory/Products/DeleteProductModal.vue";
 import Card from "@/components/DashCodeComponents/Card";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
@@ -80,10 +77,10 @@ export default {
     AdvancedTable,
     Card,
     VueSelect,
-    CreateProductModal,
+    CreateFrequencyModal,
     DetailsFrecuencyModal,
     DeleteProductModal,
-    EditProductModal,
+    EditFrequencyModal,
   },
   data() {
     return {
@@ -154,6 +151,24 @@ export default {
       loadRoutes();
     });
 
+    watch(() => frecuenciesList.value, (newValue) => {
+      frecuenciesList.value = newValue.map(item => ({
+        customerFrequencyId: item.customerFrequencyId,
+        customer: item.customer,
+        frequency: item.frequency,
+        nextVisit: item.nextVisit.split('T')[0],
+        lasstVisit: item.lasstVisit.split('T')[0],
+        observations: item.observations,
+        monday: item.monday,
+        tuesday: item.tuesday,
+        wednesday: item.wednesday,
+        thursday: item.thursday,
+        friday: item.friday,
+        saturday: item.saturday,
+        sunday: item.sunday
+      }));
+    }, { deep: true })
+
     watch(() => routes.value, (newValue) => {
       routesSelect.value = formatRoutesSelect(routes);
     }, { deep: true })
@@ -163,10 +178,11 @@ export default {
     }, { deep: true })
 
     watch(() => filterValue.value, (newValue) => {
-      console.log('filterValue => ', newValue);
       if (newValue) {
         variablesFrequenciesRoutes.id = newValue.value;
         loadFrecuenciesByRoute();
+      } else {
+        frecuenciesList.value = [];
       }
     }, { deep: true })
 
@@ -196,6 +212,7 @@ export default {
       routesSelect,
       filterValue,
       frecuenciesList,
+      loadFrecuenciesByRoute,
     };
   },
 };

@@ -1,22 +1,13 @@
 <template>
   <div>
     <Card noborder>
-      <div
-        class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center"
-      >
+      <div class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center">
         <h5>{{ title }}</h5>
         <div class="flex space-x-2">
-          <InputGroup
-          v-model="searchInput"
-          placeholder="Buscar"
-          type="text"
-          prependIcon="heroicons-outline:search"
-          merged
-          />
+          <InputGroup v-model="searchInput" placeholder="Buscar" type="text" prependIcon="heroicons-outline:search" merged />
           <slot name="button"></slot>
         </div>
       </div>
-
       <vue-good-table
         :columns="headers"
         styleClass=" vgt-table bordered centered"
@@ -45,31 +36,31 @@
             <img v-else :src= "disabledImg" alt="" class="block object-cover" />
           </span>
           <span v-if="props.column.field == 'monday'">
-            <Icon v-if="props.row.monday" :icon="'material-symbols:circle'" />
+            <Icon v-if="!props.row.monday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'tuesday'">
-            <Icon v-if="props.row.tuesday" :icon="'material-symbols:circle'" />
+            <Icon v-if="!props.row.tuesday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'wednesday'" class="flex">
-            <Icon v-if="props.row.wednesday" :icon="'material-symbols:circle'" />
+            <Icon v-if="!props.row.wednesday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'thursday'" class="flex">
-            <Icon v-if="props.row.thursday" :icon="'material-symbols:circle'" />
+            <Icon v-if="!props.row.thursday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'friday'" class="flex">
-            <Icon v-if="props.row.friday" :icon="'material-symbols:circle'" />
+            <Icon v-if="!props.row.friday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'saturday'" class="flex">
-            <Icon v-if="props.row.saturday" :icon="'material-symbols:circle'" />
+            <Icon v-if="!props.row.saturday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'sunday'" class="flex">
-            <Icon v-if="props.row.sunday" :icon="'material-symbols:circle'" />
+            <Icon v-if="!props.row.sunday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'actions'">
