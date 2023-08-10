@@ -44,32 +44,32 @@
             <img v-if="props.row.enabled || props.row.active" :src= "checkedImg" alt="" class="block object-cover" />
             <img v-else :src= "disabledImg" alt="" class="block object-cover" />
           </span>
-          <span v-if="props.column.field == 'l'">
-            <Icon v-if="props.row.l === 0" :icon="'material-symbols:circle'" />
+          <span v-if="props.column.field == 'monday'">
+            <Icon v-if="props.row.monday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
-          <span v-if="props.column.field == 'm'">
-            <Icon v-if="props.row.m === 0" :icon="'material-symbols:circle'" />
+          <span v-if="props.column.field == 'tuesday'">
+            <Icon v-if="props.row.tuesday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
-          <span v-if="props.column.field == 'mi'" class="flex">
-            <Icon v-if="props.row.mi === 0" :icon="'material-symbols:circle'" />
+          <span v-if="props.column.field == 'wednesday'" class="flex">
+            <Icon v-if="props.row.wednesday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
-          <span v-if="props.column.field == 'j'" class="flex">
-            <Icon v-if="props.row.j === 0" :icon="'material-symbols:circle'" />
+          <span v-if="props.column.field == 'thursday'" class="flex">
+            <Icon v-if="props.row.thursday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
-          <span v-if="props.column.field == 'v'" class="flex">
-            <Icon v-if="props.row.v === 0" :icon="'material-symbols:circle'" />
+          <span v-if="props.column.field == 'friday'" class="flex">
+            <Icon v-if="props.row.friday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
-          <span v-if="props.column.field == 's'" class="flex">
-            <Icon v-if="props.row.s === 0" :icon="'material-symbols:circle'" />
+          <span v-if="props.column.field == 'saturday'" class="flex">
+            <Icon v-if="props.row.saturday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
-          <span v-if="props.column.field == 'd'" class="flex">
-            <Icon v-if="props.row.d === 0" :icon="'material-symbols:circle'" />
+          <span v-if="props.column.field == 'sunday'" class="flex">
+            <Icon v-if="props.row.sunday" :icon="'material-symbols:circle'" />
             <Icon v-else :icon="'fluent-emoji-flat:green-circle'" />
           </span>
           <span v-if="props.column.field == 'actions'">

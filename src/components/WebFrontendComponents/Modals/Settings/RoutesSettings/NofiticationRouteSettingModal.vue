@@ -2,7 +2,7 @@
   <modal-base :closeModal="closeModal">
     <template v-slot:modal-body>
       <div class="grid grid-cols-1 gap-5 px-4 py-3">
-        <h4>¿Deseea configurar rutas?</h4>
+        <h4>¿Desea configurar rutas?</h4>
       </div>
       <div
         class="px-4 pt-3 pb-1 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"

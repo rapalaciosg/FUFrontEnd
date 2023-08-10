@@ -40,6 +40,29 @@
             v-model="branchOfficeId"
             :clearable="false"
           />
+          <div>
+            <label class="ltr:inline-block rtl:block input-label">Asociar a un conductor</label>
+            <div class="pt-2">
+              <Checkbox label="Asociar conductor" v-model="isAssociationDriverActive" :checked="(isAssociationDriverActive) ? true : false" :disabled="hasDriverAssociated ? true : false" />
+            </div>
+          </div>
+          <div :class="hasDriverAssociated ? 'grid grid-cols-8' : ''">
+            <VueSelect
+              :class="(hasDriverAssociated) ? 'col-span-7' : ''"
+              v-if="isAssociationDriverActive"
+              label="Conductor"
+              :options="driversFormatted"
+              placeholder="Seleccione un conductor"
+              v-model="driverId"
+              :disabled="hasDriverAssociated ? true : false"
+              :clearable="(driverId && !hasDriverAssociated) ? true : false"
+            />
+            <div v-if="hasDriverAssociated && isAssociationDriverActive" class="grid content-end py-3 px-4">
+              <button type="button" class="block text-center" @click="deleteAsociation">
+                <Icon icon="heroicons:trash" class="w-9" />
+              </button>
+            </div>
+          </div>
         </div>
         <div
           class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
@@ -60,16 +83,21 @@
 </template>
 
 <script>
-import { ref, watch, reactive, computed, onMounted } from "vue";
+import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+import Icon from "@/components/DashCodeComponents/Icon";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+import keycloak from "@/security/KeycloakService";
 
 import { UPDATE_VEHICLE } from "@/services/administration/vehicle/vehicleGraphql.js";
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
+import { GET_VEHICLE_DRIVER_ASOCIATION, CREATE_VEHICLE_DRIVER } from "@/services/administration/vehicle-driver/vehicleDriverGraphql.js";
+import { GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
 import {
   useLazyQuery,
   provideApolloClient,
@@ -80,6 +108,8 @@ import { apolloClient } from "@/main.js";
 export default {
   components: {
     ModalBase,
+    Icon,
+    Checkbox,
     Textinput,
     VueSelect,
   },
@@ -87,9 +117,10 @@ export default {
     data: {
       type: Object,
       default: {}
-    }
+    },
+    asociationDeleted: Boolean
   },
-  emits: ["vehicle-updated"],
+  emits: ["vehicle-updated", "delete-asociation"],
   data() {
     return {};
   },
@@ -101,12 +132,37 @@ export default {
 
     let closeModal = ref(false);
 
+    const isAssociationDriverActive = ref(false);
+
+    let hasDriverAssociated = ref(false);
+
+    let associationDriver = ref(null);
+
     let branchOfficesFormatted = ref([]);
+    let driversFormatted = ref([]);
 
     const branchOfficeId = ref({});
 
+    const driverId = ref(null);
+
     const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
       useLazyQuery(GET_ALL_BRANCH_OFFICES)
+    );
+
+    const queryGetVehiclesDriverAsociation = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_VEHICLE_DRIVER_ASOCIATION)
+    );
+
+    const queryGetDrivers = provideApolloClient(apolloClient)(() =>
+      useLazyQuery(GET_ALL_DRIVERS)
+    );
+
+    const drivers = computed(
+      () => queryGetDrivers.result.value?.srvDriver ?? []
+    );
+
+    const vehiclesDriversAsociation = computed(
+      () => queryGetVehiclesDriverAsociation.result.value?.srvVehicleDriver ?? []
     );
 
     const branchOffices = computed(
@@ -117,9 +173,19 @@ export default {
       queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
     };
 
+    const loadDrivers = () => {
+      queryGetDrivers.load() || queryGetDrivers.refetch();
+    };
+
+    const loadVehiclesDriversAsociation = () => {
+      queryGetVehiclesDriverAsociation.load() || queryGetVehiclesDriverAsociation.refetch();
+    };
+
     const initilize = () => {
       loadBranchOffices();
     };
+
+    onBeforeMount(() => loadVehiclesDriversAsociation());
 
     onMounted(() => initilize());
 
@@ -131,6 +197,27 @@ export default {
       return valueFormated;
     };
 
+    const formatDriverSelect = (driversAll, driversNotAvailable) => {
+      const differentValues = driversAll.value.filter(object1 => {
+        return !driversNotAvailable.value.some(object2 => {
+          return object1.driverId === object2.driver.driverId;
+        });
+      });
+      const valueFormated = differentValues.map((item) => ({
+        value: item.driverId,
+        label: item.code,
+      }));
+      return valueFormated;
+    };
+
+    watch(
+      () => drivers.value,
+      (newValue) => {
+        driversFormatted.value = formatDriverSelect(drivers, vehiclesDriversAsociation);
+      },
+      { deep: true }
+    );
+
     watch(
       () => branchOffices.value,
       (newValue) => {
@@ -138,6 +225,31 @@ export default {
       },
       { deep: true }
     );
+
+    watch(
+      () => vehiclesDriversAsociation.value,
+      (newValue) => {
+        loadDrivers();
+      },
+      { deep: true }
+    );
+
+    watch(
+      () => driverId.value,
+      (newValue) => {
+        // if (!newValue) {
+        //   hasDriverAssociated.value = true;
+        // } else {
+        //   hasDriverAssociated.value = false;
+        // }
+      },
+      { deep: true }
+    );
+
+    watch(() => props.asociationDeleted, (newValue) => {
+      loadVehiclesDriversAsociation();
+      closeModal.value = !closeModal.value;
+    }, { deep: true })
 
     watch(
       () => props.data,
@@ -152,6 +264,14 @@ export default {
           branchOfficesFormatted,
           newValue.branchOffice.branchOfficeId
         );
+        associationDriver.value = vehiclesDriversAsociation.value.find(item => item.vehicle.vehicleId === newValue.vehicleId);
+        if (associationDriver.value) {
+          isAssociationDriverActive.value = true;
+          driverId.value = findDefaultDriverSelect(drivers, associationDriver.value.driver.driverId);
+          hasDriverAssociated.value = true;
+        } else {
+          driverId.value = null;
+        }
       },
       { deep: true }
     );
@@ -159,6 +279,15 @@ export default {
     const findSelectValues = (data, id) => {
       const filteredValue = data.value.find((item) => item.value === id);
       return filteredValue;
+    };
+
+    const findDefaultDriverSelect = (data, id) => {
+      const filteredValue = data.value.find((item) => item.driverId === id);
+      const valueFormated = {
+        value: filteredValue.driverId,
+        label: filteredValue.code,
+      };
+      return valueFormated;
     };
 
     const vehicle = reactive({
@@ -169,6 +298,12 @@ export default {
       licensePlate: "",
       branchOfficeId: 0,
       active: false,
+    });
+
+    const vehicleDriver = reactive({
+      vehicleId: 0,
+      driverId: 0,
+      userName: "",
     });
 
     const schema = yup.object({
@@ -186,6 +321,8 @@ export default {
       () => closeModal.value,
       (newValue) => {
         resetForm();
+        isAssociationDriverActive.value = false;
+        hasDriverAssociated.value = false;
       },
       { deep: true }
     );
@@ -215,6 +352,25 @@ export default {
       variables: { inputModel: vehicle },
     }));
 
+    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({
+      variables: { inputModel: vehicleDriver },
+    }));
+
+    const deleteAsociation = () => {
+      const payload = {
+        inputModel: {
+          vehicleId: vehicle.vehicleId,
+          driverId: driverId.value.value,
+          userName: keycloak.tokenParsed.preferred_username
+        },
+        data: {
+          commingFrom: 'vehículo',
+          label: driverId.value.label
+        }
+      }
+      emit("delete-asociation", payload);
+    }
+
     const onSubmit = handleSubmit((values, actions) => {
       vehicle.name = values.name;
       vehicle.code = values.code.toUpperCase();
@@ -224,18 +380,43 @@ export default {
 
       updateVehicle()
         .then((response) => {
-          emit("vehicle-updated");
           toast.success("Vehículo actualizado exitosamente", {
             timeout: 2000,
           });
+          if (isAssociationDriverActive.value) {
+            vehicleDriver.vehicleId = vehicle.vehicleId;
+            vehicleDriver.driverId = driverId.value.value;
+            vehicleDriver.userName = keycloak.tokenParsed.preferred_username;
+            createVehicleDriver()
+              .then((response) => {
+                if (response.data.createVehicleDriver.statusCode === "OK") {
+                  toast.success("Asociación exitosa", {
+                    timeout: 2000,
+                  });
+                } else {
+                  toast.error(response.data.createVehicleDriver.message, {
+                    timeout: 2000,
+                  });
+                }
+                loadVehiclesDriversAsociation();
+                isAssociationDriverActive.value = false;
+              })
+              .catch((error) => {
+                toast.error("Ha ocurrido un error", {
+                  timeout: 2000,
+                });
+              })
+          }
+          emit("vehicle-updated");
+          closeModal.value = !closeModal.value;
         })
         .catch((error) => {
           toast.error("Ha ocurrido un error", {
             timeout: 2000,
           });
+          closeModal.value = !closeModal.value;
         });
 
-      closeModal.value = !closeModal.value;
       actions.resetForm();
     });
 
@@ -252,6 +433,11 @@ export default {
       onSubmit,
       branchOfficesFormatted,
       branchOfficeId,
+      driversFormatted,
+      driverId,
+      isAssociationDriverActive,
+      hasDriverAssociated,
+      deleteAsociation,
     };
   },
 };

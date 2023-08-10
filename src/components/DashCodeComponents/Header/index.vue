@@ -34,7 +34,7 @@
           <handle-mobile-menu
             v-if="window.width < 1280 && window.width > 768"
           />
-          <SearchModal />
+          <!-- <SearchModal /> -->
         </div>
         <div
           v-if="this.$store.themeSettingsStore.menuLayout === 'horizontal'"
