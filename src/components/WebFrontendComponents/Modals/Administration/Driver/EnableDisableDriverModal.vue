@@ -1,24 +1,13 @@
 <template>
-    <modal-base :closeModal="closeModal">
+    <modal-base :activeModal="activeModal">
       <template v-slot:modal-body>
         <form @submit.prevent="updateDriver">
           <div class="grid grid-cols-1 gap-5">
-            <h5>
-              ¿{{ action }} esta conductor: {{ driver.name }}?
-            </h5>
+            <h5>¿{{ action }} este conductor: {{ driver.name }}?</h5>
           </div>
-          <div
-            class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-          >
-            <button
-              class="btn btn-secondary block text-center"
-              @click="closeModal = !closeModal"
-            >
-              Cerrar
-            </button>
-            <button type="submit" class="btn btn-success block text-center">
-              {{ action }}
-            </button>
+          <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+            <button class="btn btn-secondary block text-center" @click="closeModalFunction">Cerrar</button>
+            <button type="submit" class="btn btn-success block text-center">{{ action }}</button>
           </div>
         </form>
       </template>
@@ -29,7 +18,6 @@
   import { ref, watch, onMounted, reactive } from "vue";
   import ModalBase from "../../ModalBase.vue";
   import { useToast } from "vue-toastification";
-  import keycloak from "@/security/KeycloakService.js";
   
   import { ENABLE_DISABLE_DRIVER } from "@/services/administration/driver/driverGraphql.js";
   import { useMutation } from "@vue/apollo-composable";
@@ -48,15 +36,20 @@
         default: {},
       },
     },
-    emits: ["driver-updated"],
+    emits: ["driver-updated", "close-modal"],
     data() {
       return {};
     },
     setup(props, { emit }) {
+
+      // Variables declaration
+
       const toast = useToast();
   
-      let closeModal = ref(false);
-  
+      const activeModal = ref(false);
+
+      // Input model
+
       const driver = reactive({
         driverId: 0,
         branchOfficeId: 0,
@@ -68,6 +61,29 @@
         keycloakUserId: "",
         keycloakUser: ""
       });
+
+      // Function to get and set data from props
+
+      const setData = (props) => {
+        driver.driverId = props.driverId;
+        driver.branchOfficeId = props.branchOffice.branchOfficeId;
+        driver.name = props.name;
+        driver.lastName = props.lastName;
+        driver.code = props.code;
+        driver.boxCode = props.boxCode;
+        driver.active = props.active
+        driver.keycloakUserId = props.keycloakUserId;
+        driver.keycloakUser = props.keycloakUser;
+      }
+
+      // Mounted function
+
+      onMounted(() => {
+        activeModal.value = true;
+        setData(props.driver);
+      })
+
+      // Watchers
   
       watch(
         () => props.driver,
@@ -84,32 +100,35 @@
         },
         { deep: true }
       );
+
+      // Apollo mutations
   
-      const { mutate: updateDriverMut } = useMutation(
-        ENABLE_DISABLE_DRIVER,
-        () => ({
-          variables: { inputModel: driver },
-        })
-      );
+      const { mutate: updateDriverMut } = useMutation( ENABLE_DISABLE_DRIVER, () => ({ variables: { inputModel: driver } }));
+
+      // Trigger function form
   
-      const updateDriver = () => {
+      const updateDriver = async () => {
         driver.active = !driver.active;
-        updateDriverMut()
+
+        await updateDriverMut()
           .then((response) => {
+            if (response.data.updateDrive.statusCode === 'OK') toast.success("Conductor actualizo exitosamente", { timeout: 2000 });
+            else toast.success(response.data.updateDrive.message, { timeout: 2000 });
+
             emit("driver-updated");
-            toast.success("Conductor actualizo exitosamente", {
-              timeout: 2000,
-            });
           })
-          .catch((error) => {
-            toast.error("Ha ocurrido un error", {
-              timeout: 2000,
-            });
-          });
-        closeModal.value = !closeModal.value;
+          .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+          
+        closeModal();
       };
+
+      // Close modal function
+
+      const closeModal = () => emit('close-modal');
+
+      // Returning values
   
-      return { closeModal, updateDriver };
+      return { activeModal, updateDriver, closeModal };
     },
   };
   </script>

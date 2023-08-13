@@ -83,6 +83,10 @@ export default defineComponent({
   setup(props, context) {
     const ck = ref(props.checked);
 
+    watch(() => props.checked, (newValue) => {
+      ck.value = newValue;
+    }, { deep: true })
+
     // on change event
     const onChange = () => {
       ck.value = !ck.value;

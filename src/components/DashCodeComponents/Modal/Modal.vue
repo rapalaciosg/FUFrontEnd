@@ -1,9 +1,9 @@
 <template>
-  <button v-if="showButton" type="button" @click="openModal" class="font-semibold  text-sm leading-6 md:px-6 px-4 rounded capitalize  transition-all duration-150 md:whitespace-nowrap whitespace-normal relative" :class="labelClass">
+  <!-- <button v-if="showButton" type="button" @click="openModal" class="font-semibold  text-sm leading-6 md:px-6 px-4 rounded capitalize  transition-all duration-150 md:whitespace-nowrap whitespace-normal relative" :class="labelClass">
     {{ label }}
-  </button>
+  </button> -->
 
-  <TransitionRoot v-if="isOpen" :show="isOpen" as="template">
+  <TransitionRoot :show="isOpen" as="template">
     <Dialog
       as="div"
       @close="closeModal"
@@ -195,20 +195,21 @@ export default defineComponent({
   emits: ['close-modal'],
 
   setup(props, { emit }) {
-    const isOpen = ref(props.activeModal);
+    const isOpen = ref(false);
 
     watch(() => props.activeModal, (newValue) => {
-      isOpen.value = newValue
+      isOpen.value = newValue;
+      if (isOpen.value) openModal();
+      else closeModal();
     });
 
     // open
     const openModal = () => {
-      isOpen.value = !isOpen.value;
+      isOpen.value = true;
     };
     // close
     const closeModal = () => {
       isOpen.value = false;
-      emit('close-modal', false);
     };
 
     return { closeModal, openModal, isOpen };
