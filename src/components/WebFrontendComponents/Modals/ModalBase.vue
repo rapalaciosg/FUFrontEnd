@@ -4,13 +4,9 @@
     :label="title"
     labelClass="btn-success h-[40px]"
     ref="modal"
+    :activeModal="activeModal"
   >
   <slot name="modal-body"></slot>
-    <!-- <template v-slot:footer>
-      <slot name="footer-buttons"></slot>
-      <Button text="Cerrar" btnClass="btn-secondary" @click="close()" />
-      <Button v-if="isDetailModal === true" text="Guardar" btnClass="btn-success" @click="save()" />
-    </template> -->
   </Modal>
 </template>
 <script>
@@ -32,12 +28,20 @@ export default {
       type: Boolean,
       default: false
     },
+    activeModal: {
+      type: Boolean,
+      default: false
+    }
     // isDetailModal: {
     //   type: Boolean,
     //   default: true
     // }
   },
   watch: {
+    activeModal: {
+      handler(newValue, oldValue) {},
+      deep: true
+    },
     closeModal: {
       handler(newValue, oldValue) {
         this.$refs.modal.closeModal()
@@ -49,7 +53,7 @@ export default {
   },
   methods: {
     close() {
-      this.$emit('close', true)
+      this.$emit('close')
       this.$refs.modal.closeModal()
     },
     save() {

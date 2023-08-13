@@ -5,6 +5,7 @@ export const headersVehiclesTable = [
   { label: "Descripción", field: "description" },
   { label: "Sucursal", field: "branchOffice.branchOfficeName" },
   { label: "Placa", field: "licensePlate" },
+  { label: "Conductor asociado", field: "isAssociated" },
   { label: "Estado", field: "active" },
   { label: "Acciones", field: "actions" },
 ];

@@ -1,77 +1,25 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput
-            type="text"
-            label="Nombre"
-            placeholder="Nombre"
-            v-model="name"
-            :error="nameError"
-          />
-          <Textinput
-            type="text"
-            label="Apellido"
-            placeholder="Apellido"
-            v-model="lastName"
-            :error="lastNameError"
-          />
-          <Textinput
-            type="text"
-            label="Codigo"
-            placeholder="Codigo"
-            v-model="code"
-            :error="codeError"
-          />
-          <Textinput
-            type="text"
-            label="Código de caja"
-            placeholder="Código de caja"
-            v-model="boxCode"
-            :error="boxCodeError"
-          />
-          <VueSelect
-            label="Sucursal"
-            :options="branchOfficesFormatted"
-            placeholder="Seleccione una sucursal"
-            v-model="branchOfficeId"
-            :clearable="false"
-          />
-          <VueSelect
-            label="Usuarios"
-            :options="usersList"
-            placeholder="Seleccione un usuario"
-            v-model="user"
-            :clearable="false"
-          />
+          <Textinput type="text" label="Nombre" placeholder="Nombre" v-model="name" :error="nameError" :maxlength="100"/>
+          <Textinput type="text" label="Apellido" placeholder="Apellido" v-model="lastName" :error="lastNameError" :maxlength="100"/>
+          <Textinput type="text" label="Codigo" placeholder="Codigo" v-model="code" :error="codeError" :maxlength="10"/>
+          <Textinput type="text" label="Código de caja" placeholder="Código de caja" v-model="boxCode" :error="boxCodeError" :maxlength="50"/>
+          <VueSelect label="Sucursal" :options="branchOfficesFormatted" placeholder="Seleccione una sucursal" v-model="branchOfficeId" :clearable="false"/>
+          <VueSelect label="Usuarios" :options="usersListAvailables" placeholder="Seleccione un usuario" v-model="user" :clearable="false"/>
           <div>
             <label class="ltr:inline-block rtl:block input-label">Asociar a un vehículo</label>
             <div class="pt-2">
               <Checkbox label="Asociar vehículo" v-model="isAssociationVehicleActive" />
             </div>
           </div>
-          <VueSelect
-            v-if="isAssociationVehicleActive"
-            label="Vehículos"
-            :options="vehiclesFormatted"
-            placeholder="Seleccione un vehículo"
-            v-model="vehicleId"
-            :clearable="false"
-          />
+          <VueSelect v-if="isAssociationVehicleActive" label="Vehículos" :options="vehiclesFormatted" placeholder="Seleccione un vehículo" v-model="vehicleId" :clearable="false"/>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -79,26 +27,26 @@
 </template>
 
 <script>
-import { ref, watch, reactive, computed, onMounted } from "vue";
+import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import Checkbox from "@/components/DashCodeComponents/Checkbox";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
 
-import { CREATE_DRIVER } from "@/services/administration/driver/driverGraphql.js";
+import { CREATE_DRIVER, GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
 import { GET_VEHICLE_DRIVER_ASOCIATION, CREATE_VEHICLE_DRIVER } from "@/services/administration/vehicle-driver/vehicleDriverGraphql.js";
 import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
+
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -108,128 +56,117 @@ export default {
     Textinput,
     VueSelect,
   },
-  props: [],
+  props: {},
   emits: ["driver-created"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    const user = ref(null);
-
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const isAssociationVehicleActive = ref(false);
-    let vehiclesFormatted = ref([]);
+
+    const user = ref(null);
+    const usersList = ref([]);
+    let usersListAvailables = ref([]);
 
     const vehicleId = ref({});
-
-    let branchOfficesFormatted = ref([]);
+    let vehiclesFormatted = ref([]);
 
     const branchOfficeId = ref({});
+    let branchOfficesFormatted = ref([]);
 
-    const usersList = ref([]);
+    // Apollo queries initialization
 
-    const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_BRANCH_OFFICES)
-    );
+    const queryGetDrivers = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_DRIVERS));
 
-    const queryGetVehiclesDriverAsociation = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_VEHICLE_DRIVER_ASOCIATION)
-    );
+    const queryGetBranchOffices = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_BRANCH_OFFICES));
 
-    const queryGetVehicles = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_VEHICLES)
-    );
+    const queryGetVehiclesDriverAsociation = provideApolloClient(apolloClient)(() => useLazyQuery(GET_VEHICLE_DRIVER_ASOCIATION));
 
-    const branchOffices = computed(
-      () => queryGetBranchOffices.result.value?.srvBranchOffice ?? []
-    );
+    const queryGetVehicles = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_VEHICLES));
 
-    const vehicles = computed(
-      () => queryGetVehicles.result.value?.srvVehicle ?? []
-    );
+    // Apollo fetching data from queries
 
-    const vehiclesDriversAsociation = computed(
-      () => queryGetVehiclesDriverAsociation.result.value?.srvVehicleDriver ?? []
-    );
+    const drivers = computed(() => queryGetDrivers.result.value?.srvDriver ?? []);
 
-    const loadBranchOffices = () => {
-      queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
-    };
+    const branchOffices = computed(() => queryGetBranchOffices.result.value?.srvBranchOffice ?? []);
 
-    const loadVehicles = () => {
-      queryGetVehicles.load() || queryGetVehicles.refetch();
-    };
+    const vehicles = computed(() => queryGetVehicles.result.value?.srvVehicle ?? []);
 
-    const loadVehiclesDriversAsociation = () => {
-      queryGetVehiclesDriverAsociation.load() || queryGetVehiclesDriverAsociation.refetch();
-    };
+    const vehiclesDriversAsociation = computed(() => queryGetVehiclesDriverAsociation.result.value?.srvVehicleDriver ?? []);
 
-    const initilize = () => {
-      loadBranchOffices();
-      getUserList();
+    // Apollo lazy functions
+
+    const loadDrivers = () => queryGetDrivers.load() || queryGetDrivers.refetch();
+
+    const loadBranchOffices = () => queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
+
+    const loadVehicles = () => queryGetVehicles.load() || queryGetVehicles.refetch();
+
+    const loadVehiclesDriversAsociation = () => queryGetVehiclesDriverAsociation.load() || queryGetVehiclesDriverAsociation.refetch();
+
+    // Before mounted
+
+    onBeforeMount(() => {
+      loadDrivers();
       loadVehiclesDriversAsociation();
+      loadVehicles();
+    });
+
+    // Initialization function
+
+    const initialize = () => {
+      getUserList();
+      loadBranchOffices();
+      activeModal.value = true;
     };
 
-    onMounted(() => initilize());
+    // Mounted function
 
-    const getUserList = () => {
-      userAdministrationService.getUsers(keycloak.token).then((response) => {
-        usersList.value = formatUserSelect(response.data);
-      });
-    }
+    onMounted(() => initialize());
 
-    watch(() => usersList.value, (newValue) => {
-      user.value = newValue[0];
-    }, {deep: true})
+    // Getting users from keycloak
 
-    const formatUserSelect = (data) => {
-      const valueFormated = data.map((item) => ({
-        value: item.id,
-        label: item.username,
-      }));
-      return valueFormated;
-    }
+    const getUserList = () => userAdministrationService.getUsers(keycloak.token).then((response) => usersList.value = formatUserSelect(response.data));
 
-    const formatbranchOfficeSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.branchOfficeId,
-        label: item.branchOfficeName,
-      }));
-      return valueFormated;
-    };
+    // Format functions
 
-    const formatVehicleSelect = (vehiclesAll, vehiclesNotAvailable) => {
-      const differentValues = vehiclesAll.value.filter(object1 => {
-        return !vehiclesNotAvailable.value.some(object2 => {
-          return object1.vehicleId === object2.vehicle.vehicleId;
+    const formatUserSelect = (data) =>  data.map((item) => ({ value: item.id, label: item.username }));
+
+    const formatbranchOfficeSelect = (data) => data.map((item) => ({ value: item.branchOfficeId, label: item.branchOfficeName}));
+
+    // Watchers
+
+    watch(
+      () => usersList.value, 
+      (newValue) => {
+        const differentValues = newValue.filter(object1 => {
+          return !drivers.value.some(object2 => {
+            return object1.value === object2.keycloakUserId;
+          });
         });
-      });
-      const valueFormated = differentValues.map((item) => ({
-        value: item.vehicleId,
-        label: item.code,
-      }));
-      return valueFormated;
-    };
+        usersListAvailables.value = differentValues.map((item) => ({ value: item.id, label: item.label }));
+        user.value = usersListAvailables.value[0] 
+      }, 
+      {deep: true}
+    );
 
     watch(
       () => vehicles.value,
       (newValue) => {
-        vehiclesFormatted.value = formatVehicleSelect(vehicles, vehiclesDriversAsociation);
+        const differentValues = newValue.filter(object1 => {
+          return !vehiclesDriversAsociation.value.some(object2 => {
+            return object1.vehicleId === object2.vehicle.vehicleId;
+          });
+        });
+        vehiclesFormatted.value = differentValues.map((item) => ({ value: item.vehicleId, label: item.code }));
         vehicleId.value = vehiclesFormatted.value[0];
-      },
-      { deep: true }
-    );
-
-    watch(
-      () => vehiclesDriversAsociation.value,
-      (newValue) => {
-        loadVehicles();
       },
       { deep: true }
     );
@@ -237,11 +174,13 @@ export default {
     watch(
       () => branchOffices.value,
       (newValue) => {
-        branchOfficesFormatted.value = formatbranchOfficeSelect(branchOffices);
+        branchOfficesFormatted.value = formatbranchOfficeSelect(newValue);
         branchOfficeId.value = branchOfficesFormatted.value[0];
       },
       { deep: true }
     );
+
+    // Initial values
 
     const formValues = reactive({
       name: "",
@@ -249,6 +188,8 @@ export default {
       code: "",
       boxCode: "",
     });
+
+    // Input model
 
     const driver = reactive({
       driverId: 0,
@@ -268,57 +209,35 @@ export default {
       userName: "",
     });
 
+    // Yup validations rules
+
     const schema = yup.object({
-      name: yup.string().required("Nombre requerido"),
-      lastName: yup.string().required("Apellido requerido"),
-      code: yup.string().required("Código requerido"),
-      boxCode: yup.string().required("Código de caja requerido"),
+      name: yup.string().required("Nombre requerido").max(100),
+      lastName: yup.string().required("Apellido requerido").max(100),
+      code: yup.string().required("Código requerido").max(10),
+      boxCode: yup.string().required("Código de caja requerido").max(50),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate userForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-        isAssociationVehicleActive.value = false;
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema, initialValues: formValues });
 
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
-    const {
-      value: lastName,
-      errorMessage: lastNameError,
-      meta: lastNameMeta,
-    } = useField("lastName");
-    const {
-      value: code,
-      errorMessage: codeError,
-      meta: codeMeta,
-    } = useField("code");
-    const {
-      value: boxCode,
-      errorMessage: boxCodeError,
-      meta: boxCodeMeta,
-    } = useField("boxCode");
+    // vee validate use field
 
-    const { mutate: createDriver } = useMutation(CREATE_DRIVER, () => ({
-      variables: { inputModel: driver },
-    }));
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+    const { value: lastName, errorMessage: lastNameError, meta: lastNameMeta } = useField("lastName");
+    const { value: code, errorMessage: codeError, meta: codeMeta } = useField("code");
+    const { value: boxCode, errorMessage: boxCodeError, meta: boxCodeMeta } = useField("boxCode");
 
-    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({
-      variables: { inputModel: vehicleDriver },
-    }));
+    // Apollo mutations
 
-    const onSubmit = handleSubmit((values, actions) => {
+    const { mutate: createDriver } = useMutation(CREATE_DRIVER, () => ({ variables: { inputModel: driver } }));
+
+    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({ variables: { inputModel: vehicleDriver } }));
+
+    // Trigger function form
+
+    const onSubmit = handleSubmit(async (values, actions) => {
       driver.name = values.name;
       driver.lastName = values.lastName;
       driver.code = values.code.toUpperCase();
@@ -327,50 +246,46 @@ export default {
       driver.keycloakUser = user.value.label;
       driver.keycloakUserId = user.value.value;
 
-      createDriver()
-        .then((response) => {
-          toast.success("Conductor creado exitosamente", {
-            timeout: 2000,
-          });
+      await createDriver()
+        .then(async (response) => {
+          if (response.data.createDrive.statusCode === "OK") toast.success("Conductor creado exitosamente", { timeout: 2000 });
+          else toast.error(response.data.createDrive.message, { timeout: 2000 });
+
+          emit("driver-created");
+
           if (isAssociationVehicleActive.value) {
             vehicleDriver.vehicleId = vehicleId.value.value;
             vehicleDriver.driverId = +response.data.createDrive.idObject;
             vehicleDriver.userName = keycloak.tokenParsed.preferred_username;
-            createVehicleDriver()
+
+            await createVehicleDriver()
               .then((response) => {
-                if (response.data.createVehicleDriver.statusCode === "OK") {
-                  toast.success("Asociación exitosa", {
-                    timeout: 2000,
-                  });
-                } else {
-                  toast.error(response.data.createVehicleDriver.message, {
-                    timeout: 2000,
-                  });
-                }
+                if (response.data.createVehicleDriver.statusCode === "OK") toast.success("Asociación exitosa", { timeout: 2000 });
+                else toast.error(response.data.createVehicleDriver.message, { timeout: 2000 });
+
                 loadVehiclesDriversAsociation();
                 isAssociationVehicleActive.value = false;
               })
-              .catch((error) => {
-                toast.error("Ha ocurrido un error", {
-                  timeout: 2000,
-                });
-              })
+              .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
           }
-          emit("driver-created");
-          closeModal.value = !closeModal.value;
         })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-          closeModal.value = !closeModal.value;
-        });
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      loadVehiclesDriversAsociation();
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       name,
       nameError,
       code,
@@ -379,11 +294,11 @@ export default {
       lastNameError,
       boxCode,
       boxCodeError,
-      onSubmit,
       branchOfficesFormatted,
       branchOfficeId,
       user,
       usersList,
+      usersListAvailables,
       vehiclesFormatted,
       vehicleId,
       isAssociationVehicleActive,

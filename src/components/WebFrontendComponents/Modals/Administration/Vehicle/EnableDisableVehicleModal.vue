@@ -1,24 +1,13 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="updateVehicle">
         <div class="grid grid-cols-1 gap-5">
-          <h5>
-            ¿{{ action }} esta vehículo: {{ vehicle.name }}?
-          </h5>
+          <h5>¿{{ action }} esta vehículo: {{ vehicle.name }}?</h5>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            {{ action }}
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">{{ action }}</button>
         </div>
       </form>
     </template>
@@ -29,7 +18,6 @@
 import { ref, watch, onMounted, reactive } from "vue";
 import ModalBase from "../../ModalBase.vue";
 import { useToast } from "vue-toastification";
-import keycloak from "@/security/KeycloakService.js";
 
 import { UPDATE_VEHICLE } from "@/services/administration/vehicle/vehicleGraphql.js";
 import { useMutation } from "@vue/apollo-composable";
@@ -53,9 +41,14 @@ export default {
     return {};
   },
   setup(props, { emit }) {
-    const toast = useToast();
 
-    let closeModal = ref(false);
+    // Variables declaration
+
+    const toast = useToast();
+  
+    const activeModal = ref(false);
+
+    // Input model
 
     const vehicle = reactive({
       vehicleId: 0,
@@ -66,6 +59,27 @@ export default {
       branchOfficeId: 0,
       active: false
     });
+
+    // Function to get and set data from props
+
+    const setData = (props) => {
+      vehicle.vehicleId = props.vehicleId;
+      vehicle.name = props.name;
+      vehicle.code = props.code;
+      vehicle.description = props.description;
+      vehicle.licensePlate = props.licensePlate;
+      vehicle.branchOfficeId = props.branchOffice.branchOfficeId;
+      vehicle.active = props.active;
+    }
+
+    // Mounted function
+
+    onMounted(() => {
+      activeModal.value = true;
+      setData(props.vehicle);
+    })
+
+    // Watchers
 
     watch(
       () => props.vehicle,
@@ -81,31 +95,34 @@ export default {
       { deep: true }
     );
 
-    const { mutate: updateVehicleMut } = useMutation(
-      UPDATE_VEHICLE,
-      () => ({
-        variables: { inputModel: vehicle },
-      })
-    );
+    // Apollo mutations
 
-    const updateVehicle = () => {
+    const { mutate: updateVehicleMut } = useMutation(UPDATE_VEHICLE, () => ({ variables: { inputModel: vehicle } }));
+
+    // Trigger function form
+
+    const updateVehicle = async () => {
       vehicle.active = !vehicle.active;
-      updateVehicleMut()
+
+      await updateVehicleMut()
         .then((response) => {
+          if (response.data.updateVehicle.statusCode === 'OK') toast.success("Vehículo actualizo exitosamente", { timeout: 2000 });
+          else toast.success(response.data.updateVehicle.message, { timeout: 2000 });
+
           emit("vehicle-updated");
-          toast.success("Vehículo actualizo exitosamente", {
-            timeout: 2000,
-          });
         })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
-      closeModal.value = !closeModal.value;
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+        
+      closeModal();
     };
 
-    return { closeModal, updateVehicle };
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+  // Returning values
+
+    return { activeModal, updateVehicle, closeModal };
   },
 };
 </script>

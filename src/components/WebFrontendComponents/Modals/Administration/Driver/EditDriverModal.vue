@@ -1,67 +1,22 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput
-            type="text"
-            label="Nombre"
-            placeholder="Nombre"
-            v-model="name"
-            :error="nameError"
-          />
-          <Textinput
-            type="text"
-            label="Apellido"
-            placeholder="Apellido"
-            v-model="lastName"
-            :error="lastNameError"
-          />
-          <Textinput
-            type="text"
-            label="Codigo"
-            placeholder="Codigo"
-            v-model="code"
-            :error="codeError"
-          />
-          <Textinput
-            type="text"
-            label="Código de caja"
-            placeholder="Código de caja"
-            v-model="boxCode"
-            :error="boxCodeError"
-          />
-          <VueSelect
-            label="Sucursal"
-            :options="branchOfficesFormatted"
-            placeholder="Seleccione una sucursal"
-            v-model="branchOfficeId"
-            :clearable="false"
-          />
-          <VueSelect
-            label="Usuarios"
-            :options="usersList"
-            placeholder="Seleccione un usuario"
-            v-model="user"
-            :clearable="false"
-          />
+          <Textinput type="text" label="Nombre" placeholder="Nombre" v-model="name" :error="nameError" :maxlength="100"/>
+          <Textinput type="text" label="Apellido" placeholder="Apellido" v-model="lastName" :error="lastNameError" :maxlength="100"/>
+          <Textinput type="text" label="Codigo" placeholder="Codigo" v-model="code" :error="codeError" :maxlength="10"/>
+          <Textinput type="text" label="Código de caja" placeholder="Código de caja" v-model="boxCode" :error="boxCodeError" :maxlength="50"/>
+          <VueSelect label="Sucursal" :options="branchOfficesFormatted" placeholder="Seleccione una sucursal" v-model="branchOfficeId" :clearable="false"/>
+          <VueSelect label="Usuarios" :options="usersListAvailables" placeholder="Seleccione un usuario" v-model="user" :clearable="false"/>
           <div>
             <label class="ltr:inline-block rtl:block input-label">Asociar a un vehículo</label>
             <div class="pt-2">
-              <Checkbox label="Asociar vehículo" v-model="isAssociationVehicleActive" :checked="(isAssociationVehicleActive) ? true : false" :disabled="hasVehicleAssociated ? true : false" />
+              <Checkbox label="Asociar vehículo" v-model="isAssociationVehicleActive" :checked="associationChecked" :disabled="hasVehicleAssociated" />
             </div>
           </div>
           <div :class="hasVehicleAssociated ? 'grid grid-cols-8' : ''">
-            <VueSelect
-              :class="(hasVehicleAssociated) ? 'col-span-7' : ''"
-              v-if="isAssociationVehicleActive"
-              label="Vehículo"
-              :options="vehiclesFormatted"
-              placeholder="Seleccione un vehículo"
-              v-model="vehicleId"
-              :disabled="hasVehicleAssociated ? true : false"
-              :clearable="(vehicleId && !hasVehicleAssociated) ? true : false"
-            />
+            <VueSelect v-if="isAssociationVehicleActive" :class="(hasVehicleAssociated) ? 'col-span-7' : ''" label="Vehículo" :options="vehiclesFormatted" placeholder="Seleccione un vehículo" v-model="vehicleId" :disabled="hasVehicleAssociated ? true : false" :clearable="(vehicleId && !hasVehicleAssociated) ? true : false"/>
             <div v-if="hasVehicleAssociated && isAssociationVehicleActive" class="grid content-end py-3 px-4">
               <button type="button" class="block text-center" @click="deleteAsociation">
                 <Icon icon="heroicons:trash" class="w-9" />
@@ -69,20 +24,12 @@
             </div>
           </div>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
+      <DeleteVehicleDriverModalVue v-if="isModalDeleteVehicleDriverOpen" title="Eliminar asociación" :data="deleteAsociationPayload" @close-modal="isModalDeleteVehicleDriverOpen = false" @asociation-deleted="associationDeletedFunction()"/>
     </template>
   </modal-base>
 </template>
@@ -90,25 +37,27 @@
 <script>
 import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import Checkbox from "@/components/DashCodeComponents/Checkbox";
 import Icon from "@/components/DashCodeComponents/Icon";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
 
-import { UPDATE_DRIVER } from "@/services/administration/driver/driverGraphql.js";
+import DeleteVehicleDriverModalVue from '@/components/WebFrontendComponents/Modals/Administration/VehicleDriver/DeleteVehicleDriverModal.vue';
+
+import { UPDATE_DRIVER, GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
 import { GET_VEHICLE_DRIVER_ASOCIATION, CREATE_VEHICLE_DRIVER } from "@/services/administration/vehicle-driver/vehicleDriverGraphql.js";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
+
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -118,172 +67,156 @@ export default {
     Checkbox,
     Textinput,
     VueSelect,
+    DeleteVehicleDriverModalVue,
   },
   props: {
     data: {
       type: Object,
       default: {}
     },
-    asociationDeleted: Boolean
   },
-  emits: ["driver-updated", "delete-asociation"],
+  emits: ["driver-updated", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    const user = ref(null);
+    const activeModal = ref(false);
 
-    let closeModal = ref(false);
-
-    const isAssociationVehicleActive = ref(false);
-
-    let hasVehicleAssociated = ref(false);
-
-    let associationVehicle = ref(null);
-
-    let branchOfficesFormatted = ref([]);
-    let vehiclesFormatted = ref([]);
+    let isModalDeleteVehicleDriverOpen = ref(false);
 
     const branchOfficeId = ref({});
+    let branchOfficesFormatted = ref([]);
 
     const vehicleId = ref(null);
+    let vehiclesFormatted = ref([]);
 
+    const user = ref(null);
     const usersList = ref([]);
+    let usersListAvailables = ref([]);
 
-    const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_BRANCH_OFFICES)
-    );
+    let isAssociationVehicleActive = ref(false);
+    let associationChecked = ref(false);
+    let hasVehicleAssociated = ref(false);
+    let associationVehicle = ref(null);
 
-    const queryGetVehiclesDriverAsociation = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_VEHICLE_DRIVER_ASOCIATION)
-    );
+    let deleteAsociationPayload = ref({});
 
-    const queryGetVehicles = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_VEHICLES)
-    );
+    // Apollo queries initialization
 
-    const branchOffices = computed(
-      () => queryGetBranchOffices.result.value?.srvBranchOffice ?? []
-    );
+    const queryGetDrivers = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_DRIVERS));
 
-    const vehicles = computed(
-      () => queryGetVehicles.result.value?.srvVehicle ?? []
-    );
+    const queryGetBranchOffices = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_BRANCH_OFFICES));
 
-    const vehiclesDriversAsociation = computed(
-      () => queryGetVehiclesDriverAsociation.result.value?.srvVehicleDriver ?? []
-    );
+    const queryGetVehiclesDriverAsociation = provideApolloClient(apolloClient)(() => useLazyQuery(GET_VEHICLE_DRIVER_ASOCIATION));
 
-    const loadBranchOffices = () => {
-      queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
-    };
+    const queryGetVehicles = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_VEHICLES));
 
-    const loadVehicles = () => {
-      queryGetVehicles.load() || queryGetVehicles.refetch();
-    };
+    // Apollo fetching data from queries
 
-    const loadVehiclesDriversAsociation = () => {
-      queryGetVehiclesDriverAsociation.load() || queryGetVehiclesDriverAsociation.refetch();
-    };
+    const drivers = computed(() => queryGetDrivers.result.value?.srvDriver ?? []);
 
-    onBeforeMount(() => loadVehiclesDriversAsociation());
+    const branchOffices = computed(() => queryGetBranchOffices.result.value?.srvBranchOffice ?? []);
 
-    const initilize = () => {
-      loadBranchOffices();
+    const vehicles = computed(() => queryGetVehicles.result.value?.srvVehicle ?? []);
+
+    const vehiclesDriversAsociation = computed(() => queryGetVehiclesDriverAsociation.result.value?.srvVehicleDriver ?? []);
+
+    // Apollo lazy functions
+
+    const loadDrivers = () => queryGetDrivers.load() || queryGetDrivers.refetch();
+
+    const loadBranchOffices = () => queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
+
+    const loadVehicles = () => queryGetVehicles.load() || queryGetVehicles.refetch();
+
+    const loadVehiclesDriversAsociation = () => queryGetVehiclesDriverAsociation.load() || queryGetVehiclesDriverAsociation.refetch();
+
+    // Before mounted
+
+    onBeforeMount(() => {
+      loadDrivers();
+      loadVehiclesDriversAsociation();
+      loadVehicles();
+    });
+
+    // Function to get and set data from props
+
+    const setData = (props) => {
+      driver.driverId = props.driverId;
+      driver.active = props.active;
+      name.value = props.name;
+      code.value = props.code;
+      boxCode.value = props.boxCode;
+      lastName.value = props.lastName;
+      branchOfficeId.value = props.branchOfficeSelect;
+      user.value = props.userSelect;
+      associationChecked.value = props.hasVehicleAssociated;
+      associationVehicle.value = props.vehicleAssociation;
+      if (associationVehicle.value) isAssociationVehicleActive.value = true;
+    }
+
+    // Initialization function
+
+    const initialize = () => {
       getUserList();
+      loadBranchOffices();
+      setData(props.data);
+      activeModal.value = true;
     };
 
-    onMounted(() => initilize());
+    // Mounted function
 
-    const getUserList = () => {
-      userAdministrationService.getUsers(keycloak.token).then((response) => {
-        usersList.value = formatUserSelect(response.data);
-      });
-    };
+    onMounted(() => initialize());
+
+    // Getting users from keycloak
+
+    const getUserList = () => userAdministrationService.getUsers(keycloak.token).then((response) => usersList.value = formatUserSelect(response.data));
+
+    // Format functions
+
+    const formatUserSelect = (data) => data.map((item) => ({ value: item.id, label: item.username }));
+
+    const formatbranchOfficeSelect = (data) => data.map((item) => ({ value: item.branchOfficeId, label: item.branchOfficeName }));
+
+    // Watchers
 
     watch(
-      () => usersList.value,
+      () => usersList.value, 
       (newValue) => {
-        user.value = newValue[0];
-      },
-      { deep: true }
+        const differentValues = newValue.filter(object1 => {
+          return !drivers.value.some(object2 => {
+            return object1.value === object2.keycloakUserId;
+          });
+        });
+        usersListAvailables.value = differentValues.map((item) => ({ value: item.id, label: item.label }));
+      }, 
+      {deep: true}
     );
 
-    const formatUserSelect = (data) => {
-      const valueFormated = data.map((item) => ({
-        value: item.id,
-        label: item.username,
-      }));
-      return valueFormated;
-    };
-
-    const formatbranchOfficeSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.branchOfficeId,
-        label: item.branchOfficeName,
-      }));
-      return valueFormated;
-    };
-
-    const formatVehicleSelect = (vehiclesAll, vehiclesNotAvailable) => {
-      const differentValues = vehiclesAll.value.filter(object1 => {
-        return !vehiclesNotAvailable.value.some(object2 => {
+    watch(() => vehicles.value, (newValue) => {
+      const differentValues = newValue.filter(object1 => {
+        return !vehiclesDriversAsociation.value.some(object2 => {
           return object1.vehicleId === object2.vehicle.vehicleId;
         });
       });
-      const valueFormated = differentValues.map((item) => ({
-        value: item.vehicleId,
-        label: item.code,
-      }));
-      return valueFormated;
-    };
+      vehiclesFormatted.value = differentValues.map((item) => ({ value: item.vehicleId, label: item.code }));
+    }, { deep: true });
 
-    watch(
-      () => vehicles.value,
-      (newValue) => {
-        vehiclesFormatted.value = formatVehicleSelect(vehicles, vehiclesDriversAsociation);
-      },
-      { deep: true }
-    );
+    watch(() => branchOffices.value, (newValue) => { branchOfficesFormatted.value = formatbranchOfficeSelect(newValue) }, { deep: true });
 
-    watch(
-      () => branchOffices.value,
-      (newValue) => {
-        branchOfficesFormatted.value = formatbranchOfficeSelect(branchOffices);
-        branchOfficeId.value = branchOfficesFormatted.value[0];
-      },
-      { deep: true }
-    );
-
-    watch(
-      () => vehiclesDriversAsociation.value,
-      (newValue) => {
-        loadVehicles();
-      },
-      { deep: true }
-    );
-
-    watch(
-      () => vehicleId.value,
-      (newValue) => {
-        // if (!newValue) {
-        //   hasVehicleAssociated.value = true;
-        // } else {
-        //   hasVehicleAssociated.value = false;
-        // }
-      },
-      { deep: true }
-    );
-
-    watch(() => props.asociationDeleted, (newValue) => {
-      loadVehiclesDriversAsociation();
-      closeModal.value = !closeModal.value;
-    }, { deep: true })
+    watch(() => vehiclesDriversAsociation.value, (newValue) => {
+      if (isAssociationVehicleActive.value) {
+        hasVehicleAssociated.value = true;
+        vehicleId.value = { value: associationVehicle.value.vehicle.vehicleId, label: associationVehicle.value.vehicle.code };
+      } else {
+        vehicleId.value = null;
+      }
+    }, { deep: true });
 
     watch(
       () => props.data,
@@ -294,48 +227,13 @@ export default {
         code.value = newValue.code;
         boxCode.value = newValue.boxCode;
         lastName.value = newValue.lastName;
-        // driver.keycloakUser = newValue.keycloakUser;
-        // driver.keycloakUserId = newValue.keycloakUserId;
-        branchOfficeId.value = findSelectValues(
-          branchOfficesFormatted,
-          newValue.branchOffice.branchOfficeId
-        );
-        user.value = findSelectValues(
-          usersList,
-          newValue.keycloakUserId
-        );
-        associationVehicle.value = vehiclesDriversAsociation.value.find(item => item.driver.driverId === newValue.driverId);
-        if (associationVehicle.value) {
-          isAssociationVehicleActive.value = true;
-          vehicleId.value = findDefaultVehicleSelect(vehicles, associationVehicle.value.vehicle.vehicleId);
-          hasVehicleAssociated.value = true;
-        } else {
-          vehicleId.value = null;
-        }
+        branchOfficeId.value = newValue.branchOfficeSelect;
+        user.value = newValue.userSelect;
       },
       { deep: true }
     );
 
-    const findSelectValues = (data, id) => {
-      const filteredValue = data.value.find((item) => item.value === id);
-      return filteredValue;
-    };
-
-    const findDefaultVehicleSelect = (data, id) => {
-      const filteredValue = data.value.find((item) => item.vehicleId === id);
-      const valueFormated = {
-        value: filteredValue.vehicleId,
-        label: filteredValue.code,
-      };
-      return valueFormated;
-    };
-
-    const formValues = reactive({
-      name: "",
-      lastName: "",
-      code: "",
-      boxCode: "",
-    });
+    // Input model
 
     const driver = reactive({
       driverId: 0,
@@ -355,59 +253,73 @@ export default {
       userName: "",
     });
 
+    // Yup validations rules
+
     const schema = yup.object({
-      name: yup.string().required("Nombre requerido"),
-      lastName: yup.string().required("Apellido requerido"),
-      code: yup.string().required("Código requerido"),
-      boxCode: yup.string().required("Código de caja requerido"),
+      name: yup.string().required("Nombre requerido").max(100),
+      lastName: yup.string().required("Apellido requerido").max(100),
+      code: yup.string().required("Código requerido").max(10),
+      boxCode: yup.string().required("Código de caja requerido").max(50),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
+    // Vee validate userForm
+
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema });
+
+    // vee validate use field
+
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+    const { value: lastName, errorMessage: lastNameError, meta: lastNameMeta } = useField("lastName");
+    const { value: code, errorMessage: codeError, meta: codeMeta } = useField("code");
+    const { value: boxCode, errorMessage: boxCodeError, meta: boxCodeMeta } = useField("boxCode");
+
+    // Apollo mutations
+
+    const { mutate: updateDriver } = useMutation(UPDATE_DRIVER, () => ({ variables: { inputModel: driver } }));
+
+    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({ variables: { inputModel: vehicleDriver } }));
+
+    // Trigger function form
+
+    const onSubmit = handleSubmit(async (values, actions) => {
+      driver.name = values.name;
+      driver.lastName = values.lastName;
+      driver.code = values.code.toUpperCase();
+      driver.boxCode = values.boxCode.toUpperCase();
+      driver.branchOfficeId = branchOfficeId.value.value;
+      driver.keycloakUser = user.value.label;
+      driver.keycloakUserId = user.value.value;
+
+      await updateDriver()
+        .then(async (response) => {
+          if (response.data.updateDrive.statusCode === "OK") toast.success("Conductor actualizado exitosamente", { timeout: 2000 });
+          else toast.error(response.data.updateDrive.message, { timeout: 2000 });
+
+          if (isAssociationVehicleActive.value && !hasVehicleAssociated.value) {
+            vehicleDriver.vehicleId = vehicleId.value.value;
+            vehicleDriver.driverId = driver.driverId;
+            vehicleDriver.userName = keycloak.tokenParsed.preferred_username;
+
+            await createVehicleDriver()
+              .then((response) => {
+                if (response.data.createVehicleDriver.statusCode === "OK") toast.success("Asociación exitosa", { timeout: 2000 });
+                else toast.error(response.data.createVehicleDriver.message, { timeout: 2000 });
+              })
+              .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+          }
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      emit("driver-updated");
+      loadVehiclesDriversAsociation();
+      closeModal();
+      actions.resetForm();
     });
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-        isAssociationVehicleActive.value = false;
-        hasVehicleAssociated.value = false;
-      },
-      { deep: true }
-    );
-
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
-    const {
-      value: lastName,
-      errorMessage: lastNameError,
-      meta: lastNameMeta,
-    } = useField("lastName");
-    const {
-      value: code,
-      errorMessage: codeError,
-      meta: codeMeta,
-    } = useField("code");
-    const {
-      value: boxCode,
-      errorMessage: boxCodeError,
-      meta: boxCodeMeta,
-    } = useField("boxCode");
-
-    const { mutate: updateDriver } = useMutation(UPDATE_DRIVER, () => ({
-      variables: { inputModel: driver },
-    }));
-
-    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({
-      variables: { inputModel: vehicleDriver },
-    }));
+    // Vehicle-driver association
 
     const deleteAsociation = () => {
-      const payload = {
+      deleteAsociationPayload.value = {
         inputModel: {
           vehicleId: vehicleId.value.value,
           driverId: driver.driverId,
@@ -418,62 +330,33 @@ export default {
           label: vehicleId.value.label
         }
       }
-      emit("delete-asociation", payload);
+      isModalDeleteVehicleDriverOpen.value = true;
     }
 
-    const onSubmit = handleSubmit((values, actions) => {
-      driver.name = values.name;
-      driver.lastName = values.lastName;
-      driver.code = values.code.toUpperCase();
-      driver.boxCode = values.boxCode.toUpperCase();
-      driver.branchOfficeId = branchOfficeId.value.value;
-      driver.keycloakUser = user.value.label;
-      driver.keycloakUserId = user.value.value;
+    // Close modal function
 
-      updateDriver()
-        .then((response) => {
-          toast.success("Conductor actualizado exitosamente", {
-            timeout: 2000,
-          });
-          if (isAssociationVehicleActive.value) {
-            vehicleDriver.vehicleId = vehicleId.value.value;
-            vehicleDriver.driverId = driver.driverId;
-            vehicleDriver.userName = keycloak.tokenParsed.preferred_username;
-            createVehicleDriver()
-              .then((response) => {
-                if (response.data.createVehicleDriver.statusCode === "OK") {
-                  toast.success("Asociación exitosa", {
-                    timeout: 2000,
-                  });
-                } else {
-                  toast.error(response.data.createVehicleDriver.message, {
-                    timeout: 2000,
-                  });
-                }
-                loadVehiclesDriversAsociation();
-                isAssociationVehicleActive.value = false;
-              })
-              .catch((error) => {
-                toast.error("Ha ocurrido un error", {
-                  timeout: 2000,
-                });
-              })
-          }
-          emit("driver-updated");
-          closeModal.value = !closeModal.value;
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-          closeModal.value = !closeModal.value;
-        });
+    const closeModal = () => emit('close-modal');
 
-      actions.resetForm();
-    });
+    // Refres values after deletings a vehicle associated
+
+    const associationDeletedFunction = () => {
+      isAssociationVehicleActive.value = false;
+      associationChecked.value = false;
+      hasVehicleAssociated.value = false;
+      loadVehiclesDriversAsociation();
+      loadVehicles();
+    }
+
+    // Returning values
 
     return {
+      onSubmit,
       closeModal,
+      deleteAsociation,
+      associationDeletedFunction,
+      activeModal,
+      hasVehicleAssociated,
+      associationChecked,
       name,
       nameError,
       code,
@@ -482,16 +365,16 @@ export default {
       lastNameError,
       boxCode,
       boxCodeError,
-      onSubmit,
       branchOfficesFormatted,
       branchOfficeId,
       user,
       usersList,
+      usersListAvailables,
       vehiclesFormatted,
       vehicleId,
       isAssociationVehicleActive,
-      hasVehicleAssociated,
-      deleteAsociation,
+      isModalDeleteVehicleDriverOpen,
+      deleteAsociationPayload,
     };
   },
 };

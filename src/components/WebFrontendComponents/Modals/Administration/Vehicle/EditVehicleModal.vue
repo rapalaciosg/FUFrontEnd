@@ -1,62 +1,21 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput
-            type="text"
-            label="Nombre"
-            placeholder="Nombre"
-            v-model="name"
-            :error="nameError"
-          />
-          <Textinput
-            type="text"
-            label="Codigo"
-            placeholder="Codigo"
-            v-model="code"
-            :error="codeError"
-            :maxlength="10"
-          />
-          <Textinput
-            type="text"
-            label="Placa"
-            placeholder="Placa"
-            v-model="licensePlate"
-            :error="licensePlateError"
-            :maxlength="10"
-          />
-          <Textinput
-            type="text"
-            label="Descripción"
-            placeholder="Descripción"
-            v-model="description"
-            :error="descriptionError"
-          />
-          <VueSelect
-            label="Sucursal"
-            :options="branchOfficesFormatted"
-            placeholder="Seleccione una sucursal"
-            v-model="branchOfficeId"
-            :clearable="false"
-          />
+          <Textinput type="text" label="Nombre" placeholder="Nombre" v-model="name" :error="nameError" :maxlength="50"/>
+          <Textinput type="text" label="Codigo" placeholder="Codigo" v-model="code" :error="codeError" :maxlength="10"/>
+          <Textinput type="text" label="Placa" placeholder="Placa" v-model="licensePlate" :error="licensePlateError" :maxlength="10"/>
+          <Textinput type="text" label="Descripción" placeholder="Descripción" v-model="description" :error="descriptionError" :maxlength="250"/>
+          <VueSelect label="Sucursal" :options="branchOfficesFormatted" placeholder="Seleccione una sucursal" v-model="branchOfficeId" :clearable="false"/>
           <div>
             <label class="ltr:inline-block rtl:block input-label">Asociar a un conductor</label>
             <div class="pt-2">
-              <Checkbox label="Asociar conductor" v-model="isAssociationDriverActive" :checked="(isAssociationDriverActive) ? true : false" :disabled="hasDriverAssociated ? true : false" />
+              <Checkbox label="Asociar conductor" v-model="isAssociationDriverActive" :checked="associationChecked" :disabled="hasDriverAssociated" />
             </div>
           </div>
           <div :class="hasDriverAssociated ? 'grid grid-cols-8' : ''">
-            <VueSelect
-              :class="(hasDriverAssociated) ? 'col-span-7' : ''"
-              v-if="isAssociationDriverActive"
-              label="Conductor"
-              :options="driversFormatted"
-              placeholder="Seleccione un conductor"
-              v-model="driverId"
-              :disabled="hasDriverAssociated ? true : false"
-              :clearable="(driverId && !hasDriverAssociated) ? true : false"
-            />
+            <VueSelect v-if="isAssociationDriverActive" :class="(hasDriverAssociated) ? 'col-span-7' : ''" label="Conductor" :options="driversFormatted" placeholder="Seleccione un conductor" v-model="driverId" :disabled="hasDriverAssociated ? true : false" :clearable="(driverId && !hasDriverAssociated) ? true : false"/>
             <div v-if="hasDriverAssociated && isAssociationDriverActive" class="grid content-end py-3 px-4">
               <button type="button" class="block text-center" @click="deleteAsociation">
                 <Icon icon="heroicons:trash" class="w-9" />
@@ -64,20 +23,12 @@
             </div>
           </div>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
+      <DeleteVehicleDriverModalVue v-if="isModalDeleteVehicleDriverOpen" title="Eliminar asociación" :data="deleteAsociationPayload" @close-modal="isModalDeleteVehicleDriverOpen = false" @asociation-deleted="associationDeletedFunction()"/>
     </template>
   </modal-base>
 </template>
@@ -85,24 +36,26 @@
 <script>
 import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import Checkbox from "@/components/DashCodeComponents/Checkbox";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import Icon from "@/components/DashCodeComponents/Icon";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+
 import keycloak from "@/security/KeycloakService";
 
-import { UPDATE_VEHICLE } from "@/services/administration/vehicle/vehicleGraphql.js";
+import DeleteVehicleDriverModalVue from '@/components/WebFrontendComponents/Modals/Administration/VehicleDriver/DeleteVehicleDriverModal.vue';
+
+import { UPDATE_VEHICLE, GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
 import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import { GET_VEHICLE_DRIVER_ASOCIATION, CREATE_VEHICLE_DRIVER } from "@/services/administration/vehicle-driver/vehicleDriverGraphql.js";
 import { GET_ALL_DRIVERS } from "@/services/administration/driver/driverGraphql.js";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
+
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -112,144 +65,131 @@ export default {
     Checkbox,
     Textinput,
     VueSelect,
+    DeleteVehicleDriverModalVue,
   },
   props: {
     data: {
       type: Object,
       default: {}
     },
-    asociationDeleted: Boolean
   },
-  emits: ["vehicle-updated", "delete-asociation"],
+  emits: ["vehicle-updated", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
-    const isAssociationDriverActive = ref(false);
-
-    let hasDriverAssociated = ref(false);
-
-    let associationDriver = ref(null);
-
-    let branchOfficesFormatted = ref([]);
-    let driversFormatted = ref([]);
+    let isModalDeleteVehicleDriverOpen = ref(false);
 
     const branchOfficeId = ref({});
+    let branchOfficesFormatted = ref([]);
 
     const driverId = ref(null);
+    let driversFormatted = ref([]);
 
-    const queryGetBranchOffices = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_BRANCH_OFFICES)
-    );
+    let isAssociationDriverActive = ref(false);
+    let associationChecked = ref(false);
+    let hasDriverAssociated = ref(false);
+    let associationDriver = ref(null);
 
-    const queryGetVehiclesDriverAsociation = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_VEHICLE_DRIVER_ASOCIATION)
-    );
+    let deleteAsociationPayload = ref({});
 
-    const queryGetDrivers = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_DRIVERS)
-    );
+    // Apollo queries initialization
 
-    const drivers = computed(
-      () => queryGetDrivers.result.value?.srvDriver ?? []
-    );
+    const queryGetVehicles = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_VEHICLES));
 
-    const vehiclesDriversAsociation = computed(
-      () => queryGetVehiclesDriverAsociation.result.value?.srvVehicleDriver ?? []
-    );
+    const queryGetBranchOffices = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_BRANCH_OFFICES));
 
-    const branchOffices = computed(
-      () => queryGetBranchOffices.result.value?.srvBranchOffice ?? []
-    );
+    const queryGetVehiclesDriverAsociation = provideApolloClient(apolloClient)(() => useLazyQuery(GET_VEHICLE_DRIVER_ASOCIATION));
 
-    const loadBranchOffices = () => {
-      queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
-    };
+    const queryGetDrivers = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_DRIVERS));
 
-    const loadDrivers = () => {
-      queryGetDrivers.load() || queryGetDrivers.refetch();
-    };
+    // Apollo fetching data from queries
 
-    const loadVehiclesDriversAsociation = () => {
-      queryGetVehiclesDriverAsociation.load() || queryGetVehiclesDriverAsociation.refetch();
-    };
+    const vehicles = computed(() => queryGetVehicles.result.value?.srvVehicle ?? []);
+
+    const drivers = computed(() => queryGetDrivers.result.value?.srvDriver ?? []);
+
+    const vehiclesDriversAsociation = computed(() => queryGetVehiclesDriverAsociation.result.value?.srvVehicleDriver ?? []);
+
+    const branchOffices = computed(() => queryGetBranchOffices.result.value?.srvBranchOffice ?? []);
+
+    // Apollo lazy functions
+
+    const loadVehicles = () => queryGetVehicles.load() || queryGetVehicles.refetch();
+
+    const loadBranchOffices = () => queryGetBranchOffices.load() || queryGetBranchOffices.refetch();
+
+    const loadDrivers = () => queryGetDrivers.load() || queryGetDrivers.refetch();
+
+    const loadVehiclesDriversAsociation = () => queryGetVehiclesDriverAsociation.load() || queryGetVehiclesDriverAsociation.refetch();
+
+    // Before mounted
+
+    onBeforeMount(() => {
+      loadVehicles();
+      loadVehiclesDriversAsociation();
+      loadDrivers();
+    });
+
+    // Function to get and set data from props
+
+    const setData = (props) => {
+      vehicle.vehicleId = props.vehicleId;
+      vehicle.active = props.active;
+      name.value = props.name;
+      code.value = props.code;
+      description.value = props.description;
+      licensePlate.value = props.licensePlate;
+      branchOfficeId.value = props.branchOfficeSelect;
+      associationChecked.value = props.hasDriverAssociated;
+      associationDriver.value = props.driverAssociation;
+      if (associationDriver.value) isAssociationDriverActive.value = true;
+    }
+
+    // Initialization function
 
     const initilize = () => {
       loadBranchOffices();
+      setData(props.data);
+      activeModal.value = true;
     };
 
-    onBeforeMount(() => loadVehiclesDriversAsociation());
+    // Mounted function
 
     onMounted(() => initilize());
 
-    const formatbranchOfficeSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.branchOfficeId,
-        label: item.branchOfficeName,
-      }));
-      return valueFormated;
-    };
+    // Format functions
 
-    const formatDriverSelect = (driversAll, driversNotAvailable) => {
-      const differentValues = driversAll.value.filter(object1 => {
-        return !driversNotAvailable.value.some(object2 => {
+    const formatbranchOfficeSelect = (data) => data.map((item) => ({ value: item.branchOfficeId, label: item.branchOfficeName }));
+
+    // Watchers
+
+    watch(() => drivers.value, (newValue) => {
+      const differentValues = newValue.filter(object1 => {
+        return !vehiclesDriversAsociation.value.some(object2 => {
           return object1.driverId === object2.driver.driverId;
         });
       });
-      const valueFormated = differentValues.map((item) => ({
-        value: item.driverId,
-        label: item.code,
-      }));
-      return valueFormated;
-    };
+      driversFormatted.value = differentValues.map((item) => ({ value: item.driverId, label: item.code }));
+    }, { deep: true });
 
-    watch(
-      () => drivers.value,
-      (newValue) => {
-        driversFormatted.value = formatDriverSelect(drivers, vehiclesDriversAsociation);
-      },
-      { deep: true }
-    );
+    watch(() => branchOffices.value, (newValue) => { branchOfficesFormatted.value = formatbranchOfficeSelect(newValue) }, { deep: true });
 
-    watch(
-      () => branchOffices.value,
-      (newValue) => {
-        branchOfficesFormatted.value = formatbranchOfficeSelect(branchOffices);
-      },
-      { deep: true }
-    );
-
-    watch(
-      () => vehiclesDriversAsociation.value,
-      (newValue) => {
-        loadDrivers();
-      },
-      { deep: true }
-    );
-
-    watch(
-      () => driverId.value,
-      (newValue) => {
-        // if (!newValue) {
-        //   hasDriverAssociated.value = true;
-        // } else {
-        //   hasDriverAssociated.value = false;
-        // }
-      },
-      { deep: true }
-    );
-
-    watch(() => props.asociationDeleted, (newValue) => {
-      loadVehiclesDriversAsociation();
-      closeModal.value = !closeModal.value;
-    }, { deep: true })
+    watch(() => vehiclesDriversAsociation.value, (newValue) => {
+      if (isAssociationDriverActive.value) {
+        hasDriverAssociated.value = true;
+        driverId.value = { value: associationDriver.value.driver.driverId, label: associationDriver.value.driver.code };
+      } else {
+        driverId.value = null;
+      }
+    }, { deep: true });
 
     watch(
       () => props.data,
@@ -260,35 +200,12 @@ export default {
         code.value = newValue.code;
         description.value = newValue.description;
         licensePlate.value = newValue.licensePlate;
-        branchOfficeId.value = findSelectValues(
-          branchOfficesFormatted,
-          newValue.branchOffice.branchOfficeId
-        );
-        associationDriver.value = vehiclesDriversAsociation.value.find(item => item.vehicle.vehicleId === newValue.vehicleId);
-        if (associationDriver.value) {
-          isAssociationDriverActive.value = true;
-          driverId.value = findDefaultDriverSelect(drivers, associationDriver.value.driver.driverId);
-          hasDriverAssociated.value = true;
-        } else {
-          driverId.value = null;
-        }
+        branchOfficeId.value = newValue.branchOfficeSelect;
       },
       { deep: true }
     );
 
-    const findSelectValues = (data, id) => {
-      const filteredValue = data.value.find((item) => item.value === id);
-      return filteredValue;
-    };
-
-    const findDefaultDriverSelect = (data, id) => {
-      const filteredValue = data.value.find((item) => item.driverId === id);
-      const valueFormated = {
-        value: filteredValue.driverId,
-        label: filteredValue.code,
-      };
-      return valueFormated;
-    };
+    // Input model
 
     const vehicle = reactive({
       vehicleId: 0,
@@ -306,58 +223,69 @@ export default {
       userName: "",
     });
 
+    // Yup validations rules
+
     const schema = yup.object({
-      name: yup.string().required("Nombre requerido"),
+      name: yup.string().required("Nombre requerido").max(50),
       code: yup.string().required("Código requerido").max(10),
-      description: yup.string().required("Descripción requerida"),
+      description: yup.string().required("Descripción requerida").max(250),
       licensePlate: yup.string().required("Placa requerida").max(10),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema
+    // Vee validate userForm
+
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema });
+
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+    const { value: code, errorMessage: codeError, meta: codeMeta } = useField("code");
+    const { value: description, errorMessage: descriptionError, meta: descriptionMeta } = useField("description");
+    const { value: licensePlate, errorMessage: licensePlateError, meta: licensePlateMeta } = useField("licensePlate");
+
+    // vee validate use field
+
+    const { mutate: updateVehicle } = useMutation(UPDATE_VEHICLE, () => ({ variables: { inputModel: vehicle } }));
+
+    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({ variables: { inputModel: vehicleDriver } }));
+
+    // Trigger function form
+
+    const onSubmit = handleSubmit(async (values, actions) => {
+      vehicle.name = values.name;
+      vehicle.code = values.code.toUpperCase();
+      vehicle.description = values.description;
+      vehicle.licensePlate = licensePlate;
+      vehicle.branchOfficeId = branchOfficeId.value.value;
+
+      await updateVehicle()
+        .then(async (response) => {
+          if (response.data.updateVehicle.statusCode === "OK") toast.success("Vehículo actualizado exitosamente", { timeout: 2000 });
+          else toast.error(response.data.updateVehicle.message, { timeout: 2000 });
+
+          if (isAssociationDriverActive.value && !hasDriverAssociated.value) {
+            vehicleDriver.vehicleId = vehicle.vehicleId;
+            vehicleDriver.driverId = driverId.value.value;
+            vehicleDriver.userName = keycloak.tokenParsed.preferred_username;
+
+            await createVehicleDriver()
+              .then((response) => {
+                if (response.data.createVehicleDriver.statusCode === "OK") toast.success("Asociación exitosa", { timeout: 2000 });
+                else toast.error(response.data.createVehicleDriver.message, { timeout: 2000 });
+              })
+              .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+          }
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      emit("vehicle-updated");
+      loadVehiclesDriversAsociation();
+      closeModal();
+      actions.resetForm();
     });
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-        isAssociationDriverActive.value = false;
-        hasDriverAssociated.value = false;
-      },
-      { deep: true }
-    );
-
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
-    const {
-      value: code,
-      errorMessage: codeError,
-      meta: codeMeta,
-    } = useField("code");
-    const {
-      value: description,
-      errorMessage: descriptionError,
-      meta: descriptionMeta,
-    } = useField("description");
-    const {
-      value: licensePlate,
-      errorMessage: licensePlateError,
-      meta: licensePlateMeta,
-    } = useField("licensePlate");
-
-    const { mutate: updateVehicle } = useMutation(UPDATE_VEHICLE, () => ({
-      variables: { inputModel: vehicle },
-    }));
-
-    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({
-      variables: { inputModel: vehicleDriver },
-    }));
+    // Vehicle-driver association
 
     const deleteAsociation = () => {
-      const payload = {
+      deleteAsociationPayload.value = {
         inputModel: {
           vehicleId: vehicle.vehicleId,
           driverId: driverId.value.value,
@@ -368,60 +296,33 @@ export default {
           label: driverId.value.label
         }
       }
-      emit("delete-asociation", payload);
+      isModalDeleteVehicleDriverOpen.value = true;
     }
 
-    const onSubmit = handleSubmit((values, actions) => {
-      vehicle.name = values.name;
-      vehicle.code = values.code.toUpperCase();
-      vehicle.description = values.description;
-      vehicle.licensePlate = licensePlate;
-      vehicle.branchOfficeId = branchOfficeId.value.value;
+     // Close modal function
 
-      updateVehicle()
-        .then((response) => {
-          toast.success("Vehículo actualizado exitosamente", {
-            timeout: 2000,
-          });
-          if (isAssociationDriverActive.value) {
-            vehicleDriver.vehicleId = vehicle.vehicleId;
-            vehicleDriver.driverId = driverId.value.value;
-            vehicleDriver.userName = keycloak.tokenParsed.preferred_username;
-            createVehicleDriver()
-              .then((response) => {
-                if (response.data.createVehicleDriver.statusCode === "OK") {
-                  toast.success("Asociación exitosa", {
-                    timeout: 2000,
-                  });
-                } else {
-                  toast.error(response.data.createVehicleDriver.message, {
-                    timeout: 2000,
-                  });
-                }
-                loadVehiclesDriversAsociation();
-                isAssociationDriverActive.value = false;
-              })
-              .catch((error) => {
-                toast.error("Ha ocurrido un error", {
-                  timeout: 2000,
-                });
-              })
-          }
-          emit("vehicle-updated");
-          closeModal.value = !closeModal.value;
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-          closeModal.value = !closeModal.value;
-        });
+     const closeModal = () => emit('close-modal');
 
-      actions.resetForm();
-    });
+    // Refres values after deletings a vehicle associated
+
+    const associationDeletedFunction = () => {
+      isAssociationDriverActive.value = false;
+      associationChecked.value = false;
+      hasDriverAssociated.value = false;
+      loadVehiclesDriversAsociation();
+      loadDrivers();
+    }
+
+    // Returning values
 
     return {
+      onSubmit,
       closeModal,
+      deleteAsociation,
+      associationDeletedFunction,
+      activeModal,
+      hasDriverAssociated,
+      associationChecked,
       name,
       nameError,
       code,
@@ -430,14 +331,13 @@ export default {
       descriptionError,
       licensePlate,
       licensePlateError,
-      onSubmit,
       branchOfficesFormatted,
       branchOfficeId,
       driversFormatted,
       driverId,
       isAssociationDriverActive,
-      hasDriverAssociated,
-      deleteAsociation,
+      isModalDeleteVehicleDriverOpen,
+      deleteAsociationPayload,
     };
   },
 };
