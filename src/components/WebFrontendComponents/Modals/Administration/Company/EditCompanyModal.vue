@@ -1,43 +1,13 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput
-            type="text"
-            label="Nombre de la compañia"
-            placeholder="Nombre de la compañia"
-            v-model="name"
-            :error="nameError"
-          />
-          <Textinput
-            type="text"
-            label="Prefijo"
-            placeholder="Prefijo"
-            v-model="prefix"
-            :error="prefixError"
-          />
-          <Textinput
-            type="text"
-            label="Dirección"
-            placeholder="Dirección"
-            v-model="address"
-            :error="addressError"
-          />
-          <VueSelect
-            label="Provincias"
-            :options="provincesFormatted"
-            placeholder="Seleccione una provincia"
-            v-model="provinceId"
-            :clearable="false"
-          />
-          <VueSelect
-            label="Tipos de compañias"
-            :options="companyTypesFormatted"
-            placeholder="Seleccione un tipo de compañia"
-            v-model="companyTypeId"
-            :clearable="false"
-          />
+          <Textinput type="text" label="Nombre de la compañia" placeholder="Nombre de la compañia" v-model="name" :error="nameError" :maxlength="100" />
+          <Textinput type="text" label="Prefijo" placeholder="Prefijo" v-model="prefix" :error="prefixError" :maxlength="5" />
+          <Textinput type="text" label="Dirección" placeholder="Dirección" v-model="address" :error="addressError" :maxlength="200" />
+          <VueSelect label="Provincias" :options="provincesFormatted" placeholder="Seleccione una provincia" v-model="provinceId" :clearable="false" />
+          <VueSelect label="Tipos de compañias" :options="companyTypesFormatted" placeholder="Seleccione un tipo de compañia" v-model="companyTypeId" :clearable="false" />
           <div>
             <label class="ltr:inline-block rtl:block input-label">Distribuidor</label>
             <div class="pt-2">
@@ -45,18 +15,9 @@
             </div>
           </div>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -66,21 +27,20 @@
 <script>
 import { ref, watch, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
-import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 import { UPDATE_COMPANY } from "@/services/administration/company/companyGraphql.js";
 import { GET_ALL_PROVINCES } from "@/services/catalogs/provinces/provincesGraphql.js";
 import { GET_ALL_COMPANY_TYPES } from "@/services/catalogs/companyType/companyTypeGraphql.js";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
+
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -100,80 +60,79 @@ export default {
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const isDistributor = ref(false);
     const defaultValue = ref(false);
 
+    const provinceId = ref({});
     let provincesFormatted = ref([]);
+
+    const companyTypeId = ref({});
     let companyTypesFormatted = ref([]);
 
-    const provinceId = ref({});
-    const companyTypeId = ref({});
+    // Apollo queries initialization
 
-    const queryGetCompanyTypes = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_COMPANY_TYPES)
-    );
-    const queryGetProvinces = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_PROVINCES)
-    );
+    const queryGetCompanyTypes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANY_TYPES));
 
-    const companyTypes = computed(
-      () => queryGetCompanyTypes.result.value?.srvCompanyTypes ?? []
-    );
-    const provinces = computed(
-      () => queryGetProvinces.result.value?.srvProvince ?? []
-    );
+    const queryGetProvinces = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_PROVINCES));
+
+    // Apollo fetching data from queries
+
+    const companyTypes = computed(() => queryGetCompanyTypes.result.value?.srvCompanyTypes ?? []);
+
+    const provinces = computed(() => queryGetProvinces.result.value?.srvProvince ?? []);
+
+    // Apollo lazy functions
+
+    const loadCompanyTipes = () => queryGetCompanyTypes.load() || queryGetCompanyTypes.refetch();
+
+    const loadProvinces = () => queryGetProvinces.load() || queryGetProvinces.refetch();
+
+    // Function to get and set data from props
+
+    const setData = (props) => {
+      company.companyId = props.companyId;
+      name.value = props.name;
+      prefix.value = props.prefix;
+      address.value = props.address;
+      isDistributor.value = props.isDistributor;
+      if (isDistributor.value) defaultValue.value = true;
+      else defaultValue.value = false;
+      provinceId.value = props.provinceSelect;
+      companyTypeId.value = props.companyTypeSelect;
+    }
+
+    // Initialization function
 
     const initilize = () => {
-      queryGetCompanyTypes.load();
-      queryGetProvinces.load();
+      loadCompanyTipes();
+      loadProvinces();
+      setData(props.data);
+      activeModal.value = true;
     };
+
+    // Mounted function
 
     onMounted(() => initilize());
 
-    const formatProvinceSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.provinceId,
-        label: item.name,
-      }));
-      return valueFormated;
-    };
+    // Format functions
 
-    const formatCompanyTypeSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.companyTypeId,
-        label: item.name,
-      }));
-      return valueFormated;
-    };
+    const formatProvinceSelect = (data) => data.map((item) => ({ value: item.provinceId, label: item.name }));
 
-    watch(
-      () => provinces.value,
-      (newValue) => {
-        provincesFormatted.value = formatProvinceSelect(provinces);
-      },
-      { deep: true }
-    );
+    const formatCompanyTypeSelect = (data) => data.map((item) => ({ value: item.companyTypeId, label: item.name }));
+    
+    // Watchers
 
-    watch(
-      () => companyTypes.value,
-      (newValue) => {
-        companyTypesFormatted.value = formatCompanyTypeSelect(companyTypes);
-      },
-      { deep: true }
-    );
+    watch(() => provinces.value, (newValue) => { provincesFormatted.value = formatProvinceSelect(newValue) }, { deep: true });
 
-    const findSelectValues = (data, id) => {
-      const filteredValue = data.value.find((item) => item.value === id);
-      return filteredValue;
-    };
+    watch(() => companyTypes.value, (newValue) => { companyTypesFormatted.value = formatCompanyTypeSelect(newValue) }, { deep: true });
 
     watch(
       () => props.data,
@@ -185,23 +144,13 @@ export default {
         isDistributor.value = newValue.isDistributor;
         if (isDistributor.value) defaultValue.value = true
         else defaultValue.value = false
-        provinceId.value = findSelectValues(
-          provincesFormatted,
-          newValue.province.provinceId
-        );
-        companyTypeId.value = findSelectValues(
-          companyTypesFormatted,
-          newValue.companyType.companyTypeId
-        );
+        provinceId.value = props.provinceSelect;
+        companyTypeId.value = props.companyTypeSelect;
       },
       { deep: true }
     );
 
-    const formValues = reactive({
-      name: "",
-      prefix: "",
-      address: "",
-    });
+    // Input model
 
     const company = reactive({
       companyId: 0,
@@ -214,46 +163,31 @@ export default {
       isDistributor: false
     });
 
+    // Yup validations rules
+
     const schema = yup.object({
-      name: yup.string().required("Nombre requerido"),
-      prefix: yup.string().required("Prefijo requerido"),
-      address: yup.string().required("Dirección requerido"),
+      name: yup.string().required("Nombre requerido").max(100),
+      prefix: yup.string().required("Prefijo requerido").max(5),
+      address: yup.string().required("Dirección requerido").max(200),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate userForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema });
 
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
-    const {
-      value: prefix,
-      errorMessage: prefixError,
-      meta: prefixMeta,
-    } = useField("prefix");
-    const {
-      value: address,
-      errorMessage: addressError,
-      meta: addressMeta,
-    } = useField("address");
+    // vee validate use field
 
-    const { mutate: updateCompany } = useMutation(UPDATE_COMPANY, () => ({
-      variables: { inputModel: company },
-    }));
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+    const { value: prefix, errorMessage: prefixError, meta: prefixMeta } = useField("prefix");
+    const { value: address, errorMessage: addressError, meta: addressMeta } = useField("address");
 
-    const onSubmit = handleSubmit((values, actions) => {
+    // Apollo mutations
+
+    const { mutate: updateCompany } = useMutation(UPDATE_COMPANY, () => ({ variables: { inputModel: company } }));
+
+    // Trigger function form
+
+    const onSubmit = handleSubmit(async (values, actions) => {
       company.name = values.name;
       company.prefix = values.prefix.toUpperCase();
       company.address = values.address;
@@ -261,25 +195,29 @@ export default {
       company.companyTypeId = companyTypeId.value.value;
       company.isDistributor = isDistributor.value;
 
-      updateCompany()
+      await updateCompany()
         .then((response) => {
-          emit("company-updated");
-          toast.success("Compañia editada exitosamente", {
-            timeout: 2000,
-          });
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+          if (response.data.updateCompany.statusCode === "OK") toast.success("Compañía editada exitosamente", { timeout: 2000 });
+          else toast.error(response.data.updateCompany.message, { timeout: 2000 });
 
-      closeModal.value = !closeModal.value;
+          emit("company-updated");
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }));
+
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       name,
       nameError,
       prefix,
@@ -287,12 +225,11 @@ export default {
       address,
       addressError,
       provinceId,
-      companyTypeId,
-      onSubmit,
-      companyTypesFormatted,
       provincesFormatted,
+      companyTypeId,
+      companyTypesFormatted,
       isDistributor,
-      defaultValue
+      defaultValue,
     };
   },
 };

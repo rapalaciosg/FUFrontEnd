@@ -159,7 +159,7 @@ export default {
 
     onMounted(() => {
       loadBranchOffices();
-      headersVehiclesListExport.value = formatHeadersRoutesListExport(headersVehiclesTable);
+      headersVehiclesListExport.value = formatHeadersListExport(headersVehiclesTable);
     });
 
     // Watchers
@@ -228,7 +228,7 @@ export default {
 
     // Format functions
 
-    const formatHeadersRoutesListExport = (data) => {
+    const formatHeadersListExport = (data) => {
       let array = new Map();
       for (let index = 0; index < data.length; index++) {
         array.set(data[index].label, data[index].field)

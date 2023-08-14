@@ -1,21 +1,21 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <div class="grid grid-cols-2 gap-5 px-4 py-6">
         <p class="font-medium">Id:</p>
         <p>{{ data.branchOfficeId }}</p>
         <p class="font-medium">Nombre:</p>
         <p>{{ data.branchOfficeName }}</p>
-        <p class="font-medium">Compañia Id:</p>
-        <p>{{ data.companyId }}</p>
+        <p class="font-medium">Compañía:</p>
+        <p>{{ data.company.name }}</p>
         <p class="font-medium">Ruc:</p>
         <p>{{ data.ruc }}</p>
         <p class="font-medium">Dv:</p>
         <p>{{ data.dv }}</p>
         <p class="font-medium">Dirección:</p>
         <p>{{ data.address }}</p>
-        <p class="font-medium">Provincia Id:</p>
-        <p>{{ data.provinceId }}</p>
+        <p class="font-medium">Provincia:</p>
+        <p>{{ data.province.name }}</p>
         <p class="font-medium">Teléfono:</p>
         <p>{{ data.phone }}</p>
         <p class="font-medium">Correo:</p>
@@ -30,22 +30,15 @@
           </div>
         </span>
       </div>
-      <div
-        class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-      >
-        <button
-          class="btn btn-secondary block text-center"
-          @click="closeModal = !closeModal"
-        >
-          Cerrar
-        </button>
+      <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+        <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
       </div>
     </template>
   </modal-base>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import ModalBase from "../../ModalBase.vue";
 import checkedImg from "@/assets/images/all-img/icons8-checked-25.png";
 import disabledImg from "@/assets/images/all-img/icons8-disabled-25.png";
@@ -60,19 +53,29 @@ export default {
       default: {},
     },
   },
-  emits: [],
+  emits: ["close-modal"],
   data() {
     return {
       checkedImg,
       disabledImg,
     };
   },
-  watch: {},
-  methods: {},
   setup(props, { emit }) {
-    let closeModal = ref(false);
+    // Variables declaration
 
-    return { closeModal };
+    const activeModal = ref(false);
+
+    // Mounted function
+
+    onMounted(() => activeModal.value = true);
+
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
+    return { activeModal, closeModal };
   },
 };
 </script>
