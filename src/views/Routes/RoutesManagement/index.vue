@@ -2,97 +2,34 @@
   <div class="space-y-5">
     <Card>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <VueSelect
-          :options="companiesFormatted"
-          placeholder="Seleccione una compañía"
-          v-model="companyId"
-          :clearable="(companyId) ? true : false"
-        />
+        <VueSelect :options="companiesFormatted" placeholder="Seleccione una compañía" v-model="companyId" :clearable="(companyId) ? true : false"/>
         <div class="grid grid-cols-2 gap-x-5">
-          <download-excel 
-            class="btn-info rounded pt-2 text-center" 
-            :data="routesList"
-            :fields="headersRoutesListExport"
-            name="filename.xls"
-          >
-          Exportar
-          </download-excel>
-          <Button
-            class="h-[40px]"
-            text="Crear ruta"
-            btnClass="btn-success"
-            @click="toggleModal()"
-          />
+          <download-excel class="btn-info rounded pt-2 text-center" :data="routesList" :fields="headersRoutesListExport" name="filename.xls">Exportar</download-excel>
         </div>
       </div>
     </Card>
-    <AdvancedTable
-      title="Listado de rutas"
-      :headers="headersTable"
-      :data="routesList"
-      :actions="actions"
-      :showSelectOptions="false"
-      @open-modal="toggleModal"
-    ></AdvancedTable>
-    <CreateRouteModal
-      title="Crear ruta"
-      btnClass="btn-success"
-      :showButton="false"
-      :activeModal="isModalCreateOpen"
-      :routeSettings="routeSettings"
-      @close-modal="isModalCreateOpen = false"
-      @route-created="loadRoutes()"
-    />
-    <DetailsRoutesModal
-      title="Detalles de ruta"
-      :activeModal="isModalDetailsOpen"
-      :showButton="false"
-      :data="routeDetails"
-      :routeSettings="routeSettings"
-      @close-modal="isModalDetailsOpen = false"
-    />
-    <EditRouteModal
-      title="Editar ruta"
-      :activeModal="isModalOpen"
-      :showButton="false"
-      :data="routeDetails"
-      :routeSettings="routeSettings"
-      @close-modal="isModalOpen = false"
-      @route-updated="loadRoutes()"
-    />
-    <DeleteRouteModal
-      title="Eliminar ruta"
-      :activeModal="isModalDeleteOpen"
-      :showButton="false"
-      :route="routeDetails"
-      @close-modal="isModalDeleteOpen = false"
-      @route-deleted="loadRoutes()"
-    />
-    <NotificationRouteSettingModal
-      title="Rutas no configuradas"
-      :activeModal="isModalNotificationRouteSettingsOpen"
-      :showButton="false"
-      @close-modal="isModalNotificationRouteSettingsOpen = false"
-      @open-route-setting-modal="isModalRouteSettingsOpen = true"
-    />
-    <RoutesSettingsModalVue
-      title="Configurar rutas"
-      btnClass="btn-success"
-      :showButton="false"
-      :activeModal="isModalRouteSettingsOpen"
-      :isConfigured="isConfigured"
-      :routesSettings="routeSettings"
-      @close-modal="isModalRouteSettingsOpen = false"
-    />
+    <AdvancedTable title="Listado de rutas" :headers="headersTable" :data="routesList" :actions="actions" :showSelectOptions="false" @open-modal="toggleModal">
+      <template v-slot:button>
+        <Button class="h-[40px]" text="Crear ruta" btnClass="btn-success" @click="toggleModal()"/>
+      </template>
+    </AdvancedTable>
+    <CreateRouteModal v-if="isModalCreateOpen" title="Crear ruta" :routeSettings="routeSettings" @close-modal="isModalCreateOpen = false" @route-created="loadRoutes()"/>
+    <DetailsRoutesModal v-if="isModalDetailsOpen" title="Detalles de ruta" :data="routeDetails" :routeSettings="routeSettings" @close-modal="isModalDetailsOpen = false"/>
+    <EditRouteModal v-if="isModalEditOpen" title="Editar ruta" :data="routeDetails" :routeSettings="routeSettings" @close-modal="isModalEditOpen = false" @route-updated="loadRoutes()"/>
+    <DeleteRouteModal v-if="isModalDeleteOpen" title="Eliminar ruta" :route="routeDetails" @close-modal="isModalDeleteOpen = false" @route-deleted="loadRoutes()"/>
+    <NotificationRouteSettingModal v-if="isModalNotificationRouteSettingsOpen" title="Rutas no configuradas" @close-modal="isModalNotificationRouteSettingsOpen = false" @open-route-setting-modal="isModalRouteSettingsOpen = true"/>
+    <RoutesSettingsModalVue v-if="isModalRouteSettingsOpen" title="Configurar rutas" :routesSettings="routeSettings" @close-modal="isModalRouteSettingsOpen = false"/>
   </div>
 </template>
 
 <script>
 import { computed, ref, onMounted, watch, reactive, onBeforeMount } from "vue";
+
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import Card from "@/components/DashCodeComponents/Card";
 import Button from "@/components/DashCodeComponents/Button";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
 import { headersRoutesTable } from "@/constant/routes/routes/constantRoutes.js";
 
 import DetailsRoutesModal from "@/components/WebFrontendComponents/Modals/Routes/Routes/DetailsRoutesModal.vue";
@@ -105,6 +42,7 @@ import NotificationRouteSettingModal from "@/components/WebFrontendComponents/Mo
 import { GET_ALL_ROUTES, GET_ROUTES_BY_COMPANY } from "@/services/routes/routes/routesGraphql.js";
 import { GET_ROUTES_SETTINGS } from "@/services/settings/routeSettings/routeSettingsGraphql";
 import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
+
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
@@ -130,47 +68,47 @@ export default {
       ],
     };
   },
-  mounted() {},
-  methods: {},
-  setup() {
+  setup(props, {emit}) {
+
+    // Variables declaration
+
     let routeDetails = ref({});
 
-    let isModalOpen = ref(false);
+    let isModalEditOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
     let isModalCreateOpen = ref(false);
+
     let isModalNotificationRouteSettingsOpen = ref(false);
     let isModalRouteSettingsOpen = ref(false);
 
     let headersTable = ref([]);
+
     let routesInitialList = ref([]);
     let routesList = ref([]);
+
     let headersRoutesListExport = ref({});
 
+    const companyId = ref(null);
     let companiesFormatted = ref([]);
 
-    const companyId = ref(null);
+    let routeSettings = reactive({ routeBy: null, routeName: null });
+
+    // Apollo variables
 
     const variablesRoutesByCompany = reactive({ id: 0 });
 
-    let routeSettings = reactive({
-      routeBy: null,
-      routeName: null,
-    });
+    // Apollo queries initialization
 
     const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES));
 
-    const queryGetRoutes = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_ROUTES)
-    );
+    const queryGetRoutes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_ROUTES));
 
-    const queryGetRoutesByCompany = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ROUTES_BY_COMPANY, variablesRoutesByCompany)
-    );
+    const queryGetRoutesByCompany = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ROUTES_BY_COMPANY, variablesRoutesByCompany));
 
-    const queryGetRoutesSettings = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ROUTES_SETTINGS)
-    );
+    const queryGetRoutesSettings = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ROUTES_SETTINGS));
+
+    // Apollo fetching data
 
     const routes = computed(() => queryGetRoutes.result.value?.srvRoutes ?? []);
 
@@ -178,53 +116,42 @@ export default {
 
     const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
 
-    const routesSettings = computed(
-      () => queryGetRoutesSettings.result.value?.srvRouteSetting ?? []
-    );
+    const routesSettings = computed(() => queryGetRoutesSettings.result.value?.srvRouteSetting ?? []);
 
-    const loadRoutes = () => {
-      queryGetRoutes.load() || queryGetRoutes.refetch();
-    };
+    // Apollo lazy functions
 
-    const loadRoutesByCompany = () => {
-      queryGetRoutesByCompany.load() || queryGetRoutesByCompany.refetch();
-    };
+    const loadRoutes = () => queryGetRoutes.load() || queryGetRoutes.refetch();
 
-    const loadCompanies = () => {
-      queryGetCompanies.load() || queryGetCompanies.refetch()
-    }
+    const loadRoutesByCompany = () => queryGetRoutesByCompany.load() || queryGetRoutesByCompany.refetch();
 
-    const loadRoutesSettings = () => {
-      queryGetRoutesSettings.load() || queryGetRoutesSettings.refetch();
-    };
+    const loadCompanies = () => queryGetCompanies.load() || queryGetCompanies.refetch();
 
-    onBeforeMount(() => {
-      loadRoutesSettings();
-    });
+    const loadRoutesSettings = () => queryGetRoutesSettings.load() || queryGetRoutesSettings.refetch();
+
+    // Before mounted function
+
+    onBeforeMount(() => loadRoutesSettings());
+
+    // Mounted function
 
     onMounted(() => {
       loadRoutes();
       loadCompanies();
     });
 
+    // Watchers
+
     watch(
       () => routes.value,
       (newValue) => {
-        routesList.value = routes.value;
-        routesInitialList.value = routes.value;
+        routesList.value = newValue;
+        routesInitialList.value = newValue;
       }
     );
 
-    watch(
-      () => routesByCompany.value,
-      (newValue) => {
-        routesList.value = routesByCompany.value;
-      }
-    );
+    watch(() => routesByCompany.value, (newValue) => { routesList.value = newValue });
 
-    watch(() => companies.value, (newValue) => {
-      companiesFormatted.value = formatCompanySelect(companies);
-    }, { deep: true })
+    watch(() => companies.value, (newValue) => { companiesFormatted.value = formatCompanySelect(newValue)}, { deep: true });
 
     watch(() => companyId.value, (newValue) => {
       if (newValue && newValue.value != 0) {
@@ -233,7 +160,7 @@ export default {
       } else {
         routesList.value = routesInitialList.value;
       }
-    }, { deep: true })
+    }, { deep: true });
 
     watch(
       () => routesSettings.value,
@@ -250,14 +177,16 @@ export default {
         // routeSettings.routeName = { code: 'ROUTE_NAME', value: null }
 
         if (routeSettings.routeBy && routeSettings.routeName.value === "VLP") {
-          headersTable.value = formatTableHeaders(headersRoutesTable, "Vehículo", "vehicle.licensePlate");
+          headersTable.value = formatTableHeaders(headersRoutesTable, "vehicle.licensePlate");
           headersRoutesListExport.value = formatHeadersRoutesListExport(headersTable.value);
         } else {
-          headersTable.value = formatTableHeaders(headersRoutesTable, "Vehículo", "vehicle.code");
+          headersTable.value = formatTableHeaders(headersRoutesTable, "vehicle.code");
           headersRoutesListExport.value = formatHeadersRoutesListExport(headersTable.value);
         }
       }
     );
+
+    // Format functions
 
     const formatHeadersRoutesListExport = (data) => {
       let array = new Map();
@@ -268,27 +197,21 @@ export default {
         obj[key] = value;
         return obj;
       }, {});
+
       delete valueFormatted.Acciones;
+
       return valueFormatted;
     }
 
-    const formatCompanySelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.companyId,
-        label: item.name,
-      }));
-      return valueFormated;
-    };
+    const formatCompanySelect = (data) => data.map((item) => ({ value: item.companyId, label: item.name }));
 
-    const formatTableHeaders = (data, label, value) => {
+    const formatTableHeaders = (data, value) => {
       const index = 8;
-      const headersFormatted = [
-        ...data.slice(0, index),
-        { label: label, field: value },
-        ...data.slice(index),
-      ];
+      const headersFormatted = [ ...data.slice(0, index), { label: 'Vehículo', field: value }, ...data.slice(index)];
       return headersFormatted;
     };
+
+    // Toggle modals
 
     const toggleModal = (value) => {
       if (!value) {
@@ -301,18 +224,27 @@ export default {
           isModalCreateOpen.value = true;
         else isModalNotificationRouteSettingsOpen.value = true;
       } else {
-        if (value.action === "edit") isModalOpen.value = true;
+
+        routeDetails.value = value.row;
+
+        // routeDetails.value['driverVehicleSelect'] = { value: value.row.companyType.companyTypeId, label: value.row.companyType.name };
+
+        routeDetails.value['companySelect'] = { value: value.row.company.companyId, label: value.row.company.name };
+
+        if (value.action === "edit") isModalEditOpen.value = true;
 
         if (value.action === "details") isModalDetailsOpen.value = true;
 
         if (value.action === "delete") isModalDeleteOpen.value = true;
-
-        routeDetails.value = value.row;
       }
     };
+
+    // Returning values
+
     return {
       toggleModal,
-      isModalOpen,
+      loadRoutes,
+      isModalEditOpen,
       routeDetails,
       isModalDetailsOpen,
       isModalDeleteOpen,
@@ -321,7 +253,6 @@ export default {
       routeSettings,
       routes,
       headersTable,
-      loadRoutes,
       companiesFormatted,
       companyId,
       routesList,

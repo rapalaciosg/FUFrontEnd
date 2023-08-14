@@ -1,63 +1,18 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput
-            type="text"
-            label="Nombre"
-            placeholder="Nombre"
-            v-model="name"
-            :error="nameError"
-          />
-          <Textinput
-            type="text"
-            label="Código"
-            placeholder="Código"
-            v-model="code"
-            :error="codeError"
-          />
-          <Textinput
-            type="text"
-            label="Tag"
-            placeholder="Tag"
-            v-model="tag"
-            :error="tagError"
-          />
-          <Textinput
-            type="number"
-            label="Precio base"
-            placeholder="Precio base"
-            v-model="basePrice"
-            :error="basePriceError"
-          />
-          <Textinput
-            type="number"
-            label="Stock"
-            placeholder="Stock"
-            v-model="stock"
-            :error="stockError"
-          />
-          <VueSelect
-            label="Compañia"
-            :options="companiesFormatted"
-            placeholder="Seleccione una compañia"
-            v-model="companyId"
-            :clearable="false"
-          />
+          <Textinput type="text" label="Nombre" placeholder="Nombre" v-model="name" :error="nameError" :maxlength="150"/>
+          <Textinput type="text" label="Código" placeholder="Código" v-model="code" :error="codeError" :maxlength="10"/>
+          <Textinput type="text" label="Tag" placeholder="Tag" v-model="tag" :error="tagError" :maxlength="50"/>
+          <Textinput type="number" label="Precio base" placeholder="Precio base" v-model="basePrice" :error="basePriceError"/>
+          <VueSelect label="Categoría" :options="categoriesFormatted" placeholder="Seleccione una categoría" v-model="productCategoryId" :clearable="false"/>
+          <VueSelect label="Compañia" :options="companiesFormatted" placeholder="Seleccione una compañia" v-model="companyId" :clearable="false"/>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -67,19 +22,19 @@
 <script>
 import { ref, watch, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
 import { UPDATE_PRODUCT } from "@/services/inventory/products/productsGraphql.js";
 import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
+import { GET_ALL_PRODUCT_CATEGORIES } from "@/services/inventory/productCategories/productCategoriesGraphql.js";
+
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -94,55 +49,78 @@ export default {
       default: {}
     }
   },
-  emits: ["product-updated"],
+  emits: ["product-updated", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
-
-    let companiesFormatted = ref([]);
+    const activeModal = ref(false);
 
     const companyId = ref({});
+    let companiesFormatted = ref([]);
 
-    const queryGetCompanies = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_COMPANIES)
-    );
+    const productCategoryId = ref({});
+    let categoriesFormatted = ref([]);
 
-    const companies = computed(
-      () => queryGetCompanies.result.value?.srvCompanies ?? []
-    );
+    // Apollo queries initialization
 
-    const loadCompanies = () => {
-      queryGetCompanies.load() || queryGetCompanies.refetch();
-    };
+    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES));
+
+    const queryGetProductCategories = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_PRODUCT_CATEGORIES));
+
+    // Apollo fetching data from queries
+
+    const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
+
+    const productCategories = computed(() => queryGetProductCategories.result.value?.srvProductCategories ?? []);
+
+    // Apollo lazy functions
+
+    const loadCompanies = () => queryGetCompanies.load() || queryGetCompanies.refetch();
+
+    const loadProductCategories = () => queryGetProductCategories.load() || queryGetProductCategories.refetch();
+
+    // Function to get and set data from props
+
+    const setData = (props) => {
+      product.productId = props.productId;
+      tag.value = props.tag;
+      code.value = props.code;
+      name.value = props.name;
+      basePrice.value = props.basePrice;
+      productCategoryId.value = props.productCategorySelect;
+      companyId.value = props.companySelect;
+    }
+
+    // Initialization function
 
     const initilize = () => {
       loadCompanies();
+      loadProductCategories();
+      setData(props.data);
+      activeModal.value = true;
     };
+
+    // Mounted function
 
     onMounted(() => initilize());
 
-    const formatCompanySelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.companyId,
-        label: item.name,
-      }));
-      return valueFormated;
-    };
+    // Format functions
 
-    watch(
-      () => companies.value,
-      (newValue) => {
-        companiesFormatted.value = formatCompanySelect(companies);
-      },
-      { deep: true }
-    );
+    const formatCompanySelect = (data) => data.map((item) => ({ value: item.companyId, label: item.name }));
+
+    const formatCategorySelect = (data) => data.map((item) => ({ value: item.productCategoryId, label: item.name }));
+
+    // Watchers
+
+    watch(() => companies.value, (newValue) => { companiesFormatted.value = formatCompanySelect(newValue) }, { deep: true });
+
+    watch(() => productCategories.value, (newValue) => { categoriesFormatted.value = formatCategorySelect(newValue) }, { deep: true });
 
     watch(
       () => props.data,
@@ -152,27 +130,13 @@ export default {
         code.value = newValue.code;
         name.value = newValue.name;
         basePrice.value = newValue.basePrice;
-        stock.value = newValue.stock;
-        companyId.value = findSelectValues(
-          companiesFormatted,
-          newValue.company.companyId
-        );
+        productCategoryId.value = props.productCategorySelect;
+        companyId.value = props.companySelect;
       },
       { deep: true }
     );
 
-    const findSelectValues = (data, id) => {
-      const filteredValue = data.value.find((item) => item.value === id);
-      return filteredValue;
-    };
-
-    const formValues = reactive({
-      name: "",
-      code: "",
-      tag: "",
-      basePrice: 0,
-      stock: 0,
-    });
+    // Input model
 
     const product = reactive({
       productId: 0,
@@ -181,87 +145,64 @@ export default {
       code: "",
       tag: "",
       basePrice: 0,
-      stock: 0,
+      productCategoryId: 0,
     });
 
+    // Yup validations rules
+
     const schema = yup.object({
-      name: yup.string().required("Nombre requerido"),
+      name: yup.string().required("Nombre requerido").max(150),
       code: yup.string().required("Código requerido").max(10),
       tag: yup.string().required("Tag requerido").max(50),
       basePrice: yup.number().required("Precio base requerido"),
-      stock: yup.number().required("Stock requerido"),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate userForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema });
 
-    const {
-      value: tag,
-      errorMessage: tagError,
-      meta: tagMeta,
-    } = useField("tag");
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
-    const {
-      value: code,
-      errorMessage: codeError,
-      meta: codeMeta,
-    } = useField("code");
-    const {
-      value: basePrice,
-      errorMessage: basePriceError,
-      meta: basePriceMeta,
-    } = useField("basePrice");
-    const {
-      value: stock,
-      errorMessage: stockError,
-      meta: stockMeta,
-    } = useField("stock");
+    // vee validate use field
 
-    const { mutate: updateProduct } = useMutation(UPDATE_PRODUCT, () => ({
-      variables: { inputModel: product },
-    }));
+    const { value: tag, errorMessage: tagError, meta: tagMeta } = useField("tag");
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+    const { value: code, errorMessage: codeError, meta: codeMeta } = useField("code");
+    const { value: basePrice, errorMessage: basePriceError, meta: basePriceMeta } = useField("basePrice");
 
-    const onSubmit = handleSubmit((values, actions) => {
+    // Apollo mutations
+
+    const { mutate: updateProduct } = useMutation(UPDATE_PRODUCT, () => ({ variables: { inputModel: product } }));
+
+    const onSubmit = handleSubmit(async (values, actions) => {
       product.name = values.name;
       product.tag = values.tag.toUpperCase();
       product.code = values.code.toUpperCase();
       product.basePrice = +values.basePrice;
-      product.stock = +values.stock;
+      product.productCategoryId = productCategoryId.value.value;
       product.companyId = companyId.value.value;
 
-      updateProduct()
+      await updateProduct()
         .then((response) => {
-          emit("product-updated");
-          toast.success("Producto creado exitosamente", {
-            timeout: 2000,
-          });
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+          if (response.data.updateProduct.statusCode === "OK") toast.success("Producto creado exitosamente", { timeout: 2000 });
+          else toast.error(response.data.updateProduct.message, { timeout: 2000 });
 
-      closeModal.value = !closeModal.value;
+          emit("product-updated");
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       tag,
       tagError,
       name,
@@ -270,11 +211,10 @@ export default {
       codeError,
       basePrice,
       basePriceError,
-      stock,
-      stockError,
-      onSubmit,
       companiesFormatted,
       companyId,
+      productCategoryId,
+      categoriesFormatted,
     };
   },
 };

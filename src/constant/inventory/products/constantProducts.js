@@ -5,6 +5,6 @@ export const headersProductsTable = [
   { label: "Compañia", field: "company.name" },
   { label: "Tag", field: "tag" },
   { label: "Precio base", field: "basePrice" },
-  { label: "Stock", field: "stock" },
+  { label: "Categoría", field: "productCategory.name" },
   { label: "Acciones", field: "actions" },
 ];

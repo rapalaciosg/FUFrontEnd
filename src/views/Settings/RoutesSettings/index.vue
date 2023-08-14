@@ -3,24 +3,10 @@
     <Card title="Configuración de rutas">
       <div class="grid grid-cols-1 gap-4 justify-items-center">
         <h4>{{ (!isConfigured) ? '¿Desea configurar las rutas?' : '¿Ver configuración de rutas?' }}</h4>
-        <Button
-          class="h-[40px]"
-          text="Configurar rutas"
-          btnClass="btn-success"
-          @click="toggleModal()"
-        />
+        <Button class="h-[40px]" text="Configurar rutas" btnClass="btn-success" @click="toggleModal()"/>
       </div>
     </Card>
-    <RoutesSettingsModalVue
-      title="Configurar rutas"
-      btnClass="btn-success"
-      :showButton="false"
-      :activeModal="isModalRouteSettingsOpen"
-      :isConfigured="isConfigured"
-      :routesSettings="routeSettings"
-      @close-modal="isModalRouteSettingsOpen = false"
-      @routes-updated="loadRoutesSettings()"
-    />
+    <RoutesSettingsModalVue v-if="isModalRouteSettingsOpen" title="Configurar rutas" :isConfigured="isConfigured" :routesSettings="routeSettings" @close-modal="isModalRouteSettingsOpen = false" @routes-updated="loadRoutesSettings()"/>
   </div>
 </template>
 
@@ -62,6 +48,7 @@ export default {
     );
 
     const loadRoutesSettings = () => {
+      console.log('entro');
       queryGetRoutesSettings.load() || queryGetRoutesSettings.refetch();
     };
 

@@ -12,7 +12,70 @@ export const GET_ALL_PRODUCTS = gql`
       code
       tag
       basePrice
-      stock
+      productCategory {
+        productCategoryId
+        name
+      }
+    }
+  }
+`;
+
+export const GET_PRODUCTS_BY_COMPANY = gql`
+  query getProductsByCompany($id: Int!) {
+    srvProductsByCompanyId(id: $id) {
+      productId
+      company {
+        companyId
+        name
+      }
+      name
+      code
+      tag
+      basePrice
+      productCategory {
+        productCategoryId
+        name
+      }
+    }
+  }
+`;
+
+export const GET_PRODUCTS_BY_CATEGORY = gql`
+  query getProductsByCategory($productCategoryId: Int!) {
+    srvProductsByProductCategoryId(productCategoryId: $productCategoryId) {
+      productId
+      company {
+        companyId
+        name
+      }
+      name
+      code
+      tag
+      basePrice
+      productCategory {
+        productCategoryId
+        name
+      }
+    }
+  }
+`;
+
+export const GET_PRODUCTS_BY_NAME = gql`
+  query getProductsByName($name: String!) {
+    srvProductsByName(name: $name) {
+      productId
+      company {
+        companyId
+        name
+      }
+      name
+      code
+      tag
+      basePrice
+      productCategory {
+        productCategoryId
+        name
+      }
     }
   }
 `;

@@ -159,7 +159,7 @@ export default {
 
     onMounted(() => {
       loadBranchOffices();
-      headersDriversListExport.value = formatHeadersRoutesListExport(headersDriversTable);
+      headersDriversListExport.value = formatHeadersListExport(headersDriversTable);
     });
 
     // Watchers
@@ -189,7 +189,7 @@ export default {
       } else if (!newValue) {
         driversList.value = drivers.value;
       };
-    }, { deep: true })
+    }, { deep: true });
 
     watch(() => driversByBranchOffice.value, (newValue) => {
       listDriversByBranchOffice.value = newValue;
@@ -228,7 +228,7 @@ export default {
 
     // Format functions
 
-    const formatHeadersRoutesListExport = (data) => {
+    const formatHeadersListExport = (data) => {
       let array = new Map();
       for (let index = 0; index < data.length; index++) {
         array.set(data[index].label, data[index].field);
@@ -244,7 +244,7 @@ export default {
       return valueFormatted;
     }
 
-    const formatbranchOfficeSelect = (data) => data.map((item) => ({ value: item.branchOfficeId, label: item.branchOfficeName,}));
+    const formatbranchOfficeSelect = (data) => data.map((item) => ({ value: item.branchOfficeId, label: item.branchOfficeName }));
 
     const formatCodeSelect = (data) => data.map((item) => ({ value: item.code, label: item.code }));
 

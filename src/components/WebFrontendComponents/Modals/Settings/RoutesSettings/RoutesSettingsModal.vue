@@ -1,45 +1,26 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="configureRoutes">
         <div class="grid grid-cols-1 gap-5 px-4 py-3">
           <Card title="Rutas configuradas por:">
             <div class="grid grid-cols-2 gap-4">
               <div v-for="(item, i) in routesByOptions" :key="i">
-                <Radio
-                  :label="item.label"
-                  class="mb-5"
-                  v-model="routeBy"
-                  :value="item.value"
-                />
+                <Radio :label="item.label" class="mb-5" v-model="routeBy" :value="item.value"/>
               </div>
             </div>
           </Card>
           <Card title="Nombre rutas por:">
             <div class="grid grid-cols-2 gap-4">
               <div v-for="(item, i) in routeNameOptions" :key="i">
-                <Radio
-                  :label="item.label"
-                  class="mb-5"
-                  v-model="routeName"
-                  :value="item.value"
-                />
+                <Radio :label="item.label" class="mb-5" v-model="routeName" :value="item.value"/>
               </div>
             </div>
           </Card>
         </div>
-        <div
-          class="px-4 pt-3 pb-1 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 pt-3 pb-1 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -49,20 +30,13 @@
 <script>
 import { onMounted, reactive, ref, watch } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Card from "@/components/DashCodeComponents/Card";
 import Radio from "@/components/DashCodeComponents/Radio";
 
-import {
-  CREATE_ROUTES_SETTINGS,
-  UPDATE_ROUTES_SETTINGS,
-} from "@/services/settings/routeSettings/routeSettingsGraphql";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
-import { apolloClient } from "@/main.js";
+import { CREATE_ROUTES_SETTINGS, UPDATE_ROUTES_SETTINGS } from "@/services/settings/routeSettings/routeSettingsGraphql";
+import { useMutation,} from "@vue/apollo-composable";
 
 export default {
   components: {
@@ -80,7 +54,7 @@ export default {
       default: {},
     },
   },
-  emits: ["routes-updated"],
+  emits: ["routes-updated", "close-modal"],
   data() {
     return {
       routesByOptions: [
@@ -89,12 +63,13 @@ export default {
       ],
     };
   },
-  watch: {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const routeBy = ref("");
     const routeName = ref("");
@@ -103,17 +78,34 @@ export default {
 
     const routeConfiguration = reactive([]);
 
+    // Input model
+
     const routesSettingsInput = reactive({
       code: "",
       value: "",
     });
 
-    watch(
-      () => props.isConfigured,
-      (newValue) => {
-      },
-      { deep: true }
-    );
+    // Initialization function
+
+    const initilize = () => {
+      if (props.isConfigured) {
+        routeBy.value = props.routesSettings.routeBy.value;
+        routeName.value = props.routesSettings.routeName.value;
+
+        routeConfiguration.push(props.routesSettings.routeBy);
+        routeConfiguration.push(props.routesSettings.routeName);
+      } else {
+        routeConfiguration.push({ code: "ROUTE_BY", value: "" });
+        routeConfiguration.push({ code: "ROUTE_NAME", value: "" });
+      }
+      activeModal.value = true;
+    }
+
+    // Mounted function
+
+    onMounted(() => initilize())
+
+    // Watchers
 
     watch(
       () => props.routesSettings,
@@ -128,7 +120,6 @@ export default {
           routeConfiguration.push({ code: "ROUTE_BY", value: "" });
           routeConfiguration.push({ code: "ROUTE_NAME", value: "" });
         }
-        console.log("routeConfiguration => ", routeConfiguration);
       },
       { deep: true }
     );
@@ -138,41 +129,25 @@ export default {
       (newValue) => {
         routeNameOptions.value = [];
         if (newValue === "V") {
-          routeNameOptions.value.push({
-            value: "VC",
-            label: "Código del vehículo",
-          });
-          routeNameOptions.value.push({
-            value: "VLP",
-            label: "Placa del vehículo",
-          });
+          routeNameOptions.value.push({ value: "VC", label: "Código del vehículo" });
+          routeNameOptions.value.push({ value: "VLP", label: "Placa del vehículo" });
         } else {
-          routeNameOptions.value.push({
-            value: "DC",
-            label: "Código del conductor",
-          });
+          routeNameOptions.value.push({ value: "DC", label: "Código del conductor" });
         }
       },
       { deep: true }
     );
 
-    const { mutate: createRouteSetting } = useMutation(
-      CREATE_ROUTES_SETTINGS,
-      () => ({
-        variables: { inputModel: routesSettingsInput },
-      })
-    );
+    // Apollo mutations
 
-    const { mutate: updateRouteSetting } = useMutation(
-      UPDATE_ROUTES_SETTINGS,
-      () => ({
-        variables: { inputModel: routesSettingsInput },
-      })
-    );
+    const { mutate: createRouteSetting } = useMutation(CREATE_ROUTES_SETTINGS, () => ({ variables: { inputModel: routesSettingsInput }}));
+
+    const { mutate: updateRouteSetting } = useMutation(UPDATE_ROUTES_SETTINGS, () => ({ variables: { inputModel: routesSettingsInput }}));
+
+    // Trigger functions
 
     const configureRoutes = () => {
       if (props.isConfigured) {
-        console.log('actualizar');
         for (let index = 0; index < routeConfiguration.length; index++) {
           routesSettingsInput.code = routeConfiguration[index].code;
 
@@ -181,19 +156,14 @@ export default {
 
           updateRouteSetting()
             .then((response) => {
-              emit("routes-updated");
-              toast.success("Rutas configuradas exitosamente", {
-                timeout: 2000,
-              });
+              if (response.data.updateRouteSetting.statusCode === "OK") toast.success("Rutas configuradas exitosamente", { timeout: 2000 });
+              else toast.error(response.data.updateRouteSetting.message, { timeout: 2000 });
+
+              // emit("routes-updated");
             })
-            .catch((error) => {
-              toast.error("Ha ocurrido un error", {
-                timeout: 2000,
-              });
-            });
+            .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
         }
       } else {
-        console.log('crear');
         for (let index = 0; index < routeConfiguration.length; index++) {
           routesSettingsInput.code = routeConfiguration[index].code;
           
@@ -202,24 +172,28 @@ export default {
 
           createRouteSetting()
             .then((response) => {
-              emit("routes-updated");
-              toast.success("Rutas configuradas exitosamente", {
-                timeout: 2000,
-              });
+              if (response.data.createRouteSetting.statusCode === "OK") toast.success("Rutas configuradas exitosamente", { timeout: 2000 });
+              else toast.error(response.data.createRouteSetting.message, { timeout: 2000 });
+
+              // emit("routes-updated");
             })
-            .catch((error) => {
-              toast.error("Ha ocurrido un error", {
-                timeout: 2000,
-              });
-            });
+            .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
         }
       }
 
-      closeModal.value = !closeModal.value;
+      emit("routes-updated");
+      closeModal();
     };
+
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
 
     return {
       closeModal,
+      activeModal,
       routeBy,
       routeName,
       routeNameOptions,

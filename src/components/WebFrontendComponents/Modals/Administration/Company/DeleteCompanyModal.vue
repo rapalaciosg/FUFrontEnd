@@ -1,22 +1,13 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="deleteCompany">
         <div class="grid grid-cols-1 gap-5">
-          <h5>¿Desea eliminar esta compañia: {{ company.name }}?</h5>
+          <h5>¿Desea eliminar esta compañía: {{ company.name }}?</h5>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Eliminar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Eliminar</button>
         </div>
       </form>
     </template>
@@ -24,7 +15,7 @@
 </template>
 
 <script>
-import { ref, watch, reactive } from "vue";
+import { ref, watch, reactive, onMounted } from "vue";
 import ModalBase from "../../ModalBase.vue";
 import { useToast } from "vue-toastification";
 import { DELETE_COMPANY } from "@/services/administration/company/companyGraphql.js";
@@ -45,40 +36,58 @@ export default {
     return {};
   },
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
+
+    // Input model
+
     let companyId = reactive(0);
 
-    watch(
-      () => props.company,
-      (newValue) => {
-        companyId = newValue.companyId;
-      },
-      { deep: true }
-    );
+    // Function to get and set data from props
 
-    const { mutate: deleteCompanyMut } = useMutation(DELETE_COMPANY, () => ({
-      variables: { id: companyId },
-    }));
+    const setData = (props) => companyId = props.companyId;
 
-    const deleteCompany = () => {
-      deleteCompanyMut()
+    // Mounted function
+
+    onMounted(() => {
+      setData(props.company);
+      activeModal.value = true;
+    })
+
+    // Watchers
+
+    watch(() => props.company, (newValue) => { companyId = newValue.companyId }, { deep: true });
+
+    // Apollo mutations
+
+    const { mutate: deleteCompanyMut } = useMutation(DELETE_COMPANY, () => ({ variables: { id: companyId }}));
+
+    // Trigger function form
+
+    const deleteCompany = async () => {
+      await deleteCompanyMut()
         .then((response) => {
+          if (response.data.deleteCompany.statusCode === 'OK') toast.success("Compañía eliminada exitosamente", { timeout: 2000 });
+          else toast.success(response.data.deleteCompany.message, { timeout: 2000 });
+          
           emit("company-deleted");
-          toast.success("Compañia eliminada exitosamente", {
-            timeout: 2000,
-          });
         })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
-      closeModal.value = !closeModal.value;
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      closeModal();
     };
 
-    return { closeModal, deleteCompany };
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
+    return { closeModal, deleteCompany, activeModal };
   },
 };
 </script>

@@ -1,11 +1,11 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput type="text" label="Nombre de la compañia" placeholder="Nombre de la compañia" v-model="name" :error="nameError" />
-          <Textinput type="text" label="Prefijo" placeholder="Prefijo" v-model="prefix" :error="prefixError" />
-          <Textinput type="text" label="Dirección" placeholder="Dirección" v-model="address" :error="addressError" />
+          <Textinput type="text" label="Nombre de la compañia" placeholder="Nombre de la compañia" v-model="name" :error="nameError" :maxlength="100" />
+          <Textinput type="text" label="Prefijo" placeholder="Prefijo" v-model="prefix" :error="prefixError" :maxlength="5" />
+          <Textinput type="text" label="Dirección" placeholder="Dirección" v-model="address" :error="addressError" :maxlength="200" />
           <VueSelect label="Provincias" :options="provincesFormatted" placeholder="Seleccione una provincia" v-model="provinceId" :clearable="false" />
           <VueSelect label="Tipos de compañias" :options="companyTypesFormatted" placeholder="Seleccione un tipo de compañia" v-model="companyTypeId" :clearable="false" />
           <div>
@@ -16,15 +16,8 @@
           </div>
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -34,16 +27,19 @@
 <script>
 import { ref, watch, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
-import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 import { CREATE_COMPANY } from "@/services/administration/company/companyGraphql.js";
 import { GET_ALL_PROVINCES } from "@/services/catalogs/provinces/provincesGraphql.js";
 import { GET_ALL_COMPANY_TYPES } from "@/services/catalogs/companyType/companyTypeGraphql.js";
+
 import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
@@ -54,65 +50,84 @@ export default {
     VueSelect,
     Checkbox
   },
-  props: [],
-  emits: ["company-created"],
+  props: {},
+  emits: ["company-created", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const isDistributor = ref(false);
 
+    const provinceId = ref({});
     let provincesFormatted = ref([]);
+
+    const companyTypeId = ref({});
     let companyTypesFormatted = ref([]);
 
-    const provinceId = ref({});
-    const companyTypeId = ref({});
+    // Apollo queries initialization
 
     const queryGetCompanyTypes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANY_TYPES));
+
     const queryGetProvinces = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_PROVINCES));
 
+    // Apollo fetching data from queries
+
     const companyTypes = computed(() => queryGetCompanyTypes.result.value?.srvCompanyTypes ?? []);
+
     const provinces = computed(() => queryGetProvinces.result.value?.srvProvince ?? []);
 
+    // Apollo lazy functions
+
+    const loadCompanyTipes = () => queryGetCompanyTypes.load() || queryGetCompanyTypes.refetch();
+
+    const loadProvinces = () => queryGetProvinces.load() || queryGetProvinces.refetch();
+
+    // Initialization function
+
     const initilize = () => {
-        queryGetCompanyTypes.load();
-        queryGetProvinces.load();
+      loadCompanyTipes();
+      loadProvinces();
+      activeModal.value = true;
     }
+
+    // Mounted function
 
     onMounted(() => initilize())
 
-    const formatProvinceSelect = (data) => {
-      const valueFormated = data.value.map(item => ({ value: item.provinceId, label: item.name }));
-      return valueFormated;
-    }
+    // Format functions
 
-    const formatCompanyTypeSelect = (data) => {
-      const valueFormated = data.value.map(item => ({ value: item.companyTypeId, label: item.name }));
-      return valueFormated;
-    }
+    const formatProvinceSelect = (data) => data.map(item => ({ value: item.provinceId, label: item.name }));
+
+    const formatCompanyTypeSelect = (data) => data.map(item => ({ value: item.companyTypeId, label: item.name }));
+
+    // Watchers
 
     watch(() => provinces.value, (newValue) => {
-      provincesFormatted.value = formatProvinceSelect(provinces);
+      provincesFormatted.value = formatProvinceSelect(newValue);
       provinceId.value = provincesFormatted.value[0];
-    }, { deep: true })
+    }, { deep: true });
 
     watch(() => companyTypes.value, (newValue) => {
-      companyTypesFormatted.value = formatCompanyTypeSelect(companyTypes);
+      companyTypesFormatted.value = formatCompanyTypeSelect(newValue);
       companyTypeId.value = companyTypesFormatted.value[0];
-    }, { deep: true })
+    }, { deep: true });
+
+    // Initial values
 
     const formValues = reactive({
       name: "",
       prefix: "",
       address: ""
     });
+
+    // Input model
 
     const company = reactive({
       companyId: 0,
@@ -122,35 +137,33 @@ export default {
       provinceId: "",
       companyTypeId: "",
       sequential: 1
-    })
+    });
+
+    // Yup validations rules
 
     const schema = yup.object({
-      name: yup.string().required("Nombre requerido"),
-      prefix: yup.string().required("Prefijo requerido"),
-      address: yup.string().required("Dirección requerido")
+      name: yup.string().required("Nombre requerido").max(100),
+      prefix: yup.string().required("Prefijo requerido").max(5),
+      address: yup.string().required("Dirección requerido").max(200),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate userForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema, initialValues: formValues });
+
+    // vee validate use field
 
     const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
     const { value: prefix, errorMessage: prefixError, meta: prefixMeta } = useField("prefix");
     const { value: address, errorMessage: addressError, meta: addressMeta } = useField("address");
 
+    // Apollo mutations
+
     const { mutate: createCompany } = useMutation(CREATE_COMPANY, () => ({ variables: { inputModel: company } }));
 
-    const onSubmit = handleSubmit((values, actions) => {
+    // Trigger function form
 
+    const onSubmit = handleSubmit(async (values, actions) => {
       company.name = values.name
       company.prefix = values.prefix.toUpperCase()
       company.address = values.address
@@ -158,36 +171,40 @@ export default {
       company.companyTypeId = companyTypeId.value.value
       company.isDistributor = isDistributor.value
 
-      createCompany().then((response) => {
-            emit('company-created')
-            toast.success("Compañia creada exitosamente", {
-                timeout: 2000,
-              });
-          }).catch((error) => {
-            toast.error("Ha ocurrido un error", {
-                timeout: 2000,
-              });
-          })
+      await createCompany()
+        .then((response) => {
+          if (response.data.createCompany.statusCode === "OK") toast.success("Compañía creada exitosamente", { timeout: 2000 });
+          else toast.error(response.data.createCompany.message, { timeout: 2000 });
 
-      closeModal.value = !closeModal.value;
+          emit('company-created')
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      closeModal();
       actions.resetForm();
-      isDistributor.value = false;
     });
+
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
 
     return {
       closeModal,
+      onSubmit,
+      activeModal,
       name,
       nameError,
       prefix,
       prefixError,
       address,
       addressError,
+      isDistributor,
       provinceId,
-      companyTypeId,
-      onSubmit,
-      companyTypesFormatted,
       provincesFormatted,
-      isDistributor
+      companyTypeId,
+      companyTypesFormatted,
     };
   },
 };

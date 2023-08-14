@@ -1,22 +1,13 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="deleteProduct">
         <div class="grid grid-cols-1 gap-5">
-          <h5>¿Desea eliminar este producto: {{ product.code }}?</h5>
+          <h5>¿Desea eliminar este producto: {{ product.name }}?</h5>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Eliminar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Eliminar</button>
         </div>
       </form>
     </template>
@@ -47,41 +38,58 @@ export default {
     return {};
   },
   setup(props, { emit }) {
+    
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
-    const productId = ref("");
+    // Input model
 
-    watch(
-      () => props.product,
-      (newValue) => {
-        productId.value = newValue.productId;
-      },
-      { deep: true }
-    );
+    const productId = ref(0);
 
-    const { mutate: deleteProductMut } = useMutation(DELETE_PRODUCT, () => ({
-      variables: { id: productId.value },
-    }));
+    // Function to get and set data from props
 
-    const deleteProduct = () => {
-      deleteProductMut()
+    const setData = (props) => productId.value = props.productId;
+
+    // Mounted function
+
+    onMounted(() => {
+      setData(props.product);
+      activeModal.value = true;
+    })
+
+    // Watchers
+
+    watch(() => props.product, (newValue) => { productId.value = newValue.productId }, { deep: true });
+
+    // Apollo mutations
+
+    const { mutate: deleteProductMut } = useMutation(DELETE_PRODUCT, () => ({ variables: { id: productId.value } }));
+
+    // Trigger function form
+
+    const deleteProduct = async () => {
+      await deleteProductMut()
         .then((response) => {
+          if (response.data.deleteProduct.statusCode === 'OK') toast.success("Producto eliminado exitosamente", { timeout: 2000 });
+          else toast.success(response.data.deleteProduct.message, { timeout: 2000 });
+
           emit("product-deleted");
-          toast.success("Producto eliminado exitosamente", {
-            timeout: 2000,
-          });
         })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
-      closeModal.value = !closeModal.value;
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }));
+
+      closeModal();
     };
 
-    return { closeModal, deleteProduct };
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
+    return { closeModal, deleteProduct, activeModal };
   },
 };
 </script>
