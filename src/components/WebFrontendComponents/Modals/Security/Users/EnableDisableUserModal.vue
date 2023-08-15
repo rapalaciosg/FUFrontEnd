@@ -1,12 +1,12 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="updateUser">
         <div class="grid grid-cols-1 gap-5">
           <h5>¿{{action}} este usuario: {{user.firstName}}?</h5>
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
-          <button class="btn btn-secondary block text-center" @click="closeModal = !closeModal">Cerrar</button>
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
           <button type="submit" class="btn btn-success block text-center">{{action}}</button>
         </div>
       </form>
@@ -16,9 +16,11 @@
 
 <script>
 import { ref, watch, onMounted } from "vue";
-import ModalBase from "../../ModalBase.vue";
-import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import { useToast } from "vue-toastification";
+
+import ModalBase from "../../ModalBase.vue";
+
+import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
 
 export default {
@@ -35,34 +37,44 @@ export default {
       default: {}
     }
   },
-  emits: ['user-updated'],
+  emits: ['user-updated', 'close-modal'],
   data() {
     return {};
   },
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
-    const updateUser = () => {
-      props.user.enabled = !props.user.enabled
-      userAdministrationService
-        .updateUser({enabled: props.user.enabled}, keycloak.token, props.user.id)
+    // Mounted function
+
+    onMounted(() => activeModal.value = true);
+
+    // Trigger function
+
+    const updateUser = async () => {
+      props.user.enabled = !props.user.enabled;
+
+      await userAdministrationService.updateUser({enabled: props.user.enabled}, keycloak.token, props.user.id)
         .then((response) => {
-          toast.success(`Usuario actualizado exitosamente`, {
-            timeout: 2000,
-          });
+          toast.success(`Usuario actualizado exitosamente`, { timeout: 2000 });
           emit('user-updated');
         })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
-      closeModal.value = !closeModal.value;
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      closeModal();
     };
 
-    return { closeModal, updateUser };
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
+    return { closeModal, updateUser, activeModal };
   },
 };
 </script>

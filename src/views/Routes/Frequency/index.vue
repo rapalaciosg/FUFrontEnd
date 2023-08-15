@@ -10,7 +10,7 @@
     </Card>
     <AdvancedTable title="Frecuencias" :headers="headersFrecuencyTable" :data="frecuenciesList" :actions="actions" :showSelectOptions="false" @open-modal="toggleModal">
       <template v-slot:button>
-        <Button class="h-[40px]" text="Crear sucursal" btnClass="btn-success" @click="toggleModal()"/>
+        <Button class="h-[40px]" text="Crear frecuencia" btnClass="btn-success" @click="toggleModal()"/>
       </template>
     </AdvancedTable>
     <CreateFrequencyModal v-if="isModalCreateOpen" title="Crear frecuencia" @close-modal="isModalCreateOpen = false" @frequency-created="refetchFrequencies()"/>

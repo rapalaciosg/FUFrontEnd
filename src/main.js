@@ -2,7 +2,7 @@ import "animate.css/animate.compat.css";
 import "flatpickr/dist/flatpickr.css";
 import "simplebar/dist/simplebar.min.css";
 import "sweetalert2/dist/sweetalert2.min.css";
-import {createApp, provide, h} from "vue";
+import { createApp, provide, h } from "vue";
 import VueFlatPickr from "vue-flatpickr-component";
 import VueGoodTablePlugin from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
@@ -17,137 +17,150 @@ import "./assets/scss/auth.scss";
 import "./assets/scss/tailwind.scss";
 import router from "./router";
 import VCalendar from "v-calendar";
-import {createPinia} from 'pinia'
+import { createPinia } from "pinia";
 import "v-calendar/dist/style.css";
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core'
-import { DefaultApolloClient } from '@vue/apollo-composable'
+import {
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache,
+} from "@apollo/client/core";
+import { DefaultApolloClient } from "@vue/apollo-composable";
 import JsonExcel from "vue-json-excel3";
-import {useThemeSettingsStore} from "@/store/themeSettings";
+import { useThemeSettingsStore } from "@/store/themeSettings";
 import keycloak from "./security/KeycloakService";
 import userAdministrationService from "./services/keycloak/userAdministrationService";
 import axios from "axios";
 
 axios.defaults.baseURL = `${import.meta.env.VITE_APP_KEYCLOAK_URL}`;
 
-const token = ''
+const token = "";
 
 // HTTP connection to the API
-const httpLink = createHttpLink({  
-    uri: `${import.meta.env.VITE_APP_API_URL}`,
-    headers: {
-        'Authorization': `Bearer ${token}`
-    }
-})
+const httpLink = createHttpLink({
+  uri: `${import.meta.env.VITE_APP_API_URL}`,
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
 // Cache implementation
-const cache = new InMemoryCache()
+const cache = new InMemoryCache();
 
 // Create the apollo client
 export const apolloClient = new ApolloClient({
   link: httpLink,
   cache,
-})
+});
 
-const pinia = createPinia()
+const pinia = createPinia();
 
-keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
-    if (authenticated) {
-        // vue use
-        const app = createApp({
-            setup () {
-            provide(DefaultApolloClient, apolloClient)
-            },
-            render: () => h(App)
-        })
-            .use(pinia)
-            .use(VueSweetalert2)
-            .use(Toast, {
-                toastClassName: "dashcode-toast",
-                bodyClassName: "dashcode-toast-body",
-            })
-            .use(router)
-            .use(VueClickAway)
-            .use(VueTippy)
-            .use(VueFlatPickr)
-            .use(VueGoodTablePlugin)
-            .use(VueApexCharts)
-            .use(VCalendar)
-        
-        app.config.globalProperties.$store = {};
-        app.component("downloadExcel", JsonExcel);
-        app.mount("#app");
+keycloak.init({ onLoad: "login-required" }).then((authenticated) => {
+  if (authenticated) {
+    // Set up token refresh logic
+    setInterval(() => {
+      keycloak
+        .updateToken(70) // Refresh token if it expires in less than 70 seconds
+        .then((refreshed) => {
+          if (refreshed) {
+            console.log("Token refreshed");
+          }
+        });
+    }, 60000); // Refresh every minute
+    
+    // vue use
+    const app = createApp({
+      setup() {
+        provide(DefaultApolloClient, apolloClient);
+      },
+      render: () => h(App),
+    })
+      .use(pinia)
+      .use(VueSweetalert2)
+      .use(Toast, {
+        toastClassName: "dashcode-toast",
+        bodyClassName: "dashcode-toast-body",
+      })
+      .use(router)
+      .use(VueClickAway)
+      .use(VueTippy)
+      .use(VueFlatPickr)
+      .use(VueGoodTablePlugin)
+      .use(VueApexCharts)
+      .use(VCalendar);
 
-        // router.push('/home')
+    app.config.globalProperties.$store = {};
+    app.component("downloadExcel", JsonExcel);
+    app.mount("#app");
 
-        const themeSettingsStore = useThemeSettingsStore()
-        if (localStorage.users === undefined) {
-            let users = [
-                {
-                    name: "dashcode",
-                    email: "dashcode@gmail.com",
-                    password: "dashcode",
-                },
-            ];
-            localStorage.setItem("users", JSON.stringify(users));
-        }
+    // router.push('/home')
 
-        // console.log('token => ', keycloak.token)
-
-        // userAdministrationService.getUsers(keycloak.token).then((response) => { 
-        //     console.log('response => ', response);
-        //  })
-        
-        // console.log('keycloak user => ', keycloak.tokenParsed.given_name);
-
-        // check localStorage theme for dark light bordered
-        if (localStorage.theme === "dark") {
-            document.body.classList.add("dark");
-            themeSettingsStore.theme = "dark";
-            themeSettingsStore.isDark = true;
-        } else {
-            document.body.classList.add("light");
-            themeSettingsStore.theme = "light";
-            themeSettingsStore.isDark = false;
-        }
-        if (localStorage.semiDark === "true") {
-            document.body.classList.add("semi-dark");
-            themeSettingsStore.semidark = true;
-            themeSettingsStore.semiDarkTheme = "semi-dark";
-        } else {
-            document.body.classList.add("semi-light");
-            themeSettingsStore.semidark = false;
-            themeSettingsStore.semiDarkTheme = "semi-light";
-        }
-        // check loacl storege for menuLayout
-        if (localStorage.menuLayout === "horizontal") {
-            themeSettingsStore.menuLayout = "horizontal";
-        } else {
-            themeSettingsStore.menuLayout = "vertical";
-        }
-
-        // check skin  for localstorage
-        if (localStorage.skin === "bordered") {
-            themeSettingsStore.skin = "bordered";
-            document.body.classList.add("skin--bordered");
-        } else {
-            themeSettingsStore.skin = "default";
-            document.body.classList.add("skin--default");
-        }
-        // check direction for localstorage
-        if (localStorage.direction === "true") {
-            themeSettingsStore.direction = true;
-            document.documentElement.setAttribute("dir", "rtl");
-        } else {
-            themeSettingsStore.direction = false;
-            document.documentElement.setAttribute("dir", "ltr");
-        }
-
-        // Check if the monochrome mode is set or not
-        if (localStorage.getItem('monochrome') !== null) {
-            themeSettingsStore.monochrome = true;
-            document.getElementsByTagName( 'html' )[0].classList.add('grayscale');
-        }
+    const themeSettingsStore = useThemeSettingsStore();
+    if (localStorage.users === undefined) {
+      let users = [
+        {
+          name: "dashcode",
+          email: "dashcode@gmail.com",
+          password: "dashcode",
+        },
+      ];
+      localStorage.setItem("users", JSON.stringify(users));
     }
-})
 
+    // console.log('token => ', keycloak.token)
 
+    // userAdministrationService.getUsers(keycloak.token).then((response) => {
+    //     console.log('response => ', response);
+    //  })
+
+    // console.log('keycloak user => ', keycloak.tokenParsed.given_name);
+
+    // check localStorage theme for dark light bordered
+    if (localStorage.theme === "dark") {
+      document.body.classList.add("dark");
+      themeSettingsStore.theme = "dark";
+      themeSettingsStore.isDark = true;
+    } else {
+      document.body.classList.add("light");
+      themeSettingsStore.theme = "light";
+      themeSettingsStore.isDark = false;
+    }
+    if (localStorage.semiDark === "true") {
+      document.body.classList.add("semi-dark");
+      themeSettingsStore.semidark = true;
+      themeSettingsStore.semiDarkTheme = "semi-dark";
+    } else {
+      document.body.classList.add("semi-light");
+      themeSettingsStore.semidark = false;
+      themeSettingsStore.semiDarkTheme = "semi-light";
+    }
+    // check loacl storege for menuLayout
+    if (localStorage.menuLayout === "horizontal") {
+      themeSettingsStore.menuLayout = "horizontal";
+    } else {
+      themeSettingsStore.menuLayout = "vertical";
+    }
+
+    // check skin  for localstorage
+    if (localStorage.skin === "bordered") {
+      themeSettingsStore.skin = "bordered";
+      document.body.classList.add("skin--bordered");
+    } else {
+      themeSettingsStore.skin = "default";
+      document.body.classList.add("skin--default");
+    }
+    // check direction for localstorage
+    if (localStorage.direction === "true") {
+      themeSettingsStore.direction = true;
+      document.documentElement.setAttribute("dir", "rtl");
+    } else {
+      themeSettingsStore.direction = false;
+      document.documentElement.setAttribute("dir", "ltr");
+    }
+
+    // Check if the monochrome mode is set or not
+    if (localStorage.getItem("monochrome") !== null) {
+      themeSettingsStore.monochrome = true;
+      document.getElementsByTagName("html")[0].classList.add("grayscale");
+    }
+  }
+});

@@ -1,5 +1,5 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
@@ -11,7 +11,7 @@
           <VueSelect name="groups" label="Roles" :options="rolesListFormatted" placeholder="Roles" v-model="groups" multiple />
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
-          <button class="btn btn-secondary block text-center" @click="closeModal = !closeModal">Cerrar</button>
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
           <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
@@ -20,14 +20,17 @@
 </template>
 
 <script>
-import { ref, watch, reactive } from "vue";
+import { ref, watch, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
@@ -37,8 +40,8 @@ export default {
     Textinput,
     VueSelect,
   },
-  props: [],
-  emits: ['user-created'],
+  props: {},
+  emits: ['user-created', 'close-modal'],
   data() {
     return {
       rolesList: [],
@@ -46,9 +49,7 @@ export default {
     };
   },
   watch: {
-    rolesList(newValue) {
-      this.rolesListFormatted = this.formatValuesSelect(newValue)
-    }
+    rolesList(newValue) { this.rolesListFormatted = this.formatValuesSelect(newValue) },
   },
   mounted() {
     this.getRolesList()
@@ -59,17 +60,23 @@ export default {
         this.rolesList = response.data;
       });
     },
-    formatValuesSelect(data) {
-      const valueFormated = data.map(item => ({ value: item.id, label: item.name }));
-      return valueFormated;
-    }
+    formatValuesSelect(data) { return data.map(item => ({ value: item.id, label: item.name })) },
   },
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const groups = ref([]);
+
+    // Mounted function
+
+    onMounted(() => activeModal.value = true);
+
+    // Initial values
 
     const formValues = reactive({
       username: "",
@@ -77,6 +84,8 @@ export default {
       lastName: "",
       email: ""
     });
+
+    // Yup validation rules
 
     const schema = yup.object({
       username: yup.string().required("Nombre de usuario requerido"),
@@ -86,14 +95,11 @@ export default {
       password: yup.string().required("Contraseña requerida").min(3)
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues
-    });
+    // Vee validate userForm
 
-    watch(() => closeModal.value, (newValue) => {
-      resetForm()
-    }, {deep:true})
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema, initialValues: formValues });
+
+    // Vee validate userField
 
     const { value: username, errorMessage: usernameError } = useField("username");
     const { value: firstName, errorMessage: firstNameError, meta: firstNameMeta } = useField("firstName");
@@ -101,25 +107,12 @@ export default {
     const { value: email, errorMessage: emailError } = useField("email");
     const { value: password, errorMessage: passwordError } = useField("password");
 
-    const createUser = (user) => {
-      userAdministrationService.createUser(user, keycloak.token).then((response) => {
-        toast.success("Usuario creado exitosamente", {
-          timeout: 2000,
-        });
-        emit('user-created')
-      }).catch((error) => {
-        toast.error("Ha ocurrido un error", {
-          timeout: 2000,
-        });
-      });
+    // Functions to trigger
 
-      closeModal.value = !closeModal.value
-    }
-
-    const onSubmit = handleSubmit((values, actions) => {
-      let userFormatted = {}
-      let passwordFormatted = {}
-      let groupsFormatted = {}
+    const onSubmit = handleSubmit(async (values, actions) => {
+      let userFormatted = {};
+      let passwordFormatted = {};
+      let groupsFormatted = {};
 
       userFormatted = {
         username: values.username,
@@ -130,26 +123,40 @@ export default {
         groups: [],
         emailVerified: true,
         credentials: []
-      }
+      };
 
       passwordFormatted = {
         type: "password",
         value: values.password,
         temporary: false
-      }
+      };
 
-      groupsFormatted = groups.value.map(item => item.label)
+      groupsFormatted = groups.value.map(item => item.label);
 
-      userFormatted.credentials.push(passwordFormatted)
-      userFormatted.groups = groupsFormatted
+      userFormatted.credentials.push(passwordFormatted);
+      userFormatted.groups = groupsFormatted;
 
-      createUser(userFormatted);
+      await userAdministrationService.createUser(userFormatted, keycloak.token)
+        .then((response) => {
+          toast.success("Usuario creado exitosamente", { timeout: 2000 });
+          emit('user-created')
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       username,
       usernameError,
       firstName,
@@ -161,7 +168,6 @@ export default {
       password,
       passwordError,
       groups,
-      onSubmit,
     };
   },
 };

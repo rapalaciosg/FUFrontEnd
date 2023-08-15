@@ -1,5 +1,5 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
@@ -10,7 +10,7 @@
           <VueSelect name="groups" label="Roles" :options="rolesListFormatted" placeholder="Roles" v-model="groupsUserFormatted" multiple />
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
-          <button class="btn btn-secondary block text-center" @click="closeModal = !closeModal">Cerrar</button>
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
           <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
@@ -19,15 +19,18 @@
 </template>
 
 <script>
-import { reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
+import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
-import FromGroup from "@/components/DashCodeComponents/FromGroup";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
 import userAdministrationService from "@/services/keycloak/userAdministrationService";
 import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
-import { useToast } from "vue-toastification";
+
 import keycloak from "@/security/KeycloakService.js";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
@@ -35,7 +38,6 @@ export default {
   components: {
     ModalBase,
     Textinput,
-    FromGroup,
     VueSelect,
   },
   props: {
@@ -44,7 +46,7 @@ export default {
       default: {}
     }
   },
-  emits: ['user-updated'],
+  emits: ['user-updated', 'close-modal'],
   data() {
     return {
       rolesList: [],
@@ -71,6 +73,9 @@ export default {
     }
   },
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
     const groupsUser = ref([]);
@@ -78,31 +83,56 @@ export default {
 
     const userId = ref("");
 
-    let closeModal = ref(false);
+    const userStatus = ref(false);
 
-    const schema = yup.object({
+    const activeModal = ref(false);
+
+    // Getting data from props
+
+    const getData = (props) => {
+      getGroupsUser(props.id);
+      userId.value = props.id;
+      username.value = props.username;
+      firstName.value = props.firstName;
+      lastName.value = props.lastName;
+      email.value = props.email;
+      userStatus.value = props.enabled;
+    }
+
+    // Mounted function
+
+    onMounted(() => {
+      activeModal.value = true;
+      getData(props.data);
+    });
+
+    // Watchers
+
+    watch(() => props.data, (newValue) => {
+      getGroupsUser(newValue.id);
+      userId.value = newValue.id;
+      username.value = newValue.username;
+      firstName.value = newValue.firstName;
+      lastName.value = newValue.lastName;
+      email.value = newValue.email;
+    })
+
+    watch(() => groupsUser.value, (newValue) => { groupsUserFormatted.value = newValue.map(item => ({ value: item.id, label: item.name })) }, { deep: true });
+
+     // Yup validations rules
+
+     const schema = yup.object({
       username: yup.string().required("Nombre de usuario requerido"),
       firstName: yup.string().required("Nombre requerido"),
       lastName: yup.string().required("Apellido requerido"),
       email: yup.string().required("Correo requerido").email(),
     });
 
-    watch(() => props.data, (newValue) => {
-      getGroupsUser(newValue.id)
-      userId.value = newValue.id
-      username.value = newValue.username
-      firstName.value = newValue.firstName
-      lastName.value = newValue.lastName
-      email.value = newValue.email
-    })
+    // Vee validate useForm
 
-    watch(() => groupsUser.value, (newValue) => {
-      groupsUserFormatted.value = newValue.map(item => ({ value: item.id, label: item.name }))
-    }, {deep:true})
+    const { handleSubmit } = useForm({ validationSchema: schema });
 
-    const { handleSubmit } = useForm({
-      validationSchema: schema
-    });
+    // Vee validate useField
 
     const { value: username, errorMessage: usernameError } = useField("username");
     const { value: firstName, errorMessage: firstNameError, meta: firstNameMeta } = useField("firstName");
@@ -110,52 +140,55 @@ export default {
     const { value: email, errorMessage: emailError } = useField("email");
     const { value: groups, errorMessage: groupsError } = useField("groups");
 
-    const getGroupsUser = (id) => {
-      userAdministrationService.getUserGroups(keycloak.token, id).then((response) => {
-        groupsUser.value = response.data;
-      });
-    }
+    // Get groups user function
+
+    const getGroupsUser = (id) => userAdministrationService.getUserGroups(keycloak.token, id).then((response) => groupsUser.value = response.data );
 
     const updateUser = (user, id) => {
-      userAdministrationService.updateUser(user, keycloak.token, id).then((response) => {
-        toast.success("Usuario editado exitosamente", {
-          timeout: 2000,
-        });
-        emit('user-updated')
-      }).catch((error) => {
-        toast.error("Ha ocurrido un error", {
-          timeout: 2000,
-        });
-      });
+      
 
       closeModal.value = !closeModal.value
     }
 
-    const onSubmit = handleSubmit((values, actions) => {
-      let userFormatted = {}
-      let groupsFormatted = {}
+    const onSubmit = handleSubmit(async (values, actions) => {
+      let userFormatted = {};
+      let groupsFormatted = {};
 
       userFormatted = {
         username: values.username,
         firstName: values.firstName,
         lastName: values.lastName,
-        enabled: true,
+        enabled: userStatus.value,
         email: values.email,
         groups: [],
         emailVerified: true,
-      }
+      };
 
-      groupsFormatted = groupsUserFormatted.value.map(item => item.label)
+      groupsFormatted = groupsUserFormatted.value.map(item => item.label);
 
-      userFormatted.groups = groupsFormatted
+      userFormatted.groups = groupsFormatted;
 
-      updateUser(userFormatted, userId.value);
+      await userAdministrationService.updateUser(userFormatted, keycloak.token, userId.value)
+        .then((response) => {
+          toast.success("Usuario editado exitosamente", { timeout: 2000 });
+          emit('user-updated');
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       username,
       usernameError,
       firstName,
@@ -166,7 +199,6 @@ export default {
       emailError,
       groups,
       groupsError,
-      onSubmit,
       groupsUserFormatted
     };
   },
