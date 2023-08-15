@@ -1,5 +1,5 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
@@ -7,7 +7,7 @@
           <VueSelect name="Permissions" label="Permisos" :options="permissionsListFormatted" placeholder="Permisos" v-model="permissions" multiple />
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
-          <button class="btn btn-secondary block text-center" @click="closeModal = !closeModal">Cerrar</button>
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
           <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
@@ -16,14 +16,18 @@
 </template>
 
 <script>
-import { ref, watch, reactive } from "vue";
+import { ref, watch, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
 import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
 import permissionAdministrationService from "@/services/keycloak/permissionAdministrationService";
+
 import keycloak from "@/security/KeycloakService.js";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
@@ -34,7 +38,7 @@ export default {
     VueSelect,
   },
   props: [],
-  emits: ["rol-created"],
+  emits: ["rol-created", "close-modal"],
   data() {
     return {
       permissionsList: [],
@@ -66,58 +70,40 @@ export default {
     },
   },
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const permissions = ref([]);
 
-    const formValues = reactive({
-      name: "",
-    });
+    // Mounted function
+
+    onMounted(() => activeModal.value = true);
+
+    // Inital values
+
+    const formValues = reactive({ name: "" });
+
+    // Yup validations rules
 
     const schema = yup.object({
       name: yup.string().required("Nombre del rol requerido"),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate useForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema, initialValues: formValues });
 
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
+    // Vee validate userField
 
-    const createRol = (rol) => {
-      roleAdministrationService
-        .createRol(rol, keycloak.token)
-        .then((response) => {
-          toast.success("Rol creado exitosamente", {
-            timeout: 2000,
-          });
-          emit("rol-created");
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
 
-      closeModal.value = !closeModal.value;
-    };
+    // Trigger function
 
-    const onSubmit = handleSubmit((values, actions) => {
+    const onSubmit = handleSubmit(async (values, actions) => {
       let rolFormatted = {};
       let permissionsFormatted = {};
 
@@ -130,17 +116,30 @@ export default {
 
       rolFormatted.realmRoles = permissionsFormatted;
 
-      createRol(rolFormatted);
+      await roleAdministrationService.createRol(rolFormatted, keycloak.token)
+        .then((response) => {
+          toast.success("Rol creado exitosamente", { timeout: 2000 });
+          emit("rol-created");
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal functions
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
       closeModal,
+      onSubmit,
+      activeModal,
       name,
       nameError,
       permissions,
-      onSubmit,
     };
   },
 };

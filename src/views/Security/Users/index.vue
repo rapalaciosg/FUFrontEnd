@@ -80,6 +80,8 @@ export default {
 
     let filterSelect = ref("");
 
+    // Toggle function
+
     const toggleModal = (value) => {
       if (value) {
         userDetails.value = value.row;
@@ -93,6 +95,9 @@ export default {
         isModalCreateOpen.value = true;
       }
     };
+
+    // Returning values
+    
     return {
       toggleModal,
       isModalDetailsOpen,

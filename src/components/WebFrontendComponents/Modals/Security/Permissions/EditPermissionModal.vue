@@ -1,37 +1,14 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput
-            name="name"
-            type="text"
-            label="Nombre del permiso"
-            placeholder="Nombre del permiso"
-            v-model="name"
-            :error="nameError"
-          />
-          <Textinput
-            name="name"
-            type="text"
-            label="Descripción del permiso"
-            placeholder="Descripción del permiso"
-            v-model="description"
-            :error="descriptionError"
-          />
+          <Textinput type="text" label="Nombre del permiso" placeholder="Nombre del permiso" v-model="name" :error="nameError"/>
+          <Textinput type="text" label="Descripción del permiso" placeholder="Descripción del permiso" v-model="description" :error="descriptionError"/>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -39,13 +16,16 @@
 </template>
 
 <script>
-import { ref, watch, reactive } from "vue";
+import { ref, watch, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
-import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
 import permissionAdministrationService from "@/services/keycloak/permissionAdministrationService";
+
 import keycloak from "@/security/KeycloakService.js";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
@@ -53,7 +33,6 @@ export default {
   components: {
     ModalBase,
     Textinput,
-    VueSelect,
   },
   props: {
     data: {
@@ -61,22 +40,40 @@ export default {
         default: {}
     }
   },
-  emits: ["permission-updated"],
+  emits: ["permission-updated", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
+
+    // Getting data from props
+
+    const getData = (props) => {
+      name.value = props.name;
+      description.value = props.description;
+    }
+
+    // Mounted values
+
+    onMounted(() => {
+      getData(props.data);
+      activeModal.value = true;
+    });
+
+    // Initial values
 
     const formValues = reactive({
       name: "",
       description: "",
     });
+
+    // Watchers
 
     watch(
       () => props.data,
@@ -86,54 +83,23 @@ export default {
       }
     );
 
+    // Yup validation rules
+
     const schema = yup.object({
       name: yup.string().required("Nombre del permiso requerido"),
       description: yup.string().required("Descripción del permiso requerido"),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate useForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema, initialValues: formValues });
 
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
-    const {
-      value: description,
-      errorMessage: descriptionError,
-      meta: descriptionMeta,
-    } = useField("description");
+    // Vee validate useField
 
-    const updatePermission = (permission) => {
-      permissionAdministrationService
-        .updatePermission(permission, keycloak.token, permission.name)
-        .then((response) => {
-          toast.success("Permiso creado exitosamente", {
-            timeout: 2000,
-          });
-          emit("permission-created");
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+    const { value: description, errorMessage: descriptionError, meta: descriptionMeta } = useField("description");
 
-      closeModal.value = !closeModal.value;
-    };
-
-    const onSubmit = handleSubmit((values, actions) => {
+    const onSubmit = handleSubmit(async (values, actions) => {
       let permissionFormatted = {};
 
       permissionFormatted = {
@@ -141,18 +107,31 @@ export default {
         description: values.description,
       };
 
-      updatePermission(permissionFormatted);
+      await permissionAdministrationService.updatePermission(permissionFormatted, keycloak.token, permissionFormatted.name)
+        .then((response) => {
+          toast.success("Permiso creado exitosamente", { timeout: 2000 });
+          emit("permission-created");
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal functions
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       name,
       nameError,
       description,
       descriptionError,
-      onSubmit,
     };
   },
 };

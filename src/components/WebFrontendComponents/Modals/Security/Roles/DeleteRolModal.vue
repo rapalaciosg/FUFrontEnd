@@ -1,15 +1,13 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="deleteRol">
         <div class="grid grid-cols-1 gap-5">
           <h5>¿Desea eliminar este rol: {{ rol.name }}?</h5>
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
-          <button class="btn btn-secondary block text-center" @click="closeModal = !closeModal">Cerrar</button>
-          <button type="submit" class="btn btn-success block text-center">
-            Eliminar
-          </button>
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Eliminar</button>
         </div>
       </form>
     </template>
@@ -19,9 +17,12 @@
 <script>
 import { ref, watch, onMounted } from "vue";
 import ModalBase from "../../ModalBase.vue";
+
 import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
 import { useToast } from "vue-toastification";
+
 import keycloak from "@/security/KeycloakService.js";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
@@ -35,33 +36,42 @@ export default {
       default: {},
     },
   },
-  emits: ["rol-deleted"],
+  emits: ["rol-deleted", "close-modal"],
   data() {
     return {};
   },
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
-    const deleteRol = () => {
-      roleAdministrationService
-        .deleteRol(keycloak.token, props.rol.id)
+    // Mounted function
+
+    onMounted(() => activeModal.value = true);
+
+    // Trigger function
+
+    const deleteRol = async () => {
+      await roleAdministrationService.deleteRol(keycloak.token, props.rol.id)
         .then((response) => {
-          toast.success(`Rol eliminado exitosamente`, {
-            timeout: 2000,
-          });
+          toast.success(`Rol eliminado exitosamente`, { timeout: 2000 });
           emit("rol-deleted");
         })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
-      closeModal.value = !closeModal.value;
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      closeModal();
     };
 
-    return { closeModal, deleteRol };
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
+    return { closeModal, deleteRol, activeModal };
   },
 };
 </script>
