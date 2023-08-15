@@ -1,37 +1,14 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <Textinput
-            name="name"
-            type="text"
-            label="Nombre del rol"
-            placeholder="Nombre del rol"
-            v-model="name"
-            :error="nameError"
-          />
-          <VueSelect
-            name="Permissions"
-            label="Permisos"
-            :options="permissionsListFormatted"
-            placeholder="Permisos"
-            v-model="permissions"
-            multiple
-          />
+          <Textinput type="text" label="Nombre del rol" placeholder="Nombre del rol" v-model="name" :error="nameError"/>
+          <VueSelect label="Permisos" :options="permissionsListFormatted" placeholder="Permisos" v-model="permissions" multiple/>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -39,14 +16,18 @@
 </template>
 
 <script>
-import { ref, watch, reactive } from "vue";
+import { ref, watch, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+
 import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
 import permissionAdministrationService from "@/services/keycloak/permissionAdministrationService";
+
 import keycloak from "@/security/KeycloakService.js";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 
@@ -62,7 +43,7 @@ export default {
       default: {},
     },
   },
-  emits: ["rol-updated"],
+  emits: ["rol-updated", "close-modal"],
   data() {
     return {
       permissionsList: [],
@@ -94,88 +75,68 @@ export default {
     },
   },
   setup(props, { emit }) {
+
+    // Variables declarion
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const permissions = ref([]);
     const rolDetails = ref({});
     const rolId = ref("");
 
-    watch(
-      () => rolDetails.value,
-      (newValue) => {
-        permissions.value = newValue.realmRoles.map((item) => ({
-          value: item,
-          label: item,
-        }));
-      },
-      { deep: true }
-    );
+    // Mounted function
 
-    watch(
-      () => props.data,
-      (newValue) => {
+    onMounted(() => {
+      getRolDetails(keycloak.token, props.data.id);
+      rolId.value = props.data.id;
+      name.value = props.data.name;
+      activeModal.value = true;
+    });
+
+    // Watchers
+
+    watch(() => props.data, (newValue) => {
         getRolDetails(keycloak.token, newValue.id);
         rolId.value = newValue.id;
         name.value = newValue.name;
       }
     );
 
+    watch(() => rolDetails.value, (newValue) => { permissions.value = newValue.realmRoles.map((item) => ({ value: item, label: item })) }, { deep: true });
+
+    // Function to get rol details
+
     const getRolDetails = (token, rolId) => {
-      roleAdministrationService
-        .getRolDetails(token, rolId)
-        .then((response) => {
-          rolDetails.value = response.data;
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+      roleAdministrationService.getRolDetails(token, rolId)
+        .then((response) => rolDetails.value = response.data)
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
     };
+
+    // Yup validation rules
 
     const schema = yup.object({
       name: yup.string().required("Nombre del rol requerido"),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-    });
+    // Vee validate useForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema });
 
-    const {
-      value: name,
-      errorMessage: nameError,
-      meta: nameMeta,
-    } = useField("name");
+    // Vee validate useField
+
+    const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+
+    // Trigger function
 
     const updateRol = (rol, id) => {
-      roleAdministrationService
-        .updateRol(rol, keycloak.token, id)
-        .then((response) => {
-          toast.success("Rol creado exitosamente", {
-            timeout: 2000,
-          });
-          emit("rol-updated");
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+      
 
       closeModal.value = !closeModal.value;
     };
 
-    const onSubmit = handleSubmit((values, actions) => {
+    const onSubmit = handleSubmit(async (values, actions) => {
       let rolFormatted = {};
       let permissionsFormatted = {};
 
@@ -188,17 +149,30 @@ export default {
 
       rolFormatted.realmRoles = permissionsFormatted;
 
-      updateRol(rolFormatted, rolId.value);
+      await roleAdministrationService.updateRol(rolFormatted, keycloak.token, rolId.value)
+        .then((response) => {
+          toast.success("Rol actualizado exitosamente", { timeout: 2000 });
+          emit("rol-updated");
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      closeModal();
       actions.resetForm();
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       name,
       nameError,
       permissions,
-      onSubmit,
     };
   },
 };

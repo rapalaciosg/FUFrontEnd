@@ -1,68 +1,37 @@
 <template>
   <div class="space-y-5">
-    <AdvancedTable
-      title="Listado de roles"
-      :headers="headersRolesTable"
-      :data="rolesList"
-      :actions="actions"
-      :showSelectOptions="false"
-      @open-modal="toggleModal"
-    >
+    <AdvancedTable title="Listado de roles" :headers="headersRolesTable" :data="rolesList" :actions="actions" :showSelectOptions="false" @open-modal="toggleModal">
       <template v-slot:button>
-        <CreateRolModal
-          title="Crear rol"
-          btnClass="btn-success"
-          @rol-created="getRolesList()"
-        />
+        <Button class="h-[40px]" text="Crear rol" btnClass="btn-success" @click="toggleModal()"/>
       </template>
     </AdvancedTable>
-    <RolDetailsModal
-      title="Detalles del rol"
-      :activeModal="isModalDetailsOpen"
-      :showButton="false"
-      :data="rolDetails"
-      @close-modal="isModalDetailsOpen = false"
-    />
-    <EditRolModal
-      title="Editar rol"
-      :activeModal="isModalOpen"
-      :showButton="false"
-      :data="rolDetails"
-      @close-modal="isModalOpen = false"
-      @rol-updated="getRolesList()"
-    />
-    <DeleteRolModal
-      title="Eliminar rol"
-      :activeModal="isModalDeleteOpen"
-      :showButton="false"
-      :rol="rolDetails"
-      @close-modal="isModalDeleteOpen = false"
-      @rol-deleted="getRolesList()"
-    />
+    <CreateRolModal v-if="isModalCreateOpen" title="Crear rol" @rol-created="getRolesList()" @close-modal="isModalCreateOpen = false"/>
+    <RolDetailsModal v-if="isModalDetailsOpen" title="Detalles del rol" :data="rolDetails" @close-modal="isModalDetailsOpen = false"/>
+    <EditRolModal v-if="isModalEditOpen" title="Editar rol" :data="rolDetails" @close-modal="isModalEditOpen = false" @rol-updated="getRolesList()"/>
+    <DeleteRolModal v-if="isModalDeleteOpen" title="Eliminar rol" :rol="rolDetails" @close-modal="isModalDeleteOpen = false" @rol-deleted="getRolesList()"/>
   </div>
 </template>
 
 <script>
 import { computed, reactive, ref, watch, onMounted } from "vue";
-import Card from "@/components/DashCodeComponents/Card";
-import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
-import Textinput from "@/components/DashCodeComponents/Textinput";
+
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
+
 import { headersRolesTable } from "@/constant/security/roles/roles.js";
+
 import roleAdministrationService from "@/services/keycloak/roleAdministrationService";
 import keycloak from "@/security/KeycloakService.js";
+
 import CreateRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/CreateRolModal.vue";
 import DeleteRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/DeleteRolModal.vue";
 import EditRolModal from "@/components/WebFrontendComponents/Modals/Security/Roles/EditRolModal.vue";
 import RolDetailsModal from "@/components/WebFrontendComponents/Modals/Security/Roles/RolDetailsModal.vue";
+
 export default {
   components: {
-    Card,
-    VueSelect,
     Button,
     AdvancedTable,
-    Textinput,
     CreateRolModal,
     RolDetailsModal,
     DeleteRolModal,
@@ -90,24 +59,40 @@ export default {
     },
   },
   setup() {
+
+    // Variables declaration
+
     let rolDetails = ref({});
-    let isModalOpen = ref(false);
+
+    let isModalEditOpen = ref(false);
+    let isModalCreateOpen = ref(false);
     let isModalDetailsOpen = ref(false);
     let isModalDeleteOpen = ref(false);
 
+    // Toggle function
+
     const toggleModal = (value) => {
-      if (value.action === "edit") isModalOpen.value = true;
+      if (value) {
+        
+        rolDetails.value = value.row;
 
-      if (value.action === "details") isModalDetailsOpen.value = true;
+        if (value.action === "edit") isModalEditOpen.value = true;
 
-      if (value.action === "delete") isModalDeleteOpen.value = true;
+        if (value.action === "details") isModalDetailsOpen.value = true;
 
-      rolDetails.value = value.row;
+        if (value.action === "delete") isModalDeleteOpen.value = true;
+      } else {
+        isModalCreateOpen.value = true;
+      }
     };
+
+    // Returning values
+
     return {
       toggleModal,
-      isModalOpen,
       rolDetails,
+      isModalEditOpen,
+      isModalCreateOpen,
       isModalDetailsOpen,
       isModalDeleteOpen,
     };
