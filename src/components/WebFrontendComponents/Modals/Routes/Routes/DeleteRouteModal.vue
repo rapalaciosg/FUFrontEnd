@@ -32,7 +32,7 @@ export default {
       default: {},
     },
   },
-  emits: ["route-deleted"],
+  emits: ["route-deleted", "close-modal"],
   data() {
     return {};
   },
@@ -69,16 +69,15 @@ export default {
 
     // Trigger function form
 
-    const deleteRoute = () => {
-      deleteRouteMut()
+    const deleteRoute = async () => {
+      await deleteRouteMut()
         .then((response) => {
           if (response.data.deleteRoute.statusCode === 'OK') toast.success("Ruta eliminada exitosamente", { timeout: 2000 });
           else toast.success(response.data.deleteRoute.message, { timeout: 2000 });
-
-          emit("route-deleted");
         })
         .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      emit("route-deleted");
       closeModal();
     };
 

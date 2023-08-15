@@ -1,81 +1,49 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <VueSelect
-            label="Clientes"
-            :options="customersFormatted"
-            placeholder="Seleccione un cliente"
-            v-model="customerId"
-            :clearable="false"
-          />
+          <VueSelect label="Clientes" :options="customersFormatted" placeholder="Seleccione un cliente" v-model="customerId" :clearable="false" disabled />
           <div class="grid grid-cols-2">
             <div>
-              <label class="ltr:inline-block rtl:block input-label"
-                >Lunes</label
-              >
+              <label class="ltr:inline-block rtl:block input-label">Lunes</label>
               <div class="pt-2">
                 <Checkbox label="Lunes" v-model="monday" :checked="defaultMondayValue" />
               </div>
             </div>
             <div>
-              <label class="ltr:inline-block rtl:block input-label"
-                >Sábado</label
-              >
+              <label class="ltr:inline-block rtl:block input-label">Sábado</label>
               <div class="pt-2">
                 <Checkbox label="Sábado" v-model="saturday" :checked="defaultSaturdayValue" />
               </div>
             </div>
           </div>
-          <Textinput
-            type="number"
-            label="Frecuencia"
-            placeholder="Frecuencia"
-            v-model="frequency"
-            :error="frequencyError"
-          />
+          <Textinput type="number" label="Frecuencia" placeholder="Frecuencia" v-model="frequency" :error="frequencyError" />
           <div class="grid grid-cols-2">
             <div>
-              <label class="ltr:inline-block rtl:block input-label"
-                >Martes</label
-              >
+              <label class="ltr:inline-block rtl:block input-label">Martes</label>
               <div class="pt-2">
                 <Checkbox label="Martes" v-model="tuesday" :checked="defaultTuesdayValue" />
               </div>
             </div>
             <div>
-              <label class="ltr:inline-block rtl:block input-label"
-                >Domingo</label
-              >
+              <label class="ltr:inline-block rtl:block input-label">Domingo</label>
               <div class="pt-2">
                 <Checkbox label="Domingo" v-model="sunday" :checked="defaultSundayValue" />
               </div>
             </div>
           </div>
           <FromGroup label="Última visita">
-            <flat-pickr
-              v-model="lasstVisit"
-              class="form-control"
-              placeholder="Última visita"
-              :config="config"
-            />
+            <flat-pickr v-model="lasstVisit" class="form-control" placeholder="Última visita" :config="config" />
           </FromGroup>
           <div>
-            <label class="ltr:inline-block rtl:block input-label"
-              >Miércoles</label
-            >
+            <label class="ltr:inline-block rtl:block input-label">Miércoles</label>
             <div class="pt-2">
               <Checkbox label="Miércoles" v-model="wednesday" :checked="defaultWednesdayValue" />
             </div>
           </div>
           <FromGroup label="Próxima visita">
-            <flat-pickr
-              v-model="nextVisit"
-              class="form-control"
-              placeholder="Próxima visita"
-              :config="config"
-            />
+            <flat-pickr v-model="nextVisit" class="form-control" placeholder="Próxima visita" :config="config" />
           </FromGroup>
           <div>
             <label class="ltr:inline-block rtl:block input-label">Jueves</label>
@@ -83,34 +51,17 @@
               <Checkbox label="Jueves" v-model="thursday" :checked="defaultThursdayValue" />
             </div>
           </div>
-          <Textinput
-            type="text"
-            label="Observaciones"
-            placeholder="Observaciones"
-            v-model="observations"
-            :error="observationsError"
-          />
+          <Textinput type="text" label="Observaciones" placeholder="Observaciones" v-model="observations" :error="observationsError" :maxlength="250" />
           <div>
-            <label class="ltr:inline-block rtl:block input-label"
-              >Viernes</label
-            >
+            <label class="ltr:inline-block rtl:block input-label">Viernes</label>
             <div class="pt-2">
               <Checkbox label="Viernes" v-model="friday" :checked="defaultFridayValue" />
             </div>
           </div>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -120,22 +71,22 @@
 <script>
 import { ref, watch, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 import FromGroup from "@/components/DashCodeComponents/FromGroup";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
-import Checkbox from "@/components/DashCodeComponents/Checkbox";
+
 import moment from "moment";
 
 import { UPDATE_FREQUENCY } from "@/services/routes/frecuency/frecuencyGraphql.js";
 import { GET_ALL_CUSTOMERS } from "@/services/clients/customers/customersGraphql";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
+
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -152,17 +103,16 @@ export default {
       default: {}
     }
   },
-  emits: ["frequency-updated"],
+  emits: ["frequency-updated", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const monday = ref(false);
     const tuesday = ref(false);
@@ -172,50 +122,6 @@ export default {
     const saturday = ref(false);
     const sunday = ref(false);
 
-    const lasstVisit = ref(moment());
-    const nextVisit = ref(moment());
-
-    let customersFormatted = ref([]);
-
-    const customerId = ref({});
-
-    const config = ref({ dateFormat: 'Y-m-d' });
-
-    const queryGetCustomers = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_CUSTOMERS)
-    );
-
-    const customers = computed(
-      () => queryGetCustomers.result.value?.srvCustomer ?? []
-    );
-
-    const loadCustomers = () => {
-      queryGetCustomers.load() || queryGetCustomers.refetch();
-    };
-
-    const initilize = () => {
-      loadCustomers();
-    };
-
-    onMounted(() => initilize());
-
-    const formatCustomerSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.customerId,
-        label: `${item.name} ${item.lastName}`,
-      }));
-      return valueFormated;
-    };
-
-    watch(
-      () => customers.value,
-      (newValue) => {
-        customersFormatted.value = formatCustomerSelect(customers);
-        customerId.value = customersFormatted.value[0];
-      },
-      { deep: true }
-    );
-
     let defaultMondayValue = ref(false);
     let defaultTuesdayValue = ref(false);
     let defaultWednesdayValue = ref(false);
@@ -224,16 +130,96 @@ export default {
     let defaultSaturdayValue = ref(false);
     let defaultSundayValue = ref(false);
 
+    const lasstVisit = ref("");
+    const nextVisit = ref("");
+
+    const customerId = ref({});
+    let customersFormatted = ref([]);
+
+    const config = ref({ dateFormat: 'Y-m-d' });
+
+    // Apollo queries initialization
+
+    const queryGetCustomers = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_CUSTOMERS));
+
+    // Apollo fetching data from queries
+
+    const customers = computed(() => queryGetCustomers.result.value?.srvCustomer ?? []);
+
+    // Apollo lazy functions
+
+    const loadCustomers = () => queryGetCustomers.load() || queryGetCustomers.refetch();
+
+     // Function to get and set data from props
+
+     const setData = (props) => {
+      frequencyObject.customerFrequencyId = props.customerFrequencyId;
+      observations.value = props.observations;
+      frequency.value = props.frequency;
+      lasstVisit.value = props.lasstVisit;
+      nextVisit.value = props.nextVisit;
+      customerId.value = props.customerSelect;
+      monday.value = props.monday;
+      tuesday.value = props.tuesday;
+      wednesday.value = props.wednesday;
+      thursday.value = props.thursday;
+      friday.value = props.friday;
+      saturday.value = props.saturday;
+      sunday.value = props.sunday;
+
+      if (monday.value  === true) defaultMondayValue.value = true;
+      else defaultMondayValue.value = false;
+
+      if (tuesday.value  === true) defaultTuesdayValue.value = true;
+      else defaultTuesdayValue.value = false;
+
+      if (wednesday.value  === true) defaultWednesdayValue.value = true;
+      else defaultWednesdayValue.value = false;
+
+      if (thursday.value  === true) defaultThursdayValue.value = true;
+      else defaultThursdayValue.value = false;
+
+      if (friday.value  === true) defaultFridayValue.value = true;
+      else defaultFridayValue.value = false;
+
+      if (saturday.value  === true) defaultSaturdayValue.value = true;
+      else defaultSaturdayValue.value = false;
+
+      if (sunday.value  === true) defaultSundayValue.value = true;
+      else defaultSundayValue.value = false;
+    }
+
+    // Initialization function
+
+    const initilize = () => {
+      loadCustomers();
+      setData(props.data);
+      activeModal.value = true;
+      lasstVisit.value = moment().format('YYYY-MM-DD');
+      nextVisit.value = moment().format('YYYY-MM-DD');
+    };
+
+    // Mounted functions
+
+    onMounted(() => initilize());
+
+    // Format functions
+
+    const formatCustomerSelect = (data) => data.map((item) => ({ value: item.customerId, label: `${item.name} ${item.lastName}` }));
+
+    // Watchers
+
+    watch(() => customers.value, (newValue) => { customersFormatted.value = formatCustomerSelect(newValue) }, { deep: true });
+
     watch(
       () => props.data,
       (newValue) => {
-        console.log('data => ', newValue);
         frequencyObject.customerFrequencyId = newValue.customerFrequencyId;
         observations.value = newValue.observations;
         frequency.value = newValue.frequency;
         lasstVisit.value = newValue.lasstVisit;
         nextVisit.value = newValue.nextVisit;
-        customerId.value = findSelectValues(customersFormatted, newValue.customer.customerId);
+        customerId.value = newValue.customerSelect;
         monday.value = newValue.monday;
         tuesday.value = newValue.tuesday;
         wednesday.value = newValue.wednesday;
@@ -266,16 +252,7 @@ export default {
       { deep: true }
     );
 
-    const findSelectValues = (data, id) => {
-      const filteredValue = data.value.find((item) => item.value === id);
-      return filteredValue;
-    };
-
-    const formValues = reactive({
-      name: "",
-      prefix: "",
-      address: "",
-    });
+    // Input model
 
     const frequencyObject = reactive({
       customerFrequencyId: 0,
@@ -293,40 +270,29 @@ export default {
       sunday: false,
     });
 
+    // Yup validations rules
+
     const schema = yup.object({
       frequency: yup.number().required("Frecuencia requerida"),
-      observations: yup.string().required("Observación requerida"),
+      observations: yup.string().required("Observación requerida").max(250),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate userForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema });
 
-    const {
-      value: frequency,
-      errorMessage: frequencyError,
-      meta: frequencyMeta,
-    } = useField("frequency");
-    const {
-      value: observations,
-      errorMessage: observationsError,
-      meta: observationsMeta,
-    } = useField("observations");
+    // Vee validate userField
 
-    const { mutate: updateFrequency } = useMutation(UPDATE_FREQUENCY, () => ({
-      variables: { inputModel: frequencyObject },
-    }));
+    const { value: frequency, errorMessage: frequencyError, meta: frequencyMeta } = useField("frequency");
+    const { value: observations, errorMessage: observationsError, meta: observationsMeta } = useField("observations");
 
-    const onSubmit = handleSubmit((values, actions) => {
+    // Apollo mutations
+
+    const { mutate: updateFrequency } = useMutation(UPDATE_FREQUENCY, () => ({ variables: { inputModel: frequencyObject } }));
+
+    // Trigger function form
+
+    const onSubmit = handleSubmit(async (values, actions) => {
       frequencyObject.frequency = +values.frequency;
       frequencyObject.observations = values.observations;
       frequencyObject.customerId = customerId.value.value;
@@ -340,41 +306,35 @@ export default {
       frequencyObject.saturday = saturday.value;
       frequencyObject.sunday = sunday.value;
 
-      console.log('frequencyObject => ', frequencyObject);
-
-      updateFrequency()
+      await updateFrequency()
         .then((response) => {
-          emit("frequency-updated");
-          toast.success("Frecuencia actualizada exitosamente", {
-            timeout: 2000,
-          });
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+          if (response.data.updateCustomerFrequency.statusCode === "OK") toast.success("Frecuencia actualizada exitosamente", { timeout: 2000 });
+          else toast.error(response.data.updateCustomerFrequency.message, { timeout: 2000 });
 
-      closeModal.value = !closeModal.value;
+          emit("frequency-updated");
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      closeModal();
       actions.resetForm();
-      monday.value = false;
-      tuesday.value = false;
-      wednesday.value = false;
-      thursday.value = false;
-      friday.value = false;
-      saturday.value = false;
-      sunday.value = false;
     });
+
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
 
     return {
       closeModal,
+      onSubmit,
+      activeModal,
       config,
       frequency,
       frequencyError,
       observations,
       observationsError,
       customerId,
-      onSubmit,
       customersFormatted,
       monday,
       tuesday,

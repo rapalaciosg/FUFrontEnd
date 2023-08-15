@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { ref, watch, reactive, computed, onMounted } from "vue";
+import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
 
 import ModalBase from "../../ModalBase.vue";
@@ -64,7 +64,7 @@ export default {
       default: {}
     }
   },
-  emits: ["route-updated"],
+  emits: ["route-updated", "close-modal"],
   data() {
     return {};
   },
@@ -117,31 +117,29 @@ export default {
 
     // Function to get and set data from props
 
-    const setData = (props) => {
-      route.routeId = props.routeId;
-      customerSequential.value = props.customerSequential;
-      activeCustomerCreation.value = props.activeCustomerCreation;
-      name.value = props.name;
-      code.value = props.code;
-      description.value = props.description;
-      customerPrefix.value = props.customerPrefix;
+    const setData = (data) => {
+      route.routeId = data.routeId;
+      customerSequential.value = data.customerSequential.toString();
+      activeCustomerCreation.value = data.activeCustomerCreation;
+      name.value = data.name;
+      code.value = data.code;
+      description.value = data.description;
+      customerPrefix.value = data.customerPrefix;
+      companyId.value = data.companySelect;
 
       if (activeCustomerCreation.value) defaultValue.value = true;
       else defaultValue.value = false;
 
-      if (props.routeSettings.routeBy.value === "V") {
-        driverVehicleId.value = findSelectValues(
-          driverVehicleFormatted,
-          props.vehicle.vehicleId
-        );
-      } else {
-        driverVehicleId.value = findSelectValues(
-          driverVehicleFormatted,
-          props.driver.driverId
-        );
-      }
-      companyId.value = props.companySelect;
+      if (props.routeSettings.routeBy.value === "V") driverVehicleId.value = data.vehicleSelect;
+      else driverVehicleId.value = data.driverSelect;
     }
+
+    // Before mounted function
+
+    onBeforeMount(() => {
+      if (props.routeSettings.routeBy.value === "D") loadDrivers();
+      else loadVehicles();
+    })
 
     // Initialization function
 
@@ -250,26 +248,25 @@ export default {
 
     const { mutate: updateRoute } = useMutation(UPDATE_ROUTE, () => ({ variables: { inputModel: route } }));
 
-    const onSubmit = handleSubmit((values, actions) => {
+    const onSubmit = handleSubmit(async (values, actions) => {
       route.name = values.name;
       route.code = values.code.toUpperCase();
       route.description = values.description;
       route.customerPrefix = values.customerPrefix.toUpperCase();
-      route.customerSequential = values.customerSequential;
+      route.customerSequential = +values.customerSequential;
       route.companyId = companyId.value.value;
       route.activeCustomerCreation = activeCustomerCreation.value;
       if (props.routeSettings.routeBy.value === "V") route.vehicleId = driverVehicleId.value.value;
       else route.driverId = driverVehicleId.value.value;
 
-      updateRoute()
+      await updateRoute()
         .then((response) => {
           if (response.data.updateRoute.statusCode === "OK") toast.success("Ruta actualizada exitosamente", { timeout: 2000 });
           else toast.error(response.data.updateRoute.message, { timeout: 2000 });
-
-          emit("route-updated");
         })
         .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
+      emit("route-updated");
       closeModal();
       actions.resetForm();
     });
@@ -282,6 +279,7 @@ export default {
 
     return {
       closeModal,
+      activeModal,
       name,
       nameError,
       code,

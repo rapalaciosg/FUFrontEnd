@@ -158,8 +158,6 @@ export default {
             .then((response) => {
               if (response.data.updateRouteSetting.statusCode === "OK") toast.success("Rutas configuradas exitosamente", { timeout: 2000 });
               else toast.error(response.data.updateRouteSetting.message, { timeout: 2000 });
-
-              // emit("routes-updated");
             })
             .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
         }
@@ -174,8 +172,6 @@ export default {
             .then((response) => {
               if (response.data.createRouteSetting.statusCode === "OK") toast.success("Rutas configuradas exitosamente", { timeout: 2000 });
               else toast.error(response.data.createRouteSetting.message, { timeout: 2000 });
-
-              // emit("routes-updated");
             })
             .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
         }

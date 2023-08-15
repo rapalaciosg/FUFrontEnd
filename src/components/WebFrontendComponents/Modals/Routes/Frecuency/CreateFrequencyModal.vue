@@ -1,5 +1,5 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
@@ -51,7 +51,7 @@
               <Checkbox label="Jueves" v-model="thursday" />
             </div>
           </div>
-          <Textinput type="text" label="Observaciones" placeholder="Observaciones" v-model="observations" :error="observationsError" />
+          <Textinput type="text" label="Observaciones" placeholder="Observaciones" v-model="observations" :error="observationsError" :maxlength="250" />
           <div>
             <label class="ltr:inline-block rtl:block input-label">Viernes</label>
             <div class="pt-2">
@@ -60,7 +60,7 @@
           </div>
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
-          <button class="btn btn-secondary block text-center" @click="closeModal = !closeModal">Cerrar</button>
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
           <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
@@ -69,24 +69,25 @@
 </template>
 
 <script>
-import { ref, watch, reactive, computed, onMounted } from "vue";
+import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
+
 import ModalBase from "../../ModalBase.vue";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 import Textinput from "@/components/DashCodeComponents/Textinput";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import FromGroup from "@/components/DashCodeComponents/FromGroup";
+
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
-import Checkbox from "@/components/DashCodeComponents/Checkbox";
+
 import moment from 'moment';
 
 import { CREATE_FRECUENCY } from "@/services/routes/frecuency/frecuencyGraphql.js";
 import { GET_ALL_CUSTOMERS } from "@/services/clients/customers/customersGraphql";
-import {
-  useLazyQuery,
-  provideApolloClient,
-  useMutation,
-} from "@vue/apollo-composable";
+import { GET_ALL_FREQUENCIES } from "@/services/routes/frecuency/frecuencyGraphql.js";
+
+import { useLazyQuery, provideApolloClient, useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
 export default {
@@ -97,18 +98,18 @@ export default {
     FromGroup,
     Checkbox,
   },
-  props: [],
-  emits: ["frequency-created"],
+  props: {},
+  emits: ["frequency-created", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
+    const activeModal = ref(false);
 
     const monday = ref(false);
     const tuesday = ref(false);
@@ -118,55 +119,78 @@ export default {
     const saturday = ref(false);
     const sunday = ref(false);
 
-    const lasstVisit = ref(moment());
-    const nextVisit = ref(moment());
-
-    let customersFormatted = ref([]);
+    const lasstVisit = ref("");
+    const nextVisit = ref("");
 
     const customerId = ref({});
+    let customersFormatted = ref([]);
 
     const config = ref({ dateFormat: 'Y-m-d' });
 
-    const queryGetCustomers = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_CUSTOMERS)
-    );
+    // Apollo queries initialization
 
-    const customers = computed(
-      () => queryGetCustomers.result.value?.srvCustomer ?? []
-    );
+    const queryGetCustomers = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_CUSTOMERS));
 
-    const loadCustomers = () => {
-      queryGetCustomers.load() || queryGetCustomers.refetch();
-    };
+    const queryGetFrecuencies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_FREQUENCIES));
+
+    // Apollo fetching data from queries
+
+    const customers = computed(() => queryGetCustomers.result.value?.srvCustomer ?? []);
+
+    const frequencies = computed(() => queryGetFrecuencies.result.value?.srvCustomerFrequency ?? []);
+
+    // Apollo lazy functions
+
+    const loadCustomers = () => queryGetCustomers.load() || queryGetCustomers.refetch();
+
+    const loadFrequencies = () => queryGetFrecuencies.load() || queryGetFrecuencies.refetch();
+
+    // Before mounted function
+
+    onBeforeMount(() => loadFrequencies());
+
+    // Initialization function
 
     const initilize = () => {
-      loadCustomers();
+      activeModal.value = true;
+      lasstVisit.value = moment().format('YYYY-MM-DD');
+      nextVisit.value = moment().format('YYYY-MM-DD');
     };
+
+    // Mounted function
 
     onMounted(() => initilize());
 
-    const formatCustomerSelect = (data) => {
-      const valueFormated = data.value.map((item) => ({
-        value: item.customerId,
-        label: `${item.name} ${item.lastName}`,
-      }));
-      return valueFormated;
-    };
+    // Format functions
+
+    const formatCustomerSelect = (data) => data.map((item) => ({ value: item.customerId, label: `${item.name} ${item.lastName}` }));
+
+    // Watchers
+
+    watch(() => frequencies.value, (newValue) => { loadCustomers() }, { deep: true });
 
     watch(
       () => customers.value,
       (newValue) => {
-        customersFormatted.value = formatCustomerSelect(customers);
+        const availables = newValue.filter(object1 => {
+          return !frequencies.value.some(object2 => {
+            return object1.customerId === object2.customer.customerId;
+          });
+        });
+        customersFormatted.value = formatCustomerSelect(availables);
         customerId.value = customersFormatted.value[0];
       },
       { deep: true }
     );
 
+    // Initial values
+
     const formValues = reactive({
-      name: "",
-      prefix: "",
-      address: "",
+      observations: "",
+      frecuency: 0,
     });
+
+    // Input model
 
     const frequencyObject = reactive({
       customerFrequencyId: 0,
@@ -184,41 +208,31 @@ export default {
       sunday: false
     });
 
+    // Yup validations rules
+
     const schema = yup.object({
       frecuency: yup.number().required("Frecuencia requerida"),
-      observations: yup.string().required("Observación requerida"),
+      observations: yup.string().required("Observación requerida").max(250),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate userForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema, initialValues: formValues });
 
-    const {
-      value: frequency,
-      errorMessage: frequencyError,
-      meta: frequencyMeta,
-    } = useField("frequency");
-    const {
-      value: observations,
-      errorMessage: observationsError,
-      meta: observationsMeta,
-    } = useField("observations");
+    // Vee validate userField
 
-    const { mutate: createFrecuency } = useMutation(CREATE_FRECUENCY, () => ({
-      variables: { inputModel: frequencyObject },
-    }));
+    const { value: frequency, errorMessage: frequencyError, meta: frequencyMeta } = useField("frequency");
+    const { value: observations, errorMessage: observationsError, meta: observationsMeta } = useField("observations");
 
-    const onSubmit = handleSubmit((values, actions) => {
-      frequencyObject.frequency = values.frequency;
+    // Apollo mutations
+
+    const { mutate: createFrecuency } = useMutation(CREATE_FRECUENCY, () => ({ variables: { inputModel: frequencyObject } }));
+
+    // Trigger function form
+
+    const onSubmit = handleSubmit(async (values, actions) => {
+      console.log('entro');
+      frequencyObject.frequency = +values.frequency;
       frequencyObject.observations = values.observations;
       frequencyObject.customerId = customerId.value.value;
       frequencyObject.lasstVisit = lasstVisit.value;
@@ -231,39 +245,37 @@ export default {
       frequencyObject.saturday = saturday.value;
       frequencyObject.sunday = sunday.value;
 
-      createFrecuency()
+      await createFrecuency()
         .then((response) => {
-          emit("frequency-created");
-          toast.success("Frecuencia creada exitosamente", {
-            timeout: 2000,
-          });
-        })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+          if (response.data.createCustomerFrequency.statusCode === "OK") toast.success("Frecuencia creada exitosamente", { timeout: 2000 });
+          else toast.error(response.data.createCustomerFrequency.message, { timeout: 2000 });
 
-      closeModal.value = !closeModal.value;
+          emit("frequency-created");
+        })
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+
+      closeModal();
       actions.resetForm();
-      monday.value = false;
-      tuesday.value = false;
-      wednesday.value = false;
-      thursday.value = false;
-      friday.value = false;
-      saturday.value = false;
-      sunday.value = false;
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       config,
       frequency,
       frequencyError,
       observations,
       observationsError,
+      lasstVisit,
+      nextVisit,
       customerId,
-      onSubmit,
       customersFormatted,
       monday,
       tuesday,
