@@ -178,9 +178,6 @@ export default {
           if (response.data.createProduct.statusCode === "OK") toast.success("Producto creado exitosamente", { timeout: 2000 });
           else toast.error(response.data.createProduct.message, { timeout: 2000 });
           
-          toast.success("", {
-            timeout: 2000,
-          });
           emit("product-created");
         })
         .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))

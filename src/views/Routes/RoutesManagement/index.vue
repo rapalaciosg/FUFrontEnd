@@ -227,9 +227,12 @@ export default {
 
         routeDetails.value = value.row;
 
-        // routeDetails.value['driverVehicleSelect'] = { value: value.row.companyType.companyTypeId, label: value.row.companyType.name };
-
         routeDetails.value['companySelect'] = { value: value.row.company.companyId, label: value.row.company.name };
+
+        routeDetails.value['driverSelect'] = { value: value.row.driver.driverId, label: value.row.driver.code };
+
+        if (routeSettings.routeName.value === "VC") routeDetails.value['vehicleSelect'] = { value: value.row.vehicle.vehicleId, label: value.row.vehicle.code };
+        else routeDetails.value['vehicleSelect'] = { value: value.row.vehicle.vehicleId, label: value.row.vehicle.licensePlate };
 
         if (value.action === "edit") isModalEditOpen.value = true;
 

@@ -1,57 +1,66 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
-      <div class="grid grid-cols-2 gap-5 px-4 py-6">
+      <div class="grid grid-cols-5 gap-5 px-4 py-6">
         <p class="font-medium">Id:</p>
-        <p>{{ data.customerFrequencyId }}</p>
-        <p class="font-medium">Nombre:</p>
-        <p>{{ data.name }}</p>
-        <p class="font-medium">Cliente:</p>
-        <p>{{ data.customerName }}</p>
+        <p class="col-span-2">{{ data.customerFrequencyId }}</p>
+        <div class="grid grid-cols-2 gap-5 col-span-2">
+          <p class="font-medium">Lunes:</p>
+          <Checkbox :checked="data.monday" disabled />
+        </div>
+        <p class="font-medium">Id del cliente:</p>
+        <p class="col-span-2">{{ data.customer.customerId }}</p>
+        <div class="grid grid-cols-2 gap-5 col-span-2">
+          <p class="font-medium">Martes:</p>
+          <Checkbox :checked="data.tuesday" disabled />
+        </div>
+        <p class="font-medium">Nombre del cliente:</p>
+        <p class="col-span-2">{{ data.customer.name }} {{ data.customer.lastName }}</p>
+        <div class="grid grid-cols-2 gap-5 col-span-2">
+          <p class="font-medium">Miércoles:</p>
+          <Checkbox :checked="data.wednesday" disabled />
+        </div>
         <p class="font-medium">Frecuencia:</p>
-        <p>{{ data.frequency }}</p>
+        <p class="col-span-2">{{ data.frequency }}</p>
+        <div class="grid grid-cols-2 gap-5 col-span-2">
+          <p class="font-medium">Jueves:</p>
+          <Checkbox :checked="data.thursday" disabled />
+        </div>
         <p class="font-medium">Última visita:</p>
-        <p>{{ data.lasstVisit }}</p>
+        <p class="col-span-2">{{ data.lasstVisit }}</p>
+        <div class="grid grid-cols-2 gap-5 col-span-2">
+          <p class="font-medium">Viernes:</p>
+          <Checkbox :checked="data.friday" disabled />
+        </div>
         <p class="font-medium">Próxima visita:</p>
-        <p>{{ data.nextVisit }}</p>
+        <p class="col-span-2">{{ data.nextVisit }}</p>
+        <div class="grid grid-cols-2 gap-5 col-span-2">
+          <p class="font-medium">Sábado:</p>
+          <Checkbox :checked="data.saturday" disabled />
+        </div>
         <p class="font-medium">Observaciones:</p>
-        <p>{{ data.observations }}</p>
-        <p class="font-medium">Lunes:</p>
-        <p>{{ data.monday }}</p>
-        <p class="font-medium">Martes:</p>
-        <p>{{ data.tuesday }}</p>
-        <p class="font-medium">Miércoles:</p>
-        <p>{{ data.wednesday }}</p>
-        <p class="font-medium">Jueves:</p>
-        <p>{{ data.thursday }}</p>
-        <p class="font-medium">Viernes:</p>
-        <p>{{ data.friday }}</p>
-        <p class="font-medium">Sábado:</p>
-        <p>{{ data.saturday }}</p>
-        <p class="font-medium">Domingo:</p>
-        <p>{{ data.sunday }}</p>
+        <p class="col-span-2">{{ data.observations }}</p>
+        <div class="grid grid-cols-2 gap-5 col-span-2">
+          <p class="font-medium">Domingo:</p>
+          <Checkbox :checked="data.sunday" disabled />
+        </div>
       </div>
-      <div
-        class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-      >
-        <button
-          class="btn btn-secondary block text-center"
-          @click="closeModal = !closeModal"
-        >
-          Cerrar
-        </button>
+      <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+        <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
       </div>
     </template>
   </modal-base>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import ModalBase from "../../ModalBase.vue";
+import Checkbox from "@/components/DashCodeComponents/Checkbox";
 
 export default {
   components: {
     ModalBase,
+    Checkbox,
   },
   props: {
     data: {
@@ -59,16 +68,27 @@ export default {
       default: {},
     },
   },
-  emits: [],
+  emits: ["close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  methods: {},
   setup(props, { emit }) {
-    let closeModal = ref(false);
 
-    return { closeModal };
+    // Variables declaration
+
+    const activeModal = ref(false);
+
+    // Mounted function
+
+    onMounted(() => activeModal.value = true);
+
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
+    return { activeModal, closeModal };
   },
 };
 </script>

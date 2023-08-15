@@ -275,7 +275,7 @@ export default {
 
     // Trigger function form
 
-    const onSubmit = handleSubmit((values, actions) => {
+    const onSubmit = handleSubmit(async (values, actions) => {
       route.name = values.name;
       route.code = values.code;
       route.description = values.description;
@@ -286,13 +286,13 @@ export default {
       if (props.routeSettings.routeBy.value === "V") route.vehicleId = driverVehicleId.value.value;
       else route.driverId = driverVehicleId.value.value;
 
-      createRoute()
+      await createRoute()
         .then((response) => {
           if (response.data.createRoute.statusCode === "OK") toast.success("Ruta creada exitosamente", { timeout: 2000 });
           else toast.error(response.data.createRoute.message, { timeout: 2000 });
 
           updateCompanySequential()
-            .then(() => {
+            .then((response) => {
               if (response.data.updateCompany.statusCode === "OK") toast.success("Secuencial de la compañía actualizado", { timeout: 2000 });
               else toast.error(response.data.updateCompany.message, { timeout: 2000 });
             })

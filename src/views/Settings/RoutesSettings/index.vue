@@ -12,12 +12,14 @@
 
 <script>
 import { computed, ref, onMounted, watch, reactive, onBeforeMount } from "vue";
+
 import Button from "@/components/DashCodeComponents/Button";
 import Card from "@/components/DashCodeComponents/Card";
 
 import RoutesSettingsModalVue from '@/components/WebFrontendComponents/Modals/Settings/RoutesSettings/RoutesSettingsModal.vue';
 
 import { GET_ROUTES_SETTINGS } from "@/services/settings/routeSettings/routeSettingsGraphql";
+
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
@@ -28,8 +30,9 @@ export default {
     RoutesSettingsModalVue,
   },
   setup() {
-    let isModalOpen = ref(false);
 
+    // Variables declaration
+    
     let isConfigured = ref(null);
 
     let isModalRouteSettingsOpen = ref(false);
@@ -39,22 +42,23 @@ export default {
       routeName: null,
     });
 
-    const queryGetRoutesSettings = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ROUTES_SETTINGS)
-    );
+    // Apollo queries initialization
 
-    const routesSettings = computed(
-      () => queryGetRoutesSettings.result.value?.srvRouteSetting ?? []
-    );
+    const queryGetRoutesSettings = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ROUTES_SETTINGS));
 
-    const loadRoutesSettings = () => {
-      console.log('entro');
-      queryGetRoutesSettings.load() || queryGetRoutesSettings.refetch();
-    };
+    // Apollo fetching data
 
-    onBeforeMount(() => {
-      loadRoutesSettings();
-    });
+    const routesSettings = computed(() => queryGetRoutesSettings.result.value?.srvRouteSetting ?? []);
+
+    // Apollo lazy functions
+
+    const loadRoutesSettings = () => queryGetRoutesSettings.load() || queryGetRoutesSettings.refetch();
+
+    // Before mounted function
+
+    onBeforeMount(() => loadRoutesSettings());
+
+    // Watchers
 
     watch(
       () => routesSettings.value,
@@ -78,15 +82,16 @@ export default {
       }
     );
 
+    // toggle function
+
     const toggleModal = (value) => {
-      if (!value) {
-        isModalRouteSettingsOpen.value = true
-      }
+      if (!value) isModalRouteSettingsOpen.value = true;
     };
+
+    // Returning values
 
     return {
       toggleModal,
-      isModalOpen,
       isModalRouteSettingsOpen,
       isConfigured,
       routeSettings,
