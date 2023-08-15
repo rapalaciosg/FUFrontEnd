@@ -10,7 +10,7 @@
     </Card>
     <AdvancedTable title="Listado de compañías" :headers="headersCompanyTable" :data="companiesList" :actions="actions" :showSelectOptions="false" @open-modal="toggleModal">
       <template v-slot:button>
-        <Button class="h-[40px]" text="Crear sucursal" btnClass="btn-success" @click="toggleModal()"/>
+        <Button class="h-[40px]" text="Crear compañía" btnClass="btn-success" @click="toggleModal()"/>
       </template>
     </AdvancedTable>
     <DetailsCompanyModal v-if="isModalDetailsOpen" title="Detalles de la compañia" :data="companyDetails" @close-modal="isModalDetailsOpen = false"/>
