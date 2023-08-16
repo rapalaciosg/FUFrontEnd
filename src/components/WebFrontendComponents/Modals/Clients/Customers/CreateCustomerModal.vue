@@ -1,155 +1,31 @@
 <template>
-  <modal-base :closeModal="closeModal">
+  <modal-base :activeModal="activeModal">
     <template v-slot:modal-body>
       <form @submit.prevent="onSubmit">
         <div class="grid grid-cols-2 gap-5 py-6">
-          <VueSelect
-            label="Ruta"
-            :options="routesFormatted"
-            placeholder="Seleccione una ruta"
-            v-model="routeId"
-            :clearable="false"
-          />
-          <VueSelect
-            label="Provincia"
-            :options="provincesFormatted"
-            placeholder="Seleccione una provincia"
-            v-model="provinceId"
-            :clearable="false"
-          />
-          <Textinput
-            type="text"
-            label="Nombre"
-            placeholder="Ingrese el nombre del cliente"
-            v-model="name"
-            :error="nameError"
-          />
-          <VueSelect
-            label="Distrito"
-            :options="districtsFormatted"
-            placeholder="Seleccione un distrito"
-            v-model="districtId"
-            :clearable="false"
-          />
-          <Textinput
-            type="text"
-            label="Apellido"
-            placeholder="Ingrese el apellido del cliente"
-            v-model="lastName"
-            :error="lastNameError"
-          />
-          <VueSelect
-            label="Corregimiento"
-            :options="townshipsFormatted"
-            placeholder="Seleccione un corregimiento"
-            v-model="townshipId"
-            :clearable="false"
-          />
-          <Textinput
-            type="text"
-            label="Código"
-            placeholder="Código del cliente"
-            v-model="code"
-            :error="codeError"
-            disabled
-          />
-          <VueSelect
-            label="Lugar poblado"
-            :options="villagesFormatted"
-            placeholder="Seleccione un lugar poblado"
-            v-model="villageId"
-            :clearable="false"
-          />
-          <Textinput
-            type="text"
-            label="Tarjeta de identificación"
-            placeholder="Ingrese el identificador"
-            v-model="identityCard"
-            :error="identityCardError"
-          />
-          <Textinput
-            type="text"
-            label="Dirección"
-            placeholder="Ingrese la dirección"
-            v-model="address"
-            :error="addressError"
-          />
-          <Textinput
-            type="text"
-            label="Número de casa"
-            placeholder="Ingrese el número de casa"
-            v-model="houseNumber"
-            :error="houseNumberError"
-          />
-          <Textinput
-            type="text"
-            label="Nombre de contacto"
-            placeholder="Ingrese el nombre de contacto"
-            v-model="contactName"
-            :error="contactNameError"
-          />
-          <Textinput
-            type="text"
-            label="latitud"
-            placeholder="Ingrese la latitud"
-            v-model="latitude"
-            :error="latitudeError"
-          />
-          <Textinput
-            type="text"
-            label="Teléfono"
-            placeholder="Ingrese el teléfono"
-            v-model="phone"
-            :error="phoneError"
-          />
-          <Textinput
-            type="text"
-            label="longitud"
-            placeholder="Ingrese la longitud"
-            v-model="longitude"
-            :error="longitudeError"
-          />
-          <Textinput
-            type="email"
-            label="Correo"
-            placeholder="Ingrese el correo"
-            v-model="email"
-            :error="emailError"
-          />
-          <VueSelect
-            label="Tipo de impuesto"
-            :options="taxPayerTypesFormatted"
-            placeholder="Seleccione un tipo de impuesto"
-            v-model="taxPayerTypeId"
-            :clearable="false"
-          />
-          <VueSelect
-            label="Tipo de cliente"
-            :options="customerTypesFormatted"
-            placeholder="Seleccione un tipo de cliente"
-            v-model="customerTypeId"
-            :clearable="false"
-          />
-          <Textinput
-            type="text"
-            label="Dv"
-            placeholder="Ingrese dv"
-            v-model="dv"
-            :error="dvError"
-          />
+          <VueSelect label="Ruta" :options="routesFormatted" placeholder="Seleccione una ruta" v-model="routeId" :clearable="false"/>
+          <VueSelect label="Provincia" :options="provincesFormatted" placeholder="Seleccione una provincia" v-model="provinceId" :clearable="false"/>
+          <Textinput type="text" label="Nombre" placeholder="Ingrese el nombre del cliente" v-model="name" :error="nameError" :maxlength="100"/>
+          <VueSelect label="Distrito" :options="districtsFormatted" placeholder="Seleccione un distrito" v-model="districtId" :clearable="false"/>
+          <Textinput type="text" label="Apellido" placeholder="Ingrese el apellido del cliente" v-model="lastName" :error="lastNameError" :maxlength="100"/>
+          <VueSelect label="Corregimiento" :options="townshipsFormatted" placeholder="Seleccione un corregimiento" v-model="townshipId" :clearable="false"/>
+          <Textinput type="text" label="Código" placeholder="Código del cliente" v-model="code" :error="codeError" disabled/>
+          <VueSelect label="Lugar poblado" :options="villagesFormatted" placeholder="Seleccione un lugar poblado" v-model="villageId" :clearable="false"/>
+          <Textinput type="text" label="Tarjeta de identificación" placeholder="Ingrese el identificador" v-model="identityCard" :error="identityCardError" :maxlength="50"/>
+          <Textinput type="text" label="Dirección" placeholder="Ingrese la dirección" v-model="address" :error="addressError" :maxlength="200"/>
+          <Textinput type="text" label="Número de casa" placeholder="Ingrese el número de casa" v-model="houseNumber" :error="houseNumberError" :maxlength="10"/>
+          <Textinput type="text" label="Nombre de contacto" placeholder="Ingrese el nombre de contacto" v-model="contactName" :error="contactNameError" :maxlength="100"/>
+          <Textinput type="text" label="Latitud" placeholder="Ingrese la latitud" v-model="latitude" :error="latitudeError" :maxlength="12"/>
+          <Textinput type="text" label="Teléfono" placeholder="Ingrese el teléfono" v-model="phone" :error="phoneError" :maxlength="75"/>
+          <Textinput type="text" label="Longitud" placeholder="Ingrese la longitud" v-model="longitude" :error="longitudeError" :maxlength="12"/>
+          <Textinput type="email" label="Correo" placeholder="Ingrese el correo" v-model="email" :error="emailError" :maxlength="250"/>
+          <VueSelect label="Tipo de impuesto" :options="taxPayerTypesFormatted" placeholder="Seleccione un tipo de impuesto" v-model="taxPayerTypeId" :clearable="false"/>
+          <VueSelect label="Tipo de cliente" :options="customerTypesFormatted" placeholder="Seleccione un tipo de cliente" v-model="customerTypeId" :clearable="false"/>
+          <Textinput type="text" label="Dv" placeholder="Ingrese dv" v-model="dv" :error="dvError" :maxlength="20"/>
         </div>
-        <div
-          class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
-        >
-          <button
-            class="btn btn-secondary block text-center"
-            @click="closeModal = !closeModal"
-          >
-            Cerrar
-          </button>
-          <button type="submit" class="btn btn-success block text-center">
-            Guardar
-          </button>
+        <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+          <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
+          <button type="submit" class="btn btn-success block text-center">Guardar</button>
         </div>
       </form>
     </template>
@@ -157,7 +33,7 @@
 </template>
 
 <script>
-import { ref, watch, reactive, computed, onMounted } from "vue";
+import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
 import { useField, useForm } from "vee-validate";
 
@@ -187,22 +63,18 @@ export default {
     Textinput,
     VueSelect,
   },
-  props: [],
-  emits: ["customer-created"],
+  props: {},
+  emits: ["customer-created", "close-modal"],
   data() {
     return {};
   },
-  watch: {},
-  mounted() {},
-  methods: {},
   setup(props, { emit }) {
+
+    // Variables declaration
+
     const toast = useToast();
 
-    let closeModal = ref(false);
-
-    const variablesDistrics = reactive({ id: ""});
-    const variablesTownShips = reactive({ id: ""});
-    const variablesVillages = reactive({ id: ""});
+    const activeModal = ref(false);
 
     let routesFormatted = ref([]);
     let customerTypesFormatted = ref([]);
@@ -220,125 +92,103 @@ export default {
     const townshipId = ref({});
     const villageId = ref({});
 
-    const queryGetCustomers = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_CUSTOMERS)
-    );
+    let routeSelected = ref({});
 
-    const queryGetRoutes = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_ROUTES)
-    );
+    // Apollo variables
 
-    const queryGetCustomerTypes = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_CUSTOMER_TYPE)
-    );
+    const variablesDistrics = reactive({ id: ""});
+    const variablesTownShips = reactive({ id: ""});
+    const variablesVillages = reactive({ id: ""});
 
-    const queryGetTaxPayerTypes = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_TAX_PAYER_TYPE)
-    );
+    // Apollo queries initialization
 
-    const queryGetProvinces = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_PROVINCES)
-    );
+    const queryGetCustomers = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_CUSTOMERS));
 
-    const queryGetDistricts = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_DISTRICTS_BY_PROVINCE_ID, variablesDistrics)
-    );
+    const queryGetRoutes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_ROUTES));
 
-    const queryGetTownships = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_TOWNSHIP_BY_DISTRICT_ID, variablesTownShips)
-    );
+    const queryGetCustomerTypes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_CUSTOMER_TYPE));
 
-    const queryGetVillages = provideApolloClient(apolloClient)(() =>
-      useLazyQuery(GET_ALL_VILLAGE_BY_TOWNSHIP_ID, variablesVillages)
-    );
+    const queryGetTaxPayerTypes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_TAX_PAYER_TYPE));
 
-    const customers = computed(
-      () => queryGetCustomers.result.value?.srvCustomer ?? []
-    );
+    const queryGetProvinces = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_PROVINCES));
 
-    const routes = computed(
-      () => queryGetRoutes.result.value?.srvRoutes ?? []
-    );
+    const queryGetDistricts = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_DISTRICTS_BY_PROVINCE_ID, variablesDistrics));
 
-    const customerTypes = computed(
-      () => queryGetCustomerTypes.result.value?.srvCustomerTypes ?? []
-    );
+    const queryGetTownships = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_TOWNSHIP_BY_DISTRICT_ID, variablesTownShips));
 
-    const taxPayerTypes = computed(
-      () => queryGetTaxPayerTypes.result.value?.srvTaxpayerTypes ?? []
-    );
+    const queryGetVillages = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_VILLAGE_BY_TOWNSHIP_ID, variablesVillages));
 
-    const provinces = computed(
-      () => queryGetProvinces.result.value?.srvProvince ?? []
-    );
+    // Apollo fetching data from queries
 
-    const districts = computed(
-      () => queryGetDistricts.result.value?.srvDistrictByProvinceId ?? []
-    );
+    const customers = computed(() => queryGetCustomers.result.value?.srvCustomer ?? []);
 
-    const townships = computed(
-      () => queryGetTownships.result.value?.srvTownshipByDistrictId ?? []
-    );
+    const routes = computed(() => queryGetRoutes.result.value?.srvRoutes ?? []);
 
-    const villages = computed(
-      () => queryGetVillages.result.value?.srvVillageByTownshipId ?? []
-    );
+    const customerTypes = computed(() => queryGetCustomerTypes.result.value?.srvCustomerTypes ?? []);
 
-    const loadCustomers = () => {
-      queryGetCustomers.load() || queryGetCustomers.refetch();
-    };
+    const taxPayerTypes = computed(() => queryGetTaxPayerTypes.result.value?.srvTaxpayerTypes ?? []);
 
-    const loadRoutes = () => {
-      queryGetRoutes.load() || queryGetRoutes.refetch();
-    };
+    const provinces = computed(() => queryGetProvinces.result.value?.srvProvince ?? []);
 
-    const loadCustomerTypes = () => {
-      queryGetCustomerTypes.load() || queryGetCustomerTypes.refetch();
-    };
+    const districts = computed(() => queryGetDistricts.result.value?.srvDistrictByProvinceId ?? []);
 
-    const loadTaxPayerTypes = () => {
-      queryGetTaxPayerTypes.load() || queryGetTaxPayerTypes.refetch();
-    };
+    const townships = computed(() => queryGetTownships.result.value?.srvTownshipByDistrictId ?? []);
 
-    const loadProvinces = () => {
-      queryGetProvinces.load() || queryGetProvinces.refetch();
-    };
+    const villages = computed(() => queryGetVillages.result.value?.srvVillageByTownshipId ?? []);
 
-    const loadDistricts = () => {
-      queryGetDistricts.load() || queryGetDistricts.refetch();
-    };
+    // Apollo lazy functions
 
-    const loadTownships = () => {
-      queryGetTownships.load() || queryGetTownships.refetch();
-    };
+    const loadCustomers = () => queryGetCustomers.load() || queryGetCustomers.refetch();
 
-    const loadVillages = () => {
-      queryGetVillages.load() || queryGetVillages.refetch();
-    };
+    const loadRoutes = () => queryGetRoutes.load() || queryGetRoutes.refetch();
 
-    const initilize = () => {
-      loadCustomers();
+    const loadCustomerTypes = () => queryGetCustomerTypes.load() || queryGetCustomerTypes.refetch();
+
+    const loadTaxPayerTypes = () => queryGetTaxPayerTypes.load() || queryGetTaxPayerTypes.refetch();
+
+    const loadProvinces = () => queryGetProvinces.load() || queryGetProvinces.refetch();
+
+    const loadDistricts = () => queryGetDistricts.load() || queryGetDistricts.refetch();
+
+    const loadTownships = () => queryGetTownships.load() || queryGetTownships.refetch();
+
+    const loadVillages = () => queryGetVillages.load() || queryGetVillages.refetch();
+
+    // Before mounted function
+
+    onBeforeMount(() => {
       loadRoutes();
       loadCustomerTypes();
       loadTaxPayerTypes();
       loadProvinces();
+    });
+
+    // Initialization function
+
+    const initilize = () => {
+      loadCustomers();
+      activeModal.value = true;
     };
+
+    // Mounted function
 
     onMounted(() => initilize());
 
-    const formatRouteSelect = (data) => data.value.map((item) => ({ value: item.routeId, label: item.name, code: item.customerPrefix }));
+    // Format functions
 
-    const formatCustomerTypeSelect = (data) => data.value.map((item) => ({ value: item.customerTypeId, label: item.name }));
+    const formatRouteSelect = (data) => data.map((item) => ({ value: item.routeId, label: item.name, code: item.customerPrefix }));
 
-    const formatTaxPayerTypeSelect = (data) => data.value.map((item) => ({ value: item.taxpayerTypeId, label: item.name }));
+    const formatCustomerTypeSelect = (data) => data.map((item) => ({ value: item.customerTypeId, label: item.name }));
 
-    const formatProvinceSelect = (data) => data.value.map((item) => ({ value: item.provinceId, label: item.name }));
+    const formatTaxPayerTypeSelect = (data) => data.map((item) => ({ value: item.taxpayerTypeId, label: item.name }));
 
-    const formatDistrictSelect = (data) => data.value.map((item) => ({ value: item.districtId, label: item.name }));
+    const formatProvinceSelect = (data) => data.map((item) => ({ value: item.provinceId, label: item.name }));
 
-    const formatTownshipSelect = (data) => data.value.map((item) => ({ value: item.townshipId, label: item.name }));
+    const formatDistrictSelect = (data) => data.map((item) => ({ value: item.districtId, label: item.name }));
 
-    const formatVillageSelect = (data) => data.value.map((item) => ({ value: item.villageId, label: item.name }));
+    const formatTownshipSelect = (data) => data.map((item) => ({ value: item.townshipId, label: item.name }));
+
+    const formatVillageSelect = (data) => data.map((item) => ({ value: item.villageId, label: item.name }));
 
     const getSCustomerCode = (data) => {
       const listSequentials = data.value.map(item => item.customerSequential);
@@ -346,24 +196,16 @@ export default {
       return max + 1;
     }
 
-    watch(
-      () => customers.value,
-      (newValue) => {
-        console.log('customers => ', newValue);
-      },
-      { deep: true }
-    );
+    const generateSequential = (num, totalLength) => String(num).padStart(totalLength, '0');
 
-    let customersPrefix = ref([]);
+    // Watchers
 
     watch(
       () => routeId.value,
       (newValue) => {
-        console.log('customerPrefix => ', newValue.code);
-        customersPrefix.value = customers.value.map(item => item.code)
-        console.log('customersCodes => ', customersPrefix.value);
-        customersPrefix.value = customers.value.filter(item => item.code.includes(newValue.code));
-        console.log('customersPrefix.value => ', customersPrefix.value);
+        routeSelected.value = routes.value.find(item => item.routeId === newValue.value);
+        const customerSequential = generateSequential(routeSelected.value.customerSequential, 4);
+        code.value = `${routeSelected.value.customerPrefix}-${customerSequential}`;
       },
       { deep: true }
     );
@@ -371,7 +213,7 @@ export default {
     watch(
       () => routes.value,
       (newValue) => {
-        routesFormatted.value = formatRouteSelect(routes);
+        routesFormatted.value = formatRouteSelect(newValue);
         routeId.value = routesFormatted.value[0];
       },
       { deep: true }
@@ -380,7 +222,7 @@ export default {
     watch(
       () => customerTypes.value,
       (newValue) => {
-        customerTypesFormatted.value = formatCustomerTypeSelect(customerTypes);
+        customerTypesFormatted.value = formatCustomerTypeSelect(newValue);
         customerTypeId.value = customerTypesFormatted.value[0];
       },
       { deep: true }
@@ -389,7 +231,7 @@ export default {
     watch(
       () => taxPayerTypes.value,
       (newValue) => {
-        taxPayerTypesFormatted.value = formatTaxPayerTypeSelect(taxPayerTypes);
+        taxPayerTypesFormatted.value = formatTaxPayerTypeSelect(newValue);
         taxPayerTypeId.value = taxPayerTypesFormatted.value[0];
       },
       { deep: true }
@@ -398,7 +240,7 @@ export default {
     watch(
       () => provinces.value,
       (newValue) => {
-        provincesFormatted.value = formatProvinceSelect(provinces);
+        provincesFormatted.value = formatProvinceSelect(newValue);
         provinceId.value = provincesFormatted.value[0];
       },
       { deep: true }
@@ -407,7 +249,7 @@ export default {
     watch(
       () => districts.value,
       (newValue) => {
-        districtsFormatted.value = formatDistrictSelect(districts);
+        districtsFormatted.value = formatDistrictSelect(newValue);
         districtId.value = districtsFormatted.value[0];
       },
       { deep: true }
@@ -416,7 +258,7 @@ export default {
     watch(
       () => townships.value,
       (newValue) => {
-        townshipsFormatted.value = formatTownshipSelect(townships);
+        townshipsFormatted.value = formatTownshipSelect(newValue);
         townshipId.value = townshipsFormatted.value[0];
       },
       { deep: true }
@@ -425,27 +267,30 @@ export default {
     watch(
       () => villages.value,
       (newValue) => {
-        villagesFormatted.value = formatVillageSelect(villages);
+        villagesFormatted.value = formatVillageSelect(newValue);
         villageId.value = villagesFormatted.value[0];
       },
       { deep: true }
     );
 
     // Hierarchical function
+
     watch(() => provinceId.value, (newValue) => {
       variablesDistrics.id = newValue.value;
       loadDistricts()
-    }, { deep: true })
+    }, { deep: true });
 
     watch(() => districtId.value, (newValue) => {
       variablesTownShips.id = newValue.value;
       loadTownships()
-    }, { deep: true })
+    }, { deep: true });
 
     watch(() => townshipId.value, (newValue) => {
       variablesVillages.id = newValue.value;
       loadVillages()
-    }, { deep: true })
+    }, { deep: true });
+
+    // Initial values
 
     const formValues = reactive({
       code: "",
@@ -461,6 +306,8 @@ export default {
       email: "",
       dv: "",
     });
+
+    // Input model
 
     const customer = reactive({
       customerId: 0,
@@ -489,32 +336,24 @@ export default {
     });
 
     const schema = yup.object({
-      //code: yup.string().required("Código requerido"),
-      name: yup.string().required("Nombre requerido"),
-      lastName: yup.string().required("Apellido requerido"),
-      identityCard: yup.string().required("Tarjeta de identificación requerida"),
-      address: yup.string().required("Dirección requerida"),
-      houseNumber: yup.string().required("Número de casa requerido"),
-      latitude: yup.string().required("Latitud requerida"),
-      longitude: yup.string().required("Longitud requerida"),
-      contactName: yup.string().required("Nombre de contacto requerido"),
-      phone: yup.string().required("Teléfono requerido"),
-      email: yup.string().required("Correo requerido").email(),
-      dv: yup.string().required("Dv requerido"),
+      name: yup.string().required("Nombre requerido").max(100),
+      lastName: yup.string().required("Apellido requerido").max(100),
+      identityCard: yup.string().required("Tarjeta de identificación requerida").max(50),
+      address: yup.string().required("Dirección requerida").max(200),
+      houseNumber: yup.string().required("Número de casa requerido").max(10),
+      latitude: yup.string().required("Latitud requerida").max(12),
+      longitude: yup.string().required("Longitud requerida").max(12),
+      contactName: yup.string().required("Nombre de contacto requerido").max(100),
+      phone: yup.string().required("Teléfono requerido").max(75),
+      email: yup.string().required("Correo requerido").email().max(250),
+      dv: yup.string().required("Dv requerido").max(20),
     });
 
-    const { handleSubmit, resetForm } = useForm({
-      validationSchema: schema,
-      initialValues: formValues,
-    });
+    // Vee validate useForm
 
-    watch(
-      () => closeModal.value,
-      (newValue) => {
-        resetForm();
-      },
-      { deep: true }
-    );
+    const { handleSubmit, resetForm } = useForm({ validationSchema: schema, initialValues: formValues });
+
+    // Vee validate useField
 
     const { value: code, errorMessage: codeError, meta: codeMeta } = useField("code");
     const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
@@ -529,15 +368,14 @@ export default {
     const { value: email, errorMessage: emailError, meta: emailMeta } = useField("email");
     const { value: dv, errorMessage: dvError, meta: dvMeta } = useField("dv");
 
-    const { mutate: createCustomer } = useMutation(
-      CREATE_CUSTOMER,
-      () => ({
-        variables: { inputModel: customer },
-      })
-    );
+    // Apollo mutations
 
-    const onSubmit = handleSubmit((values, actions) => {
-      //customer.code = values.code;
+    const { mutate: createCustomer } = useMutation(CREATE_CUSTOMER, () => ({ variables: { inputModel: customer } }));
+
+    // Trigger function
+
+    const onSubmit = handleSubmit(async (values, actions) => {
+      customer.code = values.code;
       customer.name = values.name;
       customer.lastName = values.lastName;
       customer.identityCard = values.identityCard;
@@ -556,27 +394,31 @@ export default {
       customer.districtId = districtId.value.value;
       customer.townshipId = townshipId.value.value;
       customer.villageId = villageId.value.value;
-      customer.createBy = keycloak.tokenParsed.preferred_username
+      customer.createBy = keycloak.tokenParsed.preferred_username;
 
-      createCustomer()
+      await createCustomer()
         .then((response) => {
+          if (response.data.createCustomer.statusCode === "OK") toast.success("Cliente creado exitosamente", { timeout: 2000 });
+          else toast.error(response.data.createCustomer.message, { timeout: 2000 });
+          
           emit("customer-created");
-          toast.success("Cliente creado exitosamente", {
-            timeout: 2000,
-          });
         })
-        .catch((error) => {
-          toast.error("Ha ocurrido un error", {
-            timeout: 2000,
-          });
-        });
+        .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
 
-        closeModal.value = !closeModal.value;
+        closeModal();
         actions.resetForm();
     });
 
+    // Close modal function
+
+    const closeModal = () => emit('close-modal');
+
+    // Returning values
+
     return {
+      onSubmit,
       closeModal,
+      activeModal,
       code,
       codeError,
       name,
@@ -601,7 +443,6 @@ export default {
       emailError,
       dv,
       dvError,
-      onSubmit,
       routesFormatted,
       routeId,
       customerTypesFormatted,
