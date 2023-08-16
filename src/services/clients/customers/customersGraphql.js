@@ -96,6 +96,10 @@ export const GET_CUSTOMERS_BY_ROUTE = gql`
         name
       }
       active
+      createBy
+      createdDate
+      updateBy
+      updateDate
     }
   }
 `;
@@ -103,6 +107,26 @@ export const GET_CUSTOMERS_BY_ROUTE = gql`
 export const CREATE_CUSTOMER = gql`
   mutation createCustomerMut($inputModel: CustomerInputModelInput!) {
     createCustomer(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;
+
+export const UPDATE_CUSTOMER = gql`
+  mutation updateCustomerMut($inputModel: CustomerInputModelInput!) {
+    updateCustomer(inputModel: $inputModel) {
+      statusCode
+      message
+      idObject
+    }
+  }
+`;
+
+export const DELETE_CUSTOMER = gql`
+  mutation deleteCustomerMut($id: Int!) {
+    deleteCustomer(id: $id) {
       statusCode
       message
       idObject

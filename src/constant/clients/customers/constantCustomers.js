@@ -6,7 +6,7 @@ export const headersCustomersTable = [
   { label: "Apellido", field: "lastName" },
   { label: "Tarjeta identificación", field: "identityCard" },
   { label: "Dirección", field: "address" },
-  { label: "Teléfono", field: "houseNumber" },
+  { label: "Nº de casa", field: "houseNumber" },
   { label: "Latitud", field: "latitude" },
   { label: "Longitud", field: "longitude" },
   { label: "Contacto", field: "contactName" },

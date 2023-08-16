@@ -120,7 +120,7 @@ export default {
       await updateBranchOfficeMut()
         .then((response) => {
           if (response.data.updateBranchOffice.statusCode === 'OK') toast.success("Sucursal actualiza exitosamente", { timeout: 2000 });
-          else toast.success(response.data.updateBranchOffice.message, { timeout: 2000 });
+          else toast.error(response.data.updateBranchOffice.message, { timeout: 2000 });
 
           emit("branch-office-updated");
         })
