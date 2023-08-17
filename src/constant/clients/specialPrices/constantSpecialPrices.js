@@ -5,5 +5,6 @@ export const headersSpecialPricesTable = [
   { label: "Sucursal", field: "branchOffice.branchOfficeName" },
   { label: "Articulo", field: "product.name" },
   { label: "Ajuste precio", field: "adjustment" },
+  { label: "Estado", field: "active" },
   { label: "Acciones", field: "actions" },
 ];
