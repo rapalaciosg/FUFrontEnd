@@ -37,7 +37,7 @@ export default {
       default: {},
     },
   },
-  emits: ["branch-office-updated"],
+  emits: ["branch-office-updated", "close-modal"],
   data() {
     return {};
   },
@@ -119,7 +119,7 @@ export default {
 
       await updateBranchOfficeMut()
         .then((response) => {
-          if (response.data.updateBranchOffice.statusCode === 'OK') toast.success("Sucursal actualiza exitosamente", { timeout: 2000 });
+          if (response.data.updateBranchOffice.statusCode === 'OK') toast.success("Sucursal actualizada exitosamente", { timeout: 2000 });
           else toast.error(response.data.updateBranchOffice.message, { timeout: 2000 });
 
           emit("branch-office-updated");

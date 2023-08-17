@@ -8,9 +8,12 @@
         </div>
       </div>
     </Card>
-    <AdvancedTable title="Listado de clientes" :headers="headersCustomersTable" :data="customersList" :actions="actions" :showSelectOptions="false" @open-modal="toggleModal">
+    <AdvancedTable title="Listado de clientes" :headers="headersCustomersTable" :data="customersList" :actions="actions" :showSelectOptions="false" @open-modal="toggleModal" :filter="filterSelect">
       <template v-slot:button>
-        <Button class="h-[40px]" text="Crear cliente" btnClass="btn-success" @click="toggleModal()"/>
+        <div class="grid grid-cols-2 gap-2">
+          <VueSelect :options="status" placeholder="Todos" v-model="filterSelect" />
+          <Button class="h-[40px]" text="Crear cliente" btnClass="btn-success" @click="toggleModal()"/>
+        </div>
       </template>
     </AdvancedTable>
     <DetailsCustomerModal v-if="isModalDetailsOpen" title="Detalles de cliente" :data="customerDetails" @close-modal="isModalDetailsOpen = false"/>
@@ -77,6 +80,7 @@ export default {
 
     let routesSelect = ref([]);
 
+    let filterSelect = ref("");
     let filterValue = ref(null);
 
     let customersList = ref([]);
@@ -202,6 +206,7 @@ export default {
       filterValue,
       headersCustomersListExport,
       customersList,
+      filterSelect,
     };
   },
 };
