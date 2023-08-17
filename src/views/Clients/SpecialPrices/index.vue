@@ -4,7 +4,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-5">
         <VueSelect :options="filters" placeholder="Seleccione una tipo de filtro" v-model="filterBy" :clearable="(filterBy) ? true : false"/>
         <VueSelect :options="filtersOptions" :placeholder="'Seleccione una opción'" v-model="filterValue" :clearable="(filterValue) ? true : false" :disabled="(filterBy) ? false : true"/>
-        <!-- <VueSelect :options="companiesSelect" :placeholder="'Seleccione una compañía'" v-model="filterValue" :clearable="(filterValue) ? true : false" :disabled="(filterBy) ? false : true"/> -->
+        <VueSelect v-if="filterBy && filterBy.value === 'routeAndCompany'" :options="companiesSelect" :placeholder="'Seleccione una compañía'" v-model="filterValueCompany" :clearable="(filterValueCompany) ? true : false" :disabled="(filterValue) ? false : true"/>
         <div class="grid grid-cols-2 gap-x-5">
           <download-excel class="btn-info rounded pt-2 text-center" :data="specialPricesList" :fields="headersSpecialPriceListExport" name="filename.xls">Exportar</download-excel>
         </div>
@@ -47,7 +47,7 @@ import { GET_ALL_BRANCH_OFFICES } from "@/services/administration/branchOffice/b
 import { GET_ALL_CUSTOMERS } from "@/services/clients/customers/customersGraphql.js";
 import { GET_ALL_PRODUCTS } from "@/services/inventory/products/productsGraphql.js";
 import { GET_ROUTES_BY_USER_ID } from "@/services/routes/routes/routesGraphql.js";
-import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
+import { GET_ALL_COMPANIES_BY_ROUTE } from "@/services/administration/company/companyGraphql.js";
 
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
@@ -79,7 +79,7 @@ export default {
         { label: 'Cliente', value: 'customer' },
         { label: 'Sucursal', value: 'branchOffice' },
         { label: 'Producto', value: 'product' },
-        // { label: 'Ruta y compañía', value: 'routeAndCompany' },
+        { label: 'Ruta y compañía', value: 'routeAndCompany' },
       ]
     };
   },
@@ -98,6 +98,7 @@ export default {
 
     let filterBy = ref(null);
     let filterValue = ref(null);
+    let filterValueCompany = ref(null);
 
     let filterSelect = ref("");
     let filtersOptions = ref([]);
@@ -118,6 +119,7 @@ export default {
     // Apollo variables
 
     const variablesRoutesByUserId = reactive({ userId: "" });
+    const variablesCompaniesByRoute = reactive({ routeId: 0 });
     const variablesSpecialPricesByCustomer = reactive({ customerId: 0 });
     const variablesSpecialPricesByBranchOffice = reactive({ branchId: 0 });
     const variablesSpecialPricesByProduct = reactive({ productId: 0 });
@@ -143,7 +145,7 @@ export default {
 
     const queryGetRoutes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ROUTES_BY_USER_ID, variablesRoutesByUserId));
 
-    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES));
+    const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES_BY_ROUTE, variablesCompaniesByRoute));
 
     // Apollo fetching data
 
@@ -165,7 +167,7 @@ export default {
 
     const routes = computed(() => queryGetRoutes.result.value?.srvRoutesByUserId ?? []);
 
-    const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
+    const companies = computed(() => queryGetCompanies.result.value?.srvCompaniesByRouteId ?? []);
 
     // Apollo lazy functions
 
@@ -202,6 +204,7 @@ export default {
       loadCustomers();
       loadProducts();
       loadBranchOffices();
+      loadRoutes();
       headersSpecialPriceListExport.value = formatHeadersListExport(headersSpecialPricesTable);
     });
 
@@ -210,6 +213,8 @@ export default {
     watch(() => customers.value, (newValue) => { customerSelect.value = formatCustomerSelect(newValue) }, { deep: true });
     watch(() => branchOffices.value, (newValue) => { branchOfficeSelect.value = formatBranchOfficesSelect(newValue) }, { deep: true });
     watch(() => products.value, (newValue) => { productSelect.value = formatProductSelect(newValue) }, { deep: true });
+    watch(() => routes.value, (newValue) => { routeSelect.value = formatRoutesSelect(newValue) }, { deep: true });
+    watch(() => companies.value, (newValue) => { companiesSelect.value = formatCompaniesSelect(newValue) }, { deep: true });
 
     watch(() => filterBy.value, (newValue) => {
       filterValue.value = null;
@@ -217,7 +222,7 @@ export default {
       if (newValue && newValue.value === 'customer') filtersOptions.value = customerSelect.value;
       else if (newValue && newValue.value === 'branchOffice') filtersOptions.value = branchOfficeSelect.value;
       else if (newValue && newValue.value === 'product') filtersOptions.value = productSelect.value;
-      // else filtersOptions.value = routeSelect.value;
+      else filtersOptions.value = routeSelect.value;
     }, { deep: true });
 
     watch(() => filterValue.value, (newValue) => {
@@ -233,8 +238,22 @@ export default {
         variablesSpecialPricesByProduct.productId = newValue.value;
         loadSpecialPricesByProduct();
         specialPricesList.value = specialPricesByProduct.value;
-      } else if (!newValue) {
+      } else if (newValue && filterBy.value?.value === 'routeAndCompany') {
+        variablesCompaniesByRoute.routeId = newValue.value;
+        variablesSpecialPricesByRouteAndCompany.routeId = newValue.value;
+        loadCompanies();
+      }  else if (!newValue) {
         specialPricesList.value = [];
+      };
+    }, { deep: true });
+
+    watch(() => filterValueCompany.value, (newValue) => {
+      if (!newValue) {
+        specialPricesList.value = [];
+      }  else {
+        variablesSpecialPricesByRouteAndCompany.companyId = newValue.value;
+        loadSpecialPricesByRouteAndCompany();
+        specialPricesList.value = specialPricesByRouteAndCompany.value;
       };
     }, { deep: true });
 
@@ -251,6 +270,11 @@ export default {
     watch(() => specialPricesByProduct.value, (newValue) => {
       listSpecialPricesByProduct.value = newValue;
       specialPricesList.value = listSpecialPricesByProduct.value;
+    }, { deep: true });
+
+    watch(() => specialPricesByRouteAndCompany.value, (newValue) => {
+      listSpecialPricesByRouteAndCompany.value = newValue;
+      specialPricesList.value = listSpecialPricesByRouteAndCompany.value;
     }, { deep: true });
 
     // Format functions
@@ -321,9 +345,12 @@ export default {
       filterSelect,
       filterBy,
       filterValue,
+      filterValueCompany,
       filtersOptions,
       specialPricesList,
       headersSpecialPriceListExport,
+      routeSelect,
+      companiesSelect,
     };
   },
 };

@@ -65,6 +65,10 @@ export default {
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
         { name: "Habilitar", icon: "ps:checked", value: "enable/disable" },
       ],
+      status: [
+        { label: 'Habilitado', value: 'enabled' },
+        { label: 'Deshabilitado', value: 'disabled' },
+      ],
     };
   },
   setup(props, {emit}) {

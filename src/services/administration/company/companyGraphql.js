@@ -42,6 +42,19 @@ export const GET_ALL_COMPANIES_BY_PROVINCE = gql`
   }
 `;
 
+export const GET_ALL_COMPANIES_BY_ROUTE = gql`
+  query getCompaniesByRoute($routeId: Int!) {
+    srvCompaniesByRouteId(routeId: $routeId) {
+      companyId
+      name
+      prefix
+      address
+      sequential
+      isDistributor
+    }
+  }
+`;
+
 export const CREATE_COMPANY = gql`
   mutation createCompanyMut($inputModel: CompanyInputModelInput!) {
     createCompany(inputModel: $inputModel) {

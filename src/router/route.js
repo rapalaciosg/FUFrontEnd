@@ -61,7 +61,7 @@ const routes = [
       {
         path: "inventory",
         name: "inventory",
-        component: () => import("@/views/Inventory"),
+        component: () => import("@/views/Inventory/InventoryTransfer"),
         meta: {
           hide: true,
         },
