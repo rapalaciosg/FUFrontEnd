@@ -35,6 +35,10 @@
             <Checkbox v-if="props.row.activeCustomerCreation" checked disabled />
             <Checkbox v-else disabled />
           </span>
+          <span v-if="props.column.field == 'isPrimary'" class="flex justify-center">
+            <Checkbox v-if="props.row.isPrimary" checked disabled />
+            <Checkbox v-else disabled />
+          </span>
           <span v-if="props.column.field == 'enabled' || props.column.field == 'active'" class="flex justify-center">
             <img v-if="props.row.enabled || props.row.active" :src= "checkedImg" alt="" class="block object-cover" />
             <img v-if="props.row.enabled === false || props.row.active === false" :src= "disabledImg" alt="" class="block object-cover" />
