@@ -25,6 +25,8 @@ import CreateTransferModal from "@/components/WebFrontendComponents/Modals/Inven
 
 import { GET_ALL_TRANSFER } from "@/services/inventory/inventoryTransfer/inventoryTransferGraphql.js";
 
+import moment from 'moment';
+
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
 
@@ -80,6 +82,21 @@ export default {
     // Watchers
 
     watch(() => transfers.value, (newValue) => { transfersList.value = newValue }, { deep: true });
+
+    watch(() => transfersList.value, (newValue) => {
+      transfersList.value = newValue.map(item => ({
+        transferId: item.transferId,
+        origenWharehouseId: item.origenWharehouseId,
+        destinationWharehouseId: item.destinationWharehouseId,
+        productId: item.productId,
+        quantity: item.quantity,
+        createdBy: item.createdBy,
+        createdDate: moment(item.createdDate).format('YYYY-MM-DD HH:mm:ss'),
+        warehouseInputOrigin: item.warehouseInputOrigin,
+        warehouseInputDestination: item.warehouseInputDestination,
+        product: item.product,
+      }));
+    }, { deep: true })
 
     // Format functions
 

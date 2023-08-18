@@ -75,6 +75,14 @@ const routes = [
         },
       },
       {
+        path: "warehouses",
+        name: "warehouses",
+        component: () => import("@/views/Inventory/Warehouses"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "reports",
         name: "reports",
         component: () => import("@/views/Reports"),

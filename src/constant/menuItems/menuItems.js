@@ -59,6 +59,10 @@ export const menuItems = [
         childtitle: "Productos",
         childlink: "products",
       },
+      {
+        childtitle: "Bodegas",
+        childlink: "warehouses",
+      },
     ],
   },
   {
