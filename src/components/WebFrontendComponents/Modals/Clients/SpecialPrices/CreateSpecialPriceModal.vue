@@ -62,6 +62,8 @@ export default {
     const customerId = ref({});
     const branchOfficeId = ref({});
 
+    let customerSpecialPrices = ref(null);
+
     // Apollo queries initialization
 
     const queryGetSpecialPrices = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_SPECIAL_PRICES));
@@ -99,6 +101,7 @@ export default {
     onBeforeMount(() => {
       loadSpecialPrices();
       loadCustomers();
+      loadProducts();
     });
 
     // Initialization function
@@ -131,27 +134,18 @@ export default {
       { deep: true }
     );
 
-    let customerSpecialPrices = ref(null);
-
     watch(
       () => customerId.value,
       (newValue) => {
         customerSpecialPrices.value = specialPrices.value.filter(item => item.customer.customerId === newValue.value);
-        loadProducts();
-      },
-      { deep: true }
-    );
 
-    watch(
-      () => products.value, 
-      (newValue) => {
-        // const differentValues = newValue.filter(object1 => {
-        //   return !customerSpecialPrices.value.some(object2 => {
-        //     return object1.productId === object2.product.productId;
-        //   });
-        // });
-        // console.log('differentValues => ', differentValues);
-        productsFormatted.value = formatProductsSelect(newValue);
+        const differentValues = products.value.filter(object1 => {
+          return !customerSpecialPrices.value.some(object2 => {
+            return object1.productId === object2.product.productId;
+          });
+        });
+
+        productsFormatted.value = formatProductsSelect(differentValues);
         productId.value = productsFormatted.value[0];
       },
       { deep: true }
