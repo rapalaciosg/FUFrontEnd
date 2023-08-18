@@ -96,12 +96,13 @@ export default {
 
     const setData = (props) => {
       warehouse.warehouseId = props.warehouseId;
-        name.value = props.name;
-        code.value = props.code;
-        isPrimary.value = props.isPrimary;
-        if (isPrimary.value) defaultValue.value = true
-        else defaultValue.value = false
-        vehicleId.value = props.vehicleSelect;
+      warehouse.active = props.active;
+      name.value = props.name;
+      code.value = props.code;
+      isPrimary.value = props.isPrimary;
+      if (isPrimary.value) defaultValue.value = true
+      else defaultValue.value = false
+      vehicleId.value = props.vehicleSelect;
     }
 
     // Initialization function
@@ -141,6 +142,7 @@ export default {
       () => props.data,
       (newValue) => {
         warehouse.warehouseId = newValue.warehouseId;
+        warehouse.active = newValue.active;
         name.value = newValue.name;
         code.value = newValue.code;
         isPrimary.value = newValue.isPrimary;
@@ -159,6 +161,7 @@ export default {
       code: "",
       isPrimary: false,
       vehicleId: 0,
+      active: false,
     });
 
     // Yup validations rules
