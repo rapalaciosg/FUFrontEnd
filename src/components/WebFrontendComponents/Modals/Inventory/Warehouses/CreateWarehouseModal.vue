@@ -133,6 +133,7 @@ export default {
       code: "",
       isPrimary: false,
       vehicleId: 0,
+      active: true,
     });
 
     // Yup validations rules

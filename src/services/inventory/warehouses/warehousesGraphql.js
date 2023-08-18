@@ -12,6 +12,7 @@ export const GET_ALL_WAREHOUSES = gql`
       code
       name
       isPrimary
+      active
     }
   }
 `;
@@ -28,6 +29,7 @@ export const GET_ALL_WAREHOUSES_BY_VEHICLE = gql`
       code
       name
       isPrimary
+      active
     }
   }
 `;

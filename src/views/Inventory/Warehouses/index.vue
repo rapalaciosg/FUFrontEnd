@@ -20,7 +20,7 @@
     <DetailsWarehouseModal v-if="isModalDetailsOpen" title="Detalles de la bodega" :data="warehouseDetails" @close-modal="isModalDetailsOpen = false"/>
     <CreateWarehouseModal v-if="isModalCreateOpen" title="Crear bodega" @warehouse-created="loadWarehouses()" @close-modal="isModalCreateOpen = false"/>
     <EditWarehouseModal v-if="isModalEditOpen" title="Editar bodega" :data="warehouseDetails" @close-modal="isModalEditOpen = false" @warehouse-updated="loadWarehouses()"/>
-    <!-- <DeleteCompanyModal v-if="isModalDeleteOpen" title="Eliminar bodega" :company="warehouseDetails" @close-modal="isModalDeleteOpen = false" @warehouse-deleted="loadWarehouses()"/> -->
+    <EnableDisableWarehouseModal v-if="isModalEnableDisableOpen" :title="(warehouseDetails.active) ? 'Deshabilitar' : 'Habilitar'" :action="(warehouseDetails.active) ? 'Deshabilitar' : 'Habilitar'" :warehouse="warehouseDetails" @close-modal="isModalEnableDisableOpen = false" @warehouse-updated="loadWarehouses()"/>
   </div>
 </template>
 
@@ -37,7 +37,7 @@ import { headersWarehousesTable } from "@/constant/inventory/warehouses/constant
 import CreateWarehouseModal from "@/components/WebFrontendComponents/Modals/Inventory/Warehouses/CreateWarehouseModal.vue";
 import DetailsWarehouseModal from "@/components/WebFrontendComponents/Modals/Inventory/Warehouses/DetailsWarehouseModal.vue";
 import EditWarehouseModal from "@/components/WebFrontendComponents/Modals/Inventory/Warehouses/EditWarehouseModal.vue";
-import DeleteCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DeleteCompanyModal.vue";
+import EnableDisableWarehouseModal from "@/components/WebFrontendComponents/Modals/Inventory/Warehouses/EnableDisableWarehouseModal.vue";
 
 import { GET_ALL_WAREHOUSES, GET_ALL_WAREHOUSES_BY_VEHICLE } from "@/services/inventory/warehouses/warehousesGraphql.js";
 import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
@@ -53,7 +53,7 @@ export default {
     Button,
     CreateWarehouseModal,
     DetailsWarehouseModal,
-    DeleteCompanyModal,
+    EnableDisableWarehouseModal,
     EditWarehouseModal,
   },
   data() {
@@ -62,7 +62,7 @@ export default {
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
         { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
-        { name: "Eliminar", icon: "heroicons:trash", value: "delete" },
+        { name: "Habilitar", icon: "ps:checked", value: "enable/disable" },
       ],
       status: [
         { label: 'Habilitado', value: 'enabled' },
@@ -78,7 +78,7 @@ export default {
     let isModalCreateOpen = ref(false);
     let isModalEditOpen = ref(false);
     let isModalDetailsOpen = ref(false);
-    let isModalDeleteOpen = ref(false);
+    let isModalEnableDisableOpen = ref(false);
 
     let vehicleSelect = ref([]);
 
@@ -179,7 +179,7 @@ export default {
 
         if (value.action === "details") isModalDetailsOpen.value = true;
 
-        if (value.action === "delete") isModalDeleteOpen.value = true;
+        if (value.action === "enable/disable") isModalEnableDisableOpen.value = true;
       } else {
         isModalCreateOpen.value = true;
       }
@@ -194,7 +194,7 @@ export default {
       isModalEditOpen,
       isModalCreateOpen,
       isModalDetailsOpen,
-      isModalDeleteOpen,
+      isModalEnableDisableOpen,
       filterSelect,
       filterValue,
       warehousesList,
