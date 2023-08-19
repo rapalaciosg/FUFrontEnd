@@ -13,10 +13,10 @@
         <Button class="h-[40px]" text="Crear compañía" btnClass="btn-success" @click="toggleModal()"/>
       </template>
     </AdvancedTable>
-    <DetailsCompanyModal v-if="isModalDetailsOpen" title="Detalles de la compañia" :data="companyDetails" @close-modal="isModalDetailsOpen = false"/>
-    <CreateCompanyModal v-if="isModalCreateOpen" title="Crear compañia" @company-created="loadCompanies()" @close-modal="isModalCreateOpen = false"/>
-    <EditCompanyModal v-if="isModalEditOpen" title="Editar comapañia" :data="companyDetails" @close-modal="isModalEditOpen = false" @company-updated="loadCompanies()"/>
-    <DeleteCompanyModal v-if="isModalDeleteOpen" title="Eliminar compañia" :company="companyDetails" @close-modal="isModalDeleteOpen = false" @company-deleted="loadCompanies()"/>
+    <DetailsCompanyModal v-if="isModalDetailsOpen" title="Detalles de la compañía" :data="companyDetails" @close-modal="isModalDetailsOpen = false"/>
+    <CreateCompanyModal v-if="isModalCreateOpen" title="Crear compañía" @company-created="loadCompanies()" @close-modal="isModalCreateOpen = false"/>
+    <EditCompanyModal v-if="isModalEditOpen" title="Editar comapañía" :data="companyDetails" @close-modal="isModalEditOpen = false" @company-updated="loadCompanies()"/>
+    <DeleteCompanyModal v-if="isModalDeleteOpen" title="Eliminar compañía" :company="companyDetails" @close-modal="isModalDeleteOpen = false" @company-deleted="loadCompanies()"/>
   </div>
 </template>
 

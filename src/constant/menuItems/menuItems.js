@@ -120,6 +120,10 @@ export const menuItems = [
         childtitle: "Vehículo",
         childlink: "vehicle",
       },
+      {
+        childtitle: "Dispositivos",
+        childlink: "devices",
+      },
     ],
   },
   {

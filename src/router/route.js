@@ -155,6 +155,14 @@ const routes = [
         },
       },
       {
+        path: "devices",
+        name: "devices",
+        component: () => import("@/views/Administration/Devices"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "styles-setttings",
         name: "styles-setttings",
         component: () => import("@/views/Settings/StylesSettings"),
