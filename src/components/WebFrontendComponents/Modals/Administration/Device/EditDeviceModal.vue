@@ -63,7 +63,12 @@ export default {
     VueSelect,
     Checkbox,
   },
-  props: {},
+  props: {
+    data: {
+      type: Object,
+      default: {}
+    }
+  },
   emits: ["pos-updated", "close-modal"],
   data() {
     return {};
@@ -117,7 +122,7 @@ export default {
       if (invoiceOnline.value) defaultValueInvoiceOnline.value = true;
       else defaultValueInvoiceOnline.value = false;
       freight.value = props.freight;
-      if (invoiceOnline.value) defaultValueFreigth.value = true;
+      if (freight.value) defaultValueFreigth.value = true;
       else defaultValueFreigth.value = false;
       branchOfficeId.value = props.branchOfficeSelect;
     }
@@ -163,7 +168,7 @@ export default {
         if (invoiceOnline.value) defaultValueInvoiceOnline.value = true;
         else defaultValueInvoiceOnline.value = false;
         freight.value = newValue.freight;
-        if (invoiceOnline.value) defaultValueFreigth.value = true;
+        if (freight.value) defaultValueFreigth.value = true;
         else defaultValueFreigth.value = false;
         branchOfficeId.value = newValue.branchOfficeSelect;
       },

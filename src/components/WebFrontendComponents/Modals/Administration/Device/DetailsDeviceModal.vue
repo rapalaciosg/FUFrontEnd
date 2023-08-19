@@ -5,7 +5,7 @@
         <p class="font-medium">Id interno:</p>
         <p>{{ data.posId }}</p>
         <p class="font-medium">Sucursal:</p>
-        <p>{{ data.branchOfficeId }}</p>
+        <p>{{ data.branchOffice.branchOfficeName }}</p>
         <p class="font-medium">Id del dispositivo:</p>
         <p>{{ data.deviceId }}</p>
         <p class="font-medium">dPtoFacDF:</p>

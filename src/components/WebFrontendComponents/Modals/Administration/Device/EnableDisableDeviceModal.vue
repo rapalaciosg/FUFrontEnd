@@ -93,7 +93,7 @@ export default {
       pos.printer = props.printer;
       pos.invoiceOnline = props.invoiceOnline;
       pos.freight = props.freight;
-      pos.branchOfficeId = props.branchOfficeId;
+      pos.branchOfficeId = props.branchOffice.branchOfficeId;
       pos.updateBy = props.updateBy;
     }
 
@@ -125,7 +125,7 @@ export default {
         pos.printer = newValue.printer;
         pos.invoiceOnline = newValue.invoiceOnline;
         pos.freight = newValue.freight;
-        pos.branchOfficeId = newValue.branchOfficeId;
+        pos.branchOfficeId = newValue.branchOffice.branchOfficeId;
         pos.updateBy = newValue.updateBy;
       },
       { deep: true }
