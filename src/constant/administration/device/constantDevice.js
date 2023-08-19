@@ -1,6 +1,6 @@
 export const headersDevicesTable = [
   { label: "Id interno", field: "posId" },
-  { label: "Sucursal", field: "branchOfficeId" },
+  { label: "Sucursal", field: "branchOffice.branchOfficeName" },
   { label: "Id del dispositivo", field: "deviceId" },
   { label: "dPtoFacDF", field: "dPtoFacDF" },
   { label: "Prefijo de factura", field: "invoicePrefix" },

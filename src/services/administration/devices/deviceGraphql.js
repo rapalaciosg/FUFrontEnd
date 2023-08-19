@@ -4,7 +4,10 @@ export const GET_ALL_POS = gql`
   query getPos {
     srvPos {
       posId
-      branchOfficeId
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
       deviceId
       dPtoFacDF
       invoicePrefix
@@ -30,7 +33,10 @@ export const GET_ALL_POS_BY_DEVICE = gql`
   query getPosByDevice($id: String!) {
     srvPosByDeviceId(id: $id) {
       posId
-      branchOfficeId
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
       deviceId
       dPtoFacDF
       invoicePrefix

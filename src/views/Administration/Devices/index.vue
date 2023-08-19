@@ -173,7 +173,7 @@ export default {
       if (value) {
         deviceDetails.value = value.row;
 
-        //deviceDetails.value["branchOfficeSelect"] = { value: value.row.branchOffice.branchOfficeId, label: value.row.branchOffice.branchOfficeName };
+        deviceDetails.value["branchOfficeSelect"] = { value: value.row.branchOffice.branchOfficeId, label: value.row.branchOffice.branchOfficeName };
 
         if (value.action === "edit") isModalEditOpen.value = true;
 
