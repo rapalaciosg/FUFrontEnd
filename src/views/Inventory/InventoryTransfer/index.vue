@@ -76,6 +76,9 @@ export default {
 
     onMounted(() => {
       loadTransfers();
+      console.log('response => ', queryGetTransfers);
+      console.log('response ok => ', queryGetTransfers.result);
+      console.log('response error => ', queryGetTransfers.error);
       headersTransferListExport.value = formatHeadersListExport(headersInventoryTransferTable);
     });
 
