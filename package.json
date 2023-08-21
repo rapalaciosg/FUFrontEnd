@@ -40,6 +40,7 @@
     "moment": "^2.29.4",
     "pinia": "^2.0.28",
     "postcss": "^8",
+    "rollbar": "^2.26.2",
     "simplebar": "^5.3.8",
     "simplebar-vue3": "^0.2.0",
     "swiper": "^8.2.6",

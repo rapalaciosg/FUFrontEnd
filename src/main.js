@@ -30,6 +30,7 @@ import { useThemeSettingsStore } from "@/store/themeSettings";
 import keycloak from "./security/KeycloakService";
 import userAdministrationService from "./services/keycloak/userAdministrationService";
 import axios from "axios";
+import RollbarPlugin from '../rollbar';
 
 axios.defaults.baseURL = `${import.meta.env.VITE_APP_KEYCLOAK_URL}`;
 
@@ -86,7 +87,8 @@ keycloak.init({ onLoad: "login-required" }).then((authenticated) => {
       .use(VueFlatPickr)
       .use(VueGoodTablePlugin)
       .use(VueApexCharts)
-      .use(VCalendar);
+      .use(VCalendar)
+      .use(RollbarPlugin);
 
     app.config.globalProperties.$store = {};
     app.component("downloadExcel", JsonExcel);
