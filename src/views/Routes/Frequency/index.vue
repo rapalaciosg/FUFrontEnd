@@ -135,23 +135,23 @@ export default {
       }
     }, { deep: true });
 
-    watch(() => frecuenciesList.value, (newValue) => {
-      frecuenciesList.value = newValue.map(item => ({
-        customerFrequencyId: item.customerFrequencyId,
-        customer: item.customer,
-        frequency: item.frequency,
-        nextVisit: item.nextVisit.split('T')[0],
-        lasstVisit: item.lasstVisit.split('T')[0],
-        observations: item.observations,
-        monday: item.monday,
-        tuesday: item.tuesday,
-        wednesday: item.wednesday,
-        thursday: item.thursday,
-        friday: item.friday,
-        saturday: item.saturday,
-        sunday: item.sunday
-      }));
-    }, { deep: true })
+    // watch(() => frecuenciesList.value, (newValue) => {
+    //   frecuenciesList.value = newValue.map(item => ({
+    //     customerFrequencyId: item.customerFrequencyId,
+    //     customer: item.customer,
+    //     frequency: item.frequency,
+    //     nextVisit: item.nextVisit.split('T')[0],
+    //     lasstVisit: item.lasstVisit.split('T')[0],
+    //     observations: item.observations,
+    //     monday: item.monday,
+    //     tuesday: item.tuesday,
+    //     wednesday: item.wednesday,
+    //     thursday: item.thursday,
+    //     friday: item.friday,
+    //     saturday: item.saturday,
+    //     sunday: item.sunday
+    //   }));
+    // }, { deep: true })
 
     // Format functions
 

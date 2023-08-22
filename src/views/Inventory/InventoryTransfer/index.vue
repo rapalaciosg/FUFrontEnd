@@ -76,9 +76,6 @@ export default {
 
     onMounted(() => {
       loadTransfers();
-      console.log('response => ', queryGetTransfers);
-      console.log('response ok => ', queryGetTransfers.result);
-      console.log('response error => ', queryGetTransfers.error);
       headersTransferListExport.value = formatHeadersListExport(headersInventoryTransferTable);
     });
 
@@ -86,20 +83,20 @@ export default {
 
     watch(() => transfers.value, (newValue) => { transfersList.value = newValue }, { deep: true });
 
-    watch(() => transfersList.value, (newValue) => {
-      transfersList.value = newValue.map(item => ({
-        transferId: item.transferId,
-        origenWharehouseId: item.origenWharehouseId,
-        destinationWharehouseId: item.destinationWharehouseId,
-        productId: item.productId,
-        quantity: item.quantity,
-        createdBy: item.createdBy,
-        createdDate: moment(item.createdDate).format('YYYY-MM-DD HH:mm:ss'),
-        warehouseInputOrigin: item.warehouseInputOrigin,
-        warehouseInputDestination: item.warehouseInputDestination,
-        product: item.product,
-      }));
-    }, { deep: true })
+    // watch(() => transfersList.value, (newValue) => {
+    //   transfersList.value = newValue.map(item => ({
+    //     transferId: item.transferId,
+    //     origenWharehouseId: item.origenWharehouseId,
+    //     destinationWharehouseId: item.destinationWharehouseId,
+    //     productId: item.productId,
+    //     quantity: item.quantity,
+    //     createdBy: item.createdBy,
+    //     createdDate: moment(item.createdDate).format('YYYY-MM-DD HH:mm:ss'),
+    //     warehouseInputOrigin: item.warehouseInputOrigin,
+    //     warehouseInputDestination: item.warehouseInputDestination,
+    //     product: item.product,
+    //   }));
+    // }, { deep: true })
 
     // Format functions
 
