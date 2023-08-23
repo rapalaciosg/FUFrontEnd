@@ -39,12 +39,14 @@ import EditRouteModal from "@/components/WebFrontendComponents/Modals/Routes/Rou
 import RoutesSettingsModalVue from '@/components/WebFrontendComponents/Modals/Settings/RoutesSettings/RoutesSettingsModal.vue';
 import NotificationRouteSettingModal from "@/components/WebFrontendComponents/Modals/Settings/RoutesSettings/NofiticationRouteSettingModal.vue";
 
-import { GET_ALL_ROUTES, GET_ROUTES_BY_COMPANY } from "@/services/routes/routes/routesGraphql.js";
+import { GET_ALL_ROUTES, GET_ROUTES_BY_COMPANY, GET_ROUTES_BY_USER_ID } from "@/services/routes/routes/routesGraphql.js";
 import { GET_ROUTES_SETTINGS } from "@/services/settings/routeSettings/routeSettingsGraphql";
 import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
 
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
+
+import keycloak from "@/security/KeycloakService.js";
 
 export default {
   components: {
@@ -98,9 +100,13 @@ export default {
 
     const variablesRoutesByCompany = reactive({ id: 0 });
 
+    const variablesRoutesByUser = reactive({ userId: "" });
+
     // Apollo queries initialization
 
     const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES));
+
+    const queryGetRoutesByUser = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ROUTES_BY_USER_ID, variablesRoutesByUser));
 
     const queryGetRoutes = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_ROUTES));
 
@@ -109,6 +115,8 @@ export default {
     const queryGetRoutesSettings = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ROUTES_SETTINGS));
 
     // Apollo fetching data
+
+    const routesByUser = computed(() => queryGetRoutesByUser.result.value?.srvRoutesByUserId ?? []);
 
     const routes = computed(() => queryGetRoutes.result.value?.srvRoutes ?? []);
 
@@ -120,6 +128,8 @@ export default {
 
     // Apollo lazy functions
 
+    const loadRoutesByUser = () => queryGetRoutesByUser.load() || queryGetRoutesByUser.refetch();
+
     const loadRoutes = () => queryGetRoutes.load() || queryGetRoutes.refetch();
 
     const loadRoutesByCompany = () => queryGetRoutesByCompany.load() || queryGetRoutesByCompany.refetch();
@@ -130,19 +140,23 @@ export default {
 
     // Before mounted function
 
-    onBeforeMount(() => loadRoutesSettings());
+    onBeforeMount(() => {
+      variablesRoutesByUser.userId = keycloak.subject;
+      loadRoutesSettings();
+    });
 
     // Mounted function
 
     onMounted(() => {
       loadRoutes();
+      loadRoutesByUser();
       loadCompanies();
     });
 
     // Watchers
 
     watch(
-      () => routes.value,
+      () => routesByUser.value,
       (newValue) => {
         routesList.value = newValue;
         routesInitialList.value = newValue;

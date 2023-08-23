@@ -1,5 +1,32 @@
 import gql from "graphql-tag";
 
+export const GET_BRANCH_OFFICES_BY_USER = gql`
+  query getBranchOfficesByUser($userId: String!) {
+    srvBranchOfficeByUserId(userId: $userId) {
+      company {
+        companyId
+        name
+      }
+      ruc
+      dv
+      address
+      phone
+      email
+      province {
+        provinceId
+        name
+      }
+      branchOfficeId
+      branchOfficeName
+      createdBy
+      createdDate
+      updateBy
+      updateDate
+      active
+    }
+  }
+`;
+
 export const GET_ALL_BRANCH_OFFICES = gql`
   query getBranchOffices {
     srvBranchOffice {

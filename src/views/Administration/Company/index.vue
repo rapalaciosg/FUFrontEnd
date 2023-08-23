@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, reactive, watch } from "vue";
+import { computed, ref, onMounted, reactive, watch, onBeforeMount } from "vue";
 
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
 import Card from "@/components/DashCodeComponents/Card";
@@ -35,11 +35,13 @@ import DetailsCompanyModal from "@/components/WebFrontendComponents/Modals/Admin
 import DeleteCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/DeleteCompanyModal.vue";
 import EditCompanyModal from "@/components/WebFrontendComponents/Modals/Administration/Company/EditCompanyModal.vue";
 
-import { GET_ALL_COMPANIES, GET_ALL_COMPANIES_BY_PROVINCE } from "@/services/administration/company/companyGraphql.js";
+import { GET_ALL_COMPANIES, GET_ALL_COMPANIES_BY_PROVINCE, GET_ALL_COMPANIES_BY_USER } from "@/services/administration/company/companyGraphql.js";
 import { GET_ALL_PROVINCES } from "@/services/catalogs/provinces/provincesGraphql.js";
 
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
+
+import keycloak from "@/security/KeycloakService.js";
 
 export default {
   components: {
@@ -85,9 +87,13 @@ export default {
 
     const variablesCompaniesByProvince = reactive({ id: "" });
 
+    const variablesCompaniesByUser = reactive({ userId: "" });
+
     // Apollo queries initialization
 
     const queryGetCompanies = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES));
+
+    const queryGetCompaniesByUser = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES_BY_USER, variablesCompaniesByUser));
 
     const queryGetCompaniesByProvince = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_COMPANIES_BY_PROVINCE, variablesCompaniesByProvince));
 
@@ -97,6 +103,8 @@ export default {
 
     const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
 
+    const companiesByUser = computed(() => queryGetCompaniesByUser.result.value?.srvCompaniesByUserId ?? []);
+
     const companiesByProvince = computed(() => queryGetCompaniesByProvince.result.value?.srvCompaniesByProvinceId ?? []);
 
     const provinces = computed(() => queryGetProvinces.result.value?.srvProvince ?? []);
@@ -105,15 +113,22 @@ export default {
 
     const loadCompanies = () => queryGetCompanies.load() || queryGetCompanies.refetch();
 
+    const loadCompaniesByUser = () => queryGetCompaniesByUser.load() || queryGetCompaniesByUser.refetch();
+
     const loadCompaniesByProvince = () => queryGetCompaniesByProvince.load() || queryGetCompaniesByProvince.refetch();
 
     const loadProvinces = () => queryGetProvinces.load() || queryGetProvinces.refetch();
+
+    // Before mounted function
+
+    onBeforeMount(() => variablesCompaniesByUser.userId = keycloak.subject);
 
     // Mounted function
 
     onMounted(() => {
       loadProvinces();
       loadCompanies();
+      loadCompaniesByUser();
       headersCompaniesListExport.value = formatHeadersListExport(headersCompanyTable);
     })
 
@@ -121,7 +136,7 @@ export default {
 
     watch(() => provinces.value, (newValue) => { provinceSelect.value = formatProvinceSelect(newValue) }, { deep: true });
 
-    watch(() => companies.value, (newValue) => { companiesList.value = newValue }, { deep: true });
+    watch(() => companiesByUser.value, (newValue) => { companiesList.value = newValue }, { deep: true });
 
     watch(() => filterValue.value, (newValue) => {
       if (!newValue) {

@@ -39,11 +39,13 @@ import CreateBranchOfficeModal from "@/components/WebFrontendComponents/Modals/A
 import EditBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/EditBranchOfficeModal.vue";
 import EnableDisableBranchOfficeModal from "@/components/WebFrontendComponents/Modals/Administration/BranchOffice/EnableDisableBranchOfficeModal.vue";
 
-import { GET_ALL_BRANCH_OFFICES, GET_BRANCH_OFFICES_BY_COMPANY, GET_BRANCH_OFFICES_BY_RUC } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
+import { GET_ALL_BRANCH_OFFICES, GET_BRANCH_OFFICES_BY_COMPANY, GET_BRANCH_OFFICES_BY_RUC, GET_BRANCH_OFFICES_BY_USER } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
 
 import { useLazyQuery, provideApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "@/main.js";
+
+import keycloak from "@/security/KeycloakService.js";
 
 export default {
   components: {
@@ -105,8 +107,11 @@ export default {
 
     const variablesBranchOfficesByCompany = reactive({ id: 0 });
     const variablesBranchOfficesByRuc = reactive({ ruc: "" });
+    const variablesBranchOfficesByUser = reactive({ userId: "" });
 
     // Apollo queries initialization
+
+    const queryGetBranchOfficesByUser = provideApolloClient(apolloClient)(() => useLazyQuery(GET_BRANCH_OFFICES_BY_USER, variablesBranchOfficesByUser));
 
     const queryGetBranchOfficesByCompany = provideApolloClient(apolloClient)(() => useLazyQuery(GET_BRANCH_OFFICES_BY_COMPANY, variablesBranchOfficesByCompany));
 
@@ -118,6 +123,8 @@ export default {
 
     // Apollo fetching data
 
+    const branchOfficesByUser = computed(() => queryGetBranchOfficesByUser.result.value?.srvBranchOfficeByUserId ?? []);
+
     const branchOfficesByCompany = computed(() => queryGetBranchOfficesByCompany.result.value?.srvBranchOfficeByCompany ?? []);
 
     const branchOfficesByRuc = computed(() => queryGetBranchOfficesByRuc.result.value?.srvBranchOfficeRUC ?? []);
@@ -127,6 +134,8 @@ export default {
     const companies = computed(() => queryGetCompanies.result.value?.srvCompanies ?? []);
 
     // Apollo lazy functions
+
+    const loadBranchOfficesByUser = () => queryGetBranchOfficesByUser.load() || queryGetBranchOfficesByUser.refetch();
 
     const loadBranchOfficesByCompany = () => queryGetBranchOfficesByCompany.load() || queryGetBranchOfficesByCompany.refetch();
 
@@ -139,19 +148,21 @@ export default {
     // Before mounted function
 
     onBeforeMount(() => {
+      variablesBranchOfficesByUser.userId = keycloak.subject;
       loadBranchOffices();
     });
 
     // Mounted function
 
     onMounted(() => {
+      loadBranchOfficesByUser();
       loadCompanies();
       headersBranchOfficesListExport.value = formatHeadersListExport(headersBranchOfficesTable);
     });
 
     // Watchers
 
-    watch(() => branchOffices.value, (newValue) => {
+    watch(() => branchOfficesByUser.value, (newValue) => {
       rucSelect.value = formatRucSelect(newValue);
       branchOfficesList.value = newValue;
     }, { deep: true });
