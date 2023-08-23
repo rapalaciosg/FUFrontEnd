@@ -11,6 +11,14 @@ export default {
     };
     return Axios.get(URL, config);
   },
+  getUserByUsername(accessToken, username) {
+    let config = {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+      },
+    };
+    return Axios.get(`${URL}?username=${username}`, config);
+  },
   getUserDetails(accessToken, id) {
     let config = {
       headers: {
