@@ -123,6 +123,7 @@ export default {
       if (props.routeSettings.routeBy.value === "D") loadDrivers();
       else loadVehicles();
       activeModal.value = true;
+      customerSequential.value = 1;
     };
 
     // Mounted function
@@ -151,7 +152,7 @@ export default {
       driverVehicleId.value = driverVehicleFormatted.value[0];
     }, { deep: true });
 
-    watch(() => routes.value, (newValue) => { customerSequential.value = getCustomerSequential(newValue) }, { deep: true });
+    // watch(() => routes.value, (newValue) => { customerSequential.value = getCustomerSequential(newValue) }, { deep: true });
 
     watch(
       () => companyId.value,

@@ -34,6 +34,36 @@ export const GET_ALL_ROUTES = gql`
   }
 `;
 
+export const GET_ROUTES_BY_LIST_OF_COMPANIES = gql`
+  query getRoutesByListOfCompanies($ids: [Int!]!) {
+    srvRoutesByListCompanyId(ids: $ids) {
+      routeId
+      code
+      name
+      description
+      customerPrefix
+      customerSequential
+      activeCustomerCreation
+      vehicle {
+        vehicleId
+        name
+      }
+      driver {
+        driverId
+        name
+      }
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+      }
+      company {
+        companyId
+        name
+      }
+    }
+  }
+`;
+
 export const GET_ROUTES_BY_COMPANY = gql`
   query getRoutesByCompany($id: Int!) {
     srvRoutesByCompanyId(id: $id) {

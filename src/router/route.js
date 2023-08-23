@@ -13,7 +13,7 @@ const routes = [
       {
         path: "home",
         name: "home",
-        component: () => import("@/views/Routes"),
+        component: () => import("@/views/Routes/Dashboard"),
         meta: {
           hide: true,
         },
@@ -59,9 +59,17 @@ const routes = [
         },
       },
       {
+        path: "transfers",
+        name: "transfers",
+        component: () => import("@/views/Inventory/InventoryTransfer"),
+        meta: {
+          hide: true,
+        },
+      },
+      {
         path: "inventory",
         name: "inventory",
-        component: () => import("@/views/Inventory/InventoryTransfer"),
+        component: () => import("@/views/Inventory/Inventory"),
         meta: {
           hide: true,
         },

@@ -151,8 +151,8 @@ export default {
             return object1.value === object2.keycloakUserId;
           });
         });
-        usersListAvailables.value = differentValues.map((item) => ({ value: item.id, label: item.label }));
-        user.value = usersListAvailables.value[0] 
+        usersListAvailables.value = differentValues.map((item) => ({ value: item.value, label: item.label }));
+        user.value = usersListAvailables.value[0];
       }, 
       {deep: true}
     );
