@@ -1,5 +1,26 @@
 import gql from "graphql-tag";
 
+export const GET_ALL_COMPANIES_BY_USER = gql`
+  query getCompaniesByUser($userId: String!) {
+    srvCompaniesByUserId(userId: $userId) {
+      companyId
+      name
+      prefix
+      address
+      province {
+        provinceId
+        name
+      }
+      companyType {
+        companyTypeId
+        name
+      }
+      sequential
+      isDistributor
+    }
+  }
+`;
+
 export const GET_ALL_COMPANIES = gql`
   query getCompanies {
     srvCompanies {

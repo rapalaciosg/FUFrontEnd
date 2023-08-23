@@ -1,5 +1,52 @@
 import gql from "graphql-tag";
 
+export const GET_ROUTES_BY_USER_ID = gql`
+  query getRoutesByUser($userId: UUID!) {
+    srvRoutesByUserId(userId: $userId) {
+      routeId
+      code
+      name
+      description
+      customerPrefix
+      customerSequential
+      activeCustomerCreation
+      vehicle {
+        active
+        code
+        description
+        licensePlate
+        name
+        vehicleId
+      }
+      driver {
+        active
+        boxCode
+        code
+        driverId
+        keycloakUser
+        keycloakUserId
+        lastName
+        name
+      }
+      branchOffice {
+        branchOfficeId
+        branchOfficeName
+        active
+        address
+        email
+      }
+      company {
+        companyId
+        name
+        address
+        companyTypeId
+        isDistributor
+        prefix
+      }
+    }
+  }
+`;
+
 export const GET_ALL_ROUTES = gql`
   query getRoutes {
     srvRoutes {
@@ -93,53 +140,6 @@ export const GET_ROUTES_BY_COMPANY = gql`
       branchOffice {
         branchOfficeId
         branchOfficeName
-      }
-    }
-  }
-`;
-
-export const GET_ROUTES_BY_USER_ID = gql`
-  query getRoutesByUser($userId: UUID!) {
-    srvRoutesByUserId(userId: $userId) {
-      routeId
-      code
-      name
-      description
-      customerPrefix
-      customerSequential
-      activeCustomerCreation
-      vehicle {
-        active
-        code
-        description
-        licensePlate
-        name
-        vehicleId
-      }
-      driver {
-        active
-        boxCode
-        code
-        driverId
-        keycloakUser
-        keycloakUserId
-        lastName
-        name
-      }
-      branchOffice {
-        branchOfficeId
-        branchOfficeName
-        active
-        address
-        email
-      }
-      company {
-        companyId
-        name
-        address
-        companyTypeId
-        isDistributor
-        prefix
       }
     }
   }
