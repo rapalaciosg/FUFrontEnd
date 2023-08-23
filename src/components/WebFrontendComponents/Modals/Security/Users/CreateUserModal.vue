@@ -346,10 +346,7 @@ export default {
       firstName: "",
       lastName: "",
       email: "",
-      name: "",
-      lastName: "",
-      code: "",
-      boxCode: "",
+      password: "",
     });
 
     // Input model
@@ -392,8 +389,8 @@ export default {
       email: yup.string().required("Correo requerido").email(),
       password: yup.string().required("Contraseña requerida").min(3),
       // Driver creation yup validation
-      code: yup.string().required("Código requerido").max(10),
-      boxCode: yup.string().required("Código de caja requerido").max(50),
+      // code: yup.string().required("Código requerido").max(10),
+      // boxCode: yup.string().required("Código de caja requerido").max(50),
     });
 
     // Vee validate userForm
@@ -457,8 +454,6 @@ export default {
             .then((response) => userCreated.value = response.data.find(item => item.username === userFormatted.username))
             .catch((error) => toast.error("Usuario creado no encontrado", { timeout: 2000 }))
 
-          console.log('userCreated => ', userCreated.value);
-
           toast.success("Usuario creado exitosamente", { timeout: 2000 });
 
           if (isDriver.value !== true) {
@@ -496,8 +491,6 @@ export default {
 
             // Create user intern
 
-            console.log('userIntern => ', userIntern);
-
             await createUserIntern()
               .then((response) => {
                 if (response.data.createUser.statusCode === "OK") toast.success("Usuario interno creado exitosamente", { timeout: 2000 });
@@ -513,8 +506,6 @@ export default {
             driver.branchOfficeId = branchOfficeId.value.value;
             driver.keycloakUser = userCreated.value.username;
             driver.keycloakUserId = userCreated.value.id;
-
-            console.log('driver => ', driver);
 
             await createDriver()
               .then(async (response) => {
