@@ -5,13 +5,13 @@
         <div class="grid grid-cols-2 gap-5 py-6">
           <Textinput type="text" label="Nombre de la bodega" placeholder="Nombre de la bodega" v-model="name" :error="nameError" :maxlength="50"/>
           <Textinput type="text" label="Código" placeholder="Código" v-model="code" :error="codeError" :maxlength="10"/>
-          <VueSelect label="Vehículo" :options="vehiclesFormatted" placeholder="Seleccione un vehículo" v-model="vehicleId" :clearable="false"/>
           <div>
             <label class="ltr:inline-block rtl:block input-label">Primaria</label>
             <div class="pt-2">
               <Checkbox label="Primaria" v-model="isPrimary" />
             </div>
           </div>
+          <VueSelect v-if="!isPrimary" label="Vehículo" :options="vehiclesFormatted" placeholder="Seleccione un vehículo" v-model="vehicleId" :clearable="false"/>
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
           <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
@@ -161,8 +161,12 @@ export default {
     const onSubmit = handleSubmit(async (values, actions) => {
       warehouse.name = values.name;
       warehouse.code = values.code.toUpperCase();
-      warehouse.vehicleId = vehicleId.value.value;
       warehouse.isPrimary = isPrimary.value;
+      if (!warehouse.isPrimary) {
+        warehouse.vehicleId = vehicleId.value.value;
+      } else {
+        warehouse.vehicleId = 0;
+      }
 
       await createWarehouse()
         .then((response) => {

@@ -27,6 +27,34 @@ export const GET_ALL_BRANCH_OFFICES = gql`
   }
 `;
 
+export const GET_BRANCH_OFFICES_BY_LIST_OF_COMPANIES = gql`
+  query getBranchOfficesByListOfCompanies($ids: [Int!]!) {
+    srvBranchOfficeByListCompany(ids: $ids) {
+      branchOfficeId
+      branchOfficeName
+      ruc
+      dv
+      address
+      phone
+      email
+      createdBy
+      createdDate
+      updateBy
+      updateDate
+      active
+      company {
+        companyId
+        name
+      }
+      provinceId
+      province {
+        provinceId
+        name
+      }
+    }
+  }
+`;
+
 export const GET_BRANCH_OFFICES_BY_COMPANY = gql`
   query getBranchOfficesByCompany($id: Int!) {
     srvBranchOfficeByCompany(id: $id) {

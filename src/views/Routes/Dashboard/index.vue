@@ -12,7 +12,7 @@
     </Card>
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-5">
       <div class="lg:col-span-5">
-        <AdvancedTable :headers="headers" :data="routesData" title="Listado de rutas" />
+        <AdvancedTable :headers="headers" title="Listado de rutas" />
       </div>
       <div class="lg:col-span-2">
         <Card title="routes calculation">
@@ -31,7 +31,7 @@
         </Card>
       </div>
     </div>
-    <AdvancedTable :headers="headersSecondTable" :data="routesDateTwo" title="Listado de rutas" />
+    <AdvancedTable :headers="headersSecondTable" title="Listado de rutas" />
   </div>
 </template>
 <script>
@@ -39,13 +39,12 @@ import Card from "@/components/DashCodeComponents/Card";
 import VueSelect from "@/components/DashCodeComponents/Select/VueSelect";
 import Button from "@/components/DashCodeComponents/Button";
 import AdvancedTable from "@/components/WebFrontendComponents/Tables/AdvancedTable.vue";
-import { routesData, routesDateTwo } from "../../constant/basic-tablle-data.js";
 import {
   pieChart,
   pieChartDark,
   stacked,
   stackedDark,
-} from "../../constant/analytics-components-data.js";
+} from "../../../constant/analytics-components-data.js";
 export default {
   components: {
     Card,
@@ -55,8 +54,6 @@ export default {
   },
   data() {
     return {
-      routesDateTwo,
-      routesData,
       pieChart,
       pieChartDark,
       stacked,

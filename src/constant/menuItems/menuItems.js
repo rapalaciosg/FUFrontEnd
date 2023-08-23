@@ -53,6 +53,10 @@ export const menuItems = [
     child: [
       {
         childtitle: "Transferir inventario",
+        childlink: "transfers",
+      },
+      {
+        childtitle: "Inventario",
         childlink: "inventory",
       },
       {
