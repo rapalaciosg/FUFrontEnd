@@ -109,7 +109,9 @@ export default {
       (newValue) => {
         const differentValues = newValue.filter(object1 => {
           return !warehouses.value.some(object2 => {
-            return object1.vehicleId === object2.vehicle.vehicleId;
+            if (object2.vehicle) {
+              return object1.vehicleId === object2.vehicle.vehicleId;
+            }
           });
         });
         vehiclesFormatted.value = formatVehiclesSelect(differentValues);
