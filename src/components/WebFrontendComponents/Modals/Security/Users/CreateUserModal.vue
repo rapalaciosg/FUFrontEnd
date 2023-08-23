@@ -82,8 +82,10 @@ import * as yup from "yup";
 import { GET_ALL_COMPANIES } from "@/services/administration/company/companyGraphql.js";
 import { GET_ALL_BRANCH_OFFICES, GET_BRANCH_OFFICES_BY_LIST_OF_COMPANIES } from "@/services/administration/branchOffice/branchOfficeGraphql.js";
 import { GET_ROUTES_BY_LIST_OF_COMPANIES } from "@/services/routes/routes/routesGraphql.js";
-import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
+
+import { CREATE_DRIVER } from "@/services/administration/driver/driverGraphql.js";
 import { GET_VEHICLE_DRIVER_ASOCIATION, CREATE_VEHICLE_DRIVER } from "@/services/administration/vehicle-driver/vehicleDriverGraphql.js";
+import { GET_ALL_VEHICLES } from "@/services/administration/vehicle/vehicleGraphql.js";
 
 import { CREATE_GRAPH_USER } from "@/services/keycloak/userGraphqlServices/userGraphql.js";
 
@@ -131,16 +133,19 @@ export default {
 
     const isDriver = ref(false);
 
+    // Not driver
+
     const allCompanies = ref(false);
     const allBranchOffices = ref(false);
     const allRoutes = ref(false);
 
+    let allCompaniesSelected = ref([]);
+    let allBranchOfficesSelected = ref([]);
+    let allRoutesSelected = ref([]);
+
     const companyIds = ref(null);
     let companyIdsSelected = ref(null);
     let companiesFormatted = ref([]);
-
-    const branchOfficeId = ref(null);
-    let branchOfficesFormatted = ref([]);
 
     const branchOfficeIds = ref(null);
     let branchOfficesByCompanyFormatted = ref([]);
@@ -148,10 +153,17 @@ export default {
     const routeIds = ref(null);
     let routesByCompanyFormatted = ref([]);
 
+    // Driver
+
+    const branchOfficeId = ref(null);
+    let branchOfficesFormatted = ref([]);
+
     const vehicleId = ref({});
     let vehiclesFormatted = ref([]);
 
     const isAssociationVehicleActive = ref(false);
+
+    const userCreated = ref({});
 
     // Apollo variables
 
@@ -203,12 +215,12 @@ export default {
 
     onBeforeMount(() => {
       loadVehiclesDriversAsociation();
-      loadVehicles();
     });
 
     // Mounted function
 
     onMounted(() => {
+      loadVehicles();
       loadCompanies();
       loadBranchOffices();
       activeModal.value = true;
@@ -223,8 +235,6 @@ export default {
     const formatRouteSelect = (data) => data.map((item) => ({ value: item.routeId, label: item.name }));
 
     // Watchers
-
-    let allCompaniesSelected = ref([]);
 
     watch(
       () => allCompanies.value,
@@ -247,8 +257,6 @@ export default {
       loadBranchOfficesByCompanyIds();
       loadRoutesByCompanyIds();
     }, { deep: true });
-
-    let allBranchOfficesSelected = ref([]);
 
     watch(
       () => allBranchOffices.value,
@@ -274,8 +282,6 @@ export default {
       },
       { deep: true }
     );
-
-    let allRoutesSelected = ref([]);
 
     watch(
       () => allRoutes.value,
@@ -339,10 +345,32 @@ export default {
       username: "",
       firstName: "",
       lastName: "",
-      email: ""
+      email: "",
+      name: "",
+      lastName: "",
+      code: "",
+      boxCode: "",
     });
 
     // Input model
+
+    const driver = reactive({
+      driverId: 0,
+      branchOfficeId: 0,
+      name: "",
+      lastName: "",
+      code: "",
+      boxCode: "",
+      active: true,
+      keycloakUserId: "",
+      keycloakUser: "",
+    });
+
+    const vehicleDriver = reactive({
+      vehicleId: 0,
+      driverId: 0,
+      userName: "",
+    });
 
     const userIntern = reactive({
       userId: "",
@@ -362,7 +390,10 @@ export default {
       firstName: yup.string().required("Nombre requerido"),
       lastName: yup.string().required("Apellido requerido"),
       email: yup.string().required("Correo requerido").email(),
-      password: yup.string().required("Contraseña requerida").min(3)
+      password: yup.string().required("Contraseña requerida").min(3),
+      // Driver creation yup validation
+      code: yup.string().required("Código requerido").max(10),
+      boxCode: yup.string().required("Código de caja requerido").max(50),
     });
 
     // Vee validate userForm
@@ -377,9 +408,16 @@ export default {
     const { value: email, errorMessage: emailError } = useField("email");
     const { value: password, errorMessage: passwordError } = useField("password");
 
+    const { value: code, errorMessage: codeError, meta: codeMeta } = useField("code");
+    const { value: boxCode, errorMessage: boxCodeError, meta: boxCodeMeta } = useField("boxCode");
+
     // Apollo mutations
 
     const { mutate: createUserIntern } = useMutation(CREATE_GRAPH_USER, () => ({ variables: { inputModel: userIntern }}));
+
+    const { mutate: createDriver } = useMutation(CREATE_DRIVER, () => ({ variables: { inputModel: driver } }));
+
+    const { mutate: createVehicleDriver } = useMutation(CREATE_VEHICLE_DRIVER, () => ({ variables: { inputModel: vehicleDriver } }));
 
     // Functions to trigger
 
@@ -410,29 +448,99 @@ export default {
       userFormatted.credentials.push(passwordFormatted);
       userFormatted.groups = groupsFormatted;
 
-      // Intern user
-      
-      // userIntern.userId = "";
-      // userIntern.userName = "";
-      // userIntern.companiesAll = false;
-      // userIntern.companiesList = "";
-      // userIntern.branchesOfficesAll = false;
-      // userIntern.brancheOfficeList = "";
-      // userIntern.routesAll = false;
-      // userIntern.routeList = "";
-
       await userAdministrationService.createUser(userFormatted, keycloak.token)
         .then(async (response) => {
-          console.log('response => ', response);
+
+          // Getting user created
+
+          await userAdministrationService.getUserByUsername(keycloak.token, userFormatted.username)
+            .then((response) => userCreated.value = response.data.find(item => item.username === userFormatted.username))
+            .catch((error) => toast.error("Usuario creado no encontrado", { timeout: 2000 }))
+
+          console.log('userCreated => ', userCreated.value);
 
           toast.success("Usuario creado exitosamente", { timeout: 2000 });
 
-          // await createUserIntern()
-          //   .then((response) => {
-          //     if (response.data.createUser.statusCode === "OK") toast.success("Usuario interno creado exitosamente", { timeout: 2000 });
-          //     else toast.error(response.data.createUser.message, { timeout: 2000 });
-          //   })
-          //   .catch((error) => toast.error("Ha ocurrido un error al crear un usuario interno", { timeout: 2000 }))
+          if (isDriver.value !== true) {
+
+            // Not driver
+
+            // Intern user format
+
+            if (allCompanies.value === true) {
+              userIntern.companiesAll = true;
+              userIntern.companiesList = "";
+            } else {
+              userIntern.companiesAll = false;
+              userIntern.companiesList = companyIds.value.map(item => item.value ).join(',');
+            }
+
+            if (allBranchOffices.value === true) {
+              userIntern.branchesOfficesAll = true;
+              userIntern.brancheOfficeList = "";
+            } else {
+              userIntern.branchesOfficesAll = false;
+              userIntern.brancheOfficeList = branchOfficeIds.value.map(item => item.value ).join(',');
+            }
+
+            if (allRoutes.value === true) {
+              userIntern.routesAll = true;
+              userIntern.routeList = "";
+            } else {
+              userIntern.routesAll = false;
+              userIntern.routeList = routeIds.value.map(item => item.value ).join(',');
+            }
+
+            userIntern.userId = userCreated.value.id;
+            userIntern.userName = userCreated.value.username;
+
+            // Create user intern
+
+            console.log('userIntern => ', userIntern);
+
+            await createUserIntern()
+              .then((response) => {
+                if (response.data.createUser.statusCode === "OK") toast.success("Usuario interno creado exitosamente", { timeout: 2000 });
+                else toast.error(response.data.createUser.message, { timeout: 2000 });
+              })
+              .catch((error) => toast.error("Ha ocurrido un error al crear un usuario interno", { timeout: 2000 }))
+
+          } else {
+            driver.name = values.firstName;
+            driver.lastName = values.lastName;
+            driver.code = values.code.toUpperCase();
+            driver.boxCode = values.boxCode.toUpperCase();
+            driver.branchOfficeId = branchOfficeId.value.value;
+            driver.keycloakUser = userCreated.value.username;
+            driver.keycloakUserId = userCreated.value.id;
+
+            console.log('driver => ', driver);
+
+            await createDriver()
+              .then(async (response) => {
+                if (response.data.createDrive.statusCode === "OK") toast.success("Conductor creado exitosamente", { timeout: 2000 });
+                else toast.error(response.data.createDrive.message, { timeout: 2000 });
+
+                if (isAssociationVehicleActive.value === true) {
+                  vehicleDriver.vehicleId = vehicleId.value.value;
+                  vehicleDriver.driverId = +response.data.createDrive.idObject;
+                  vehicleDriver.userName = keycloak.tokenParsed.preferred_username;
+
+                  console.log('vehicleDriver => ', vehicleDriver);
+
+                  await createVehicleDriver()
+                    .then((response) => {
+                      if (response.data.createVehicleDriver.statusCode === "OK") toast.success("Asociación exitosa", { timeout: 2000 });
+                      else toast.error(response.data.createVehicleDriver.message, { timeout: 2000 });
+
+                      loadVehiclesDriversAsociation();
+                      isAssociationVehicleActive.value = false;
+                    })
+                    .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+                }
+              })
+              .catch((error) => toast.error("Ha ocurrido un error", { timeout: 2000 }))
+          }
 
           emit('user-created')
         })
@@ -478,6 +586,10 @@ export default {
       allCompanies,
       allBranchOffices,
       allRoutes,
+      code,
+      codeError,
+      boxCode,
+      boxCodeError,
     };
   },
 };

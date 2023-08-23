@@ -60,8 +60,6 @@ export default {
       headersInventoryTable,
       actions: [
         { name: "Ver detalles", icon: "heroicons:eye", value: "details" },
-        { name: "Editar", icon: "heroicons:pencil-square", value: "edit" },
-        { name: "Eliminar", icon: "heroicons:trash", value: "delete" },
       ],
       filters: [
         { label: 'Productos', value: 'product' },
