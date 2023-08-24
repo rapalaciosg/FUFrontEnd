@@ -68,6 +68,8 @@ export default {
     const vehicleId = ref({});
     let vehiclesFormatted = ref([]);
 
+    let vehiclesNotAvailables = ref([]);
+
     // Apollo queries initialization
 
     const queryGetWarehouses = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_WAREHOUSES));
@@ -105,13 +107,19 @@ export default {
     // Watchers
 
     watch(
+      () => warehouses.value,
+      (newValue) => {
+        vehiclesNotAvailables.value = newValue.filter(item => item.vehicle);
+      },
+      { deep: true }
+    );
+
+    watch(
       () => vehicles.value,
       (newValue) => {
         const differentValues = newValue.filter(object1 => {
-          return !warehouses.value.some(object2 => {
-            if (object2.vehicle) {
-              return object1.vehicleId === object2.vehicle.vehicleId;
-            }
+          return !vehiclesNotAvailables.value.some(object2 => {
+            return object1.vehicleId === object2.vehicle.vehicleId;
           });
         });
         vehiclesFormatted.value = formatVehiclesSelect(differentValues);

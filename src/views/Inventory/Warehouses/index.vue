@@ -173,7 +173,7 @@ export default {
       if (value) {
         warehouseDetails.value = value.row;
 
-        warehouseDetails.value["vehicleSelect"] = { value: value.row.vehicle.vehicleId, label: value.row.vehicle.name };
+        if (value.row.vehicle) warehouseDetails.value["vehicleSelect"] = { value: value.row.vehicle.vehicleId, label: value.row.vehicle.code };
 
         if (value.action === "edit") isModalEditOpen.value = true;
 
