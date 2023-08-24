@@ -5,13 +5,13 @@
         <div class="grid grid-cols-2 gap-5 py-6">
           <Textinput type="text" label="Nombre de la bodega" placeholder="Nombre de la bodega" v-model="name" :error="nameError" :maxlength="50"/>
           <Textinput type="text" label="Código" placeholder="Código" v-model="code" :error="codeError" :maxlength="10"/>
-          <VueSelect label="Vehículo" :options="vehiclesFormatted" placeholder="Seleccione un vehículo" v-model="vehicleId" :clearable="false"/>
           <div>
             <label class="ltr:inline-block rtl:block input-label">Primaria</label>
             <div class="pt-2">
               <Checkbox label="Primaria" v-model="isPrimary" :checked="defaultValue" />
             </div>
           </div>
+          <VueSelect v-if="!isPrimary" label="Vehículo" :options="vehiclesFormatted" placeholder="Seleccione un vehículo" v-model="vehicleId" :clearable="false"/>
         </div>
         <div class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
           <button class="btn btn-secondary block text-center" @click="closeModal()">Cerrar</button>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { ref, watch, reactive, computed, onMounted } from "vue";
+import { ref, watch, reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useToast } from "vue-toastification";
 
 import ModalBase from "../../ModalBase.vue";
@@ -74,6 +74,8 @@ export default {
     const vehicleId = ref({});
     let vehiclesFormatted = ref([]);
 
+    let vehiclesNotAvailables = ref([]);
+
     // Apollo queries initialization
 
     const queryGetWarehouses = provideApolloClient(apolloClient)(() => useLazyQuery(GET_ALL_WAREHOUSES));
@@ -100,17 +102,20 @@ export default {
       name.value = props.name;
       code.value = props.code;
       isPrimary.value = props.isPrimary;
-      if (isPrimary.value) defaultValue.value = true
-      else defaultValue.value = false
-      vehicleId.value = props.vehicleSelect;
+      if (isPrimary.value) defaultValue.value = true;
+      else defaultValue.value = false;
+      if (props.vehicleSelect) vehicleId.value = props.vehicleSelect;
     }
+
+    // Before mounted function
+
+    onBeforeMount(() => setData(props.data));
 
     // Initialization function
 
     const initilize = () => {
       loadWarehouses();
       loadVehicles();
-      setData(props.data);
       activeModal.value = true;
     };
 
@@ -125,15 +130,27 @@ export default {
     // Watchers
 
     watch(
+      () => warehouses.value,
+      (newValue) => {
+        vehiclesNotAvailables.value = newValue.filter(item => item.vehicle);
+      },
+      { deep: true }
+    );
+
+    watch(
       () => vehicles.value,
       (newValue) => {
         const differentValues = newValue.filter((object1) => {
-          return !warehouses.value.some((object2) => {
+          return !vehiclesNotAvailables.value.some((object2) => {
             return object1.vehicleId === object2.vehicle.vehicleId;
           });
         });
         vehiclesFormatted.value = formatVehiclesSelect(differentValues);
-        vehicleId.value = vehiclesFormatted.value[0];
+
+        console.log(props.data.vehicleSelect);
+
+        if (props.data.vehicleSelect) vehicleId.value = props.data.vehicleSelect;
+        else vehicleId.value = vehiclesFormatted.value[0];
       },
       { deep: true }
     );
@@ -190,7 +207,11 @@ export default {
       warehouse.name = values.name;
       warehouse.code = values.code.toUpperCase();
       warehouse.vehicleId = vehicleId.value.value;
-      warehouse.isPrimary = isPrimary.value;
+      if (!warehouse.isPrimary) {
+        warehouse.vehicleId = vehicleId.value.value;
+      } else {
+        warehouse.vehicleId = 0;
+      }
 
       await updateWarehouse()
         .then((response) => {
